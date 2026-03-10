@@ -67,32 +67,32 @@ export default function Terminal({ onNavigate, skipBoot = false }: Props) {
 
   return (
     <div
-      className="flex flex-col min-h-screen bg-[var(--bg)] text-[var(--fg)] font-mono text-sm p-6 cursor-text"
+      className="min-h-screen bg-[var(--bg)] text-[var(--fg)] font-mono text-sm p-8 cursor-text"
       onClick={focusInput}
     >
-      <div className="flex-1 mb-4">
+      <div className="max-w-2xl mx-auto">
         <TerminalHistory history={history} />
-      </div>
 
-      {inputEnabled && (
-        <div className="flex items-center gap-1">
-          <span className="text-[var(--accent)] select-none">$</span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            aria-label="terminal input"
-            className="flex-1 bg-transparent outline-none text-[var(--fg)] caret-[var(--accent)] text-[16px]"
-          />
-        </div>
-      )}
+        {inputEnabled && (
+          <div className="flex items-center gap-1 mt-1">
+            <span className="text-[var(--accent)] select-none">$</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              aria-label="terminal input"
+              className="flex-1 bg-transparent outline-none text-[var(--fg)] caret-[var(--accent)] text-[16px] w-full"
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

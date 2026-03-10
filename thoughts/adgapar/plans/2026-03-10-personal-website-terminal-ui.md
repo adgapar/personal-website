@@ -284,12 +284,12 @@ export interface Command {
 - [x] No lint errors: `pnpm lint`
 
 #### Manual Verification:
-- [ ] Terminal renders on homepage with `$ ` prompt
-- [ ] Typing text updates the input field
-- [ ] Pressing Enter shows "command not found: X. type 'help' for available commands."
+- [x] Terminal renders on homepage with `$ ` prompt
+- [x] Typing text updates the input field
+- [x] Pressing Enter shows "command not found: X. type 'help' for available commands."
 - [ ] ArrowUp/Down navigates through command history
-- [ ] Clicking anywhere on the page focuses the input
-- [ ] Output scrolls to bottom when history grows long
+- [x] Clicking anywhere on the page focuses the input
+- [x] Output scrolls to bottom when history grows long
 
 **Implementation Note**: After Phase 2 passes, create commit: `[phase 2] terminal engine: command registry, input handling, history renderer`
 

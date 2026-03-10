@@ -17,13 +17,13 @@ interface TerminalState {
   inputEnabled: boolean
 }
 
-export function useTerminal() {
+export function useTerminal(initialInputEnabled = false) {
   const [state, setState] = useState<TerminalState>({
     history: [],
     inputValue: '',
     commandHistory: [],
     commandHistoryIndex: -1,
-    inputEnabled: false,
+    inputEnabled: initialInputEnabled,
   })
 
   const appendOutput = useCallback((lines: TerminalLine[], command?: string) => {

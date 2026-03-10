@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useCallback, useEffect, type KeyboardEvent } from 'react'
+import { useRef, useCallback, type KeyboardEvent } from 'react'
 import { useTerminal } from './useTerminal'
 import TerminalHistory from './TerminalHistory'
 import { executeCommand } from '@/lib/commands/registry'
@@ -21,15 +21,9 @@ export default function Terminal({ onNavigate, skipBoot = false }: Props) {
     appendOutput,
     clearHistory,
     setInputValue,
-    enableInput,
     pushCommandHistory,
     navigateCommandHistory,
-  } = useTerminal()
-
-  // Enable input immediately if skipBoot is true (Phase 2); Phase 3 will handle boot
-  useEffect(() => {
-    if (skipBoot) enableInput()
-  }, [skipBoot, enableInput])
+  } = useTerminal(skipBoot)
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus()

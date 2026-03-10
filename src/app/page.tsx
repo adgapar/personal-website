@@ -1,7 +1,10 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import Terminal from '@/components/terminal/Terminal'
+
 export default function Home() {
-  return (
-    <main className="min-h-screen flex items-center justify-center font-mono">
-      <p>adgapar — coming soon</p>
-    </main>
-  );
+  const router = useRouter()
+
+  return <Terminal onNavigate={(href) => router.push(href)} skipBoot />
 }

@@ -185,9 +185,9 @@ Bootstrap the Next.js 15 project with pnpm, TypeScript, Tailwind CSS v4, App Rou
 - [x] Lockfile exists: `ls pnpm-lock.yaml`
 
 #### Manual Verification:
-- [ ] `http://localhost:3000` renders placeholder text
-- [ ] JetBrains Mono font loads (inspect element → computed font)
-- [ ] No console errors on load
+- [x] `http://localhost:3000` renders placeholder text
+- [x] JetBrains Mono font loads (inspect element → computed font)
+- [x] No console errors on load
 
 **Implementation Note**: After Phase 1 passes, create commit: `[phase 1] scaffold Next.js 15 project with pnpm, TypeScript, Tailwind`
 
@@ -279,9 +279,9 @@ export interface Command {
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Build succeeds: `pnpm build`
-- [ ] TypeScript compiles: `pnpm tsc --noEmit`
-- [ ] No lint errors: `pnpm lint`
+- [x] Build succeeds: `pnpm build`
+- [x] TypeScript compiles: `pnpm tsc --noEmit`
+- [x] No lint errors: `pnpm lint`
 
 #### Manual Verification:
 - [ ] Terminal renders on homepage with `$ ` prompt

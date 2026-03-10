@@ -459,17 +459,17 @@ drwxr-xr-x  contact/
 - [ ] Command files exist: `ls src/lib/commands/`
 
 #### Manual Verification:
-- [ ] On load: boot messages appear with staggered timing
-- [ ] `whois adgapar` auto-runs after boot and shows profile card
-- [ ] Input is disabled during boot, enabled after
-- [ ] `help` shows formatted command table
-- [ ] `clear` clears the terminal
-- [ ] `ls` shows directory-style section listing
-- [ ] `about` prints "→ navigating to about..." and navigates (404 OK in this phase)
-- [ ] `cat cv` renders CV content inline in the terminal
-- [ ] `git commit` returns easter egg response
-- [ ] `sudo` returns "nice try."
-- [ ] Unknown command returns error message with `help` hint
+- [x] On load: boot messages appear with staggered timing
+- [x] `whois adgapar` auto-runs after boot and shows profile card
+- [x] Input is disabled during boot, enabled after
+- [x] `help` shows formatted command table
+- [x] `clear` clears the terminal
+- [x] `ls` shows directory-style section listing
+- [x] `about` prints "→ navigating to about..." and navigates (404 OK in this phase)
+- [x] `cat cv` renders CV content inline in the terminal
+- [x] `git commit` returns easter egg response
+- [x] `sudo` returns "nice try."
+- [x] Unknown command returns error message with `help` hint
 - [ ] ArrowUp/Down recalls previous commands
 
 **Implementation Note**: After Phase 3 passes, create commit: `[phase 3] boot sequence, core commands, navigation routing, easter eggs`

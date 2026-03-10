@@ -10,38 +10,37 @@ export interface HistoryEntry {
 }
 
 interface TerminalState {
-  history: HistoryEntry[]
+  // Boot log accumulates during boot, then is replaced by single command output
+  bootLines: TerminalLine[]
+  output: TerminalLine[] | null   // null = show boot lines
   inputValue: string
   commandHistory: string[]
   commandHistoryIndex: number
   inputEnabled: boolean
 }
 
-export function useTerminal(initialInputEnabled = false) {
+export function useTerminal() {
   const [state, setState] = useState<TerminalState>({
-    history: [],
+    bootLines: [],
+    output: null,
     inputValue: '',
     commandHistory: [],
     commandHistoryIndex: -1,
-    inputEnabled: initialInputEnabled,
+    inputEnabled: false,
   })
 
-  const appendOutput = useCallback((lines: TerminalLine[], command?: string) => {
-    setState((prev) => ({
-      ...prev,
-      history: [
-        ...prev.history,
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          command,
-          lines,
-        },
-      ],
-    }))
+  const appendBoot = useCallback((lines: TerminalLine[]) => {
+    setState((prev) => ({ ...prev, bootLines: [...prev.bootLines, ...lines] }))
   }, [])
 
-  const clearHistory = useCallback(() => {
-    setState((prev) => ({ ...prev, history: [] }))
+  const setOutput = useCallback((lines: TerminalLine[], command?: string) => {
+    // Add a "$ command" echo line at the top if a command was typed
+    const echo: TerminalLine[] = command ? [{ content: command, style: 'command' }] : []
+    setState((prev) => ({ ...prev, output: [...echo, ...lines] }))
+  }, [])
+
+  const clearOutput = useCallback(() => {
+    setState((prev) => ({ ...prev, output: [] }))
   }, [])
 
   const setInputValue = useCallback((value: string) => {
@@ -66,13 +65,8 @@ export function useTerminal(initialInputEnabled = false) {
       setState((prev) => {
         const maxIndex = currentHistory.length - 1
         let newIndex = prev.commandHistoryIndex
-
-        if (direction === 'up') {
-          newIndex = Math.min(newIndex + 1, maxIndex)
-        } else {
-          newIndex = Math.max(newIndex - 1, -1)
-        }
-
+        if (direction === 'up') newIndex = Math.min(newIndex + 1, maxIndex)
+        else newIndex = Math.max(newIndex - 1, -1)
         return {
           ...prev,
           commandHistoryIndex: newIndex,
@@ -84,13 +78,14 @@ export function useTerminal(initialInputEnabled = false) {
   )
 
   return {
-    history: state.history,
+    bootLines: state.bootLines,
+    output: state.output,
     inputValue: state.inputValue,
     commandHistory: state.commandHistory,
-    commandHistoryIndex: state.commandHistoryIndex,
     inputEnabled: state.inputEnabled,
-    appendOutput,
-    clearHistory,
+    appendBoot,
+    setOutput,
+    clearOutput,
     setInputValue,
     enableInput,
     pushCommandHistory,

@@ -6,5 +6,5 @@ import Terminal from '@/components/terminal/Terminal'
 export default function Home() {
   const router = useRouter()
 
-  return <Terminal onNavigate={(href) => router.push(href)} skipBoot />
+  return <Terminal onNavigate={(href) => router.push(href)} />
 }

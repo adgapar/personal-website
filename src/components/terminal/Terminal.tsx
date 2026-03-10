@@ -1,18 +1,25 @@
 'use client'
 
-import { useRef, useCallback, type KeyboardEvent } from 'react'
+import { useRef, useCallback, useEffect, type KeyboardEvent } from 'react'
 import { useTerminal } from './useTerminal'
 import TerminalHistory from './TerminalHistory'
-import { executeCommand } from '@/lib/commands/registry'
+import { executeCommand } from '@/lib/commands'
 
 interface Props {
   onNavigate?: (href: string) => void
-  /** If true, skip boot sequence and enable input immediately (used in Phase 2 dev) */
-  skipBoot?: boolean
 }
 
-export default function Terminal({ onNavigate, skipBoot = false }: Props) {
+const BOOT_STEPS = [
+  { delay: 150, lines: [{ content: '[ OK ] Starting session — adilet.gaparov', style: 'success' as const }] },
+  { delay: 350, lines: [{ content: '[ OK ] User profile loaded', style: 'success' as const }] },
+  { delay: 550, lines: [{ content: `[ INFO ] Last login: ${new Date().toDateString()}`, style: 'info' as const }] },
+  { delay: 750, lines: [{ content: '', style: 'default' as const }] },
+  { delay: 950, lines: [{ content: 'whois adgapar', style: 'command' as const }] },
+]
+
+export default function Terminal({ onNavigate }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const bootRan = useRef(false)
   const {
     history,
     inputValue,
@@ -21,9 +28,37 @@ export default function Terminal({ onNavigate, skipBoot = false }: Props) {
     appendOutput,
     clearHistory,
     setInputValue,
+    enableInput,
     pushCommandHistory,
     navigateCommandHistory,
-  } = useTerminal(skipBoot)
+  } = useTerminal(false)
+
+  useEffect(() => {
+    if (bootRan.current) return
+    bootRan.current = true
+
+    const timers: ReturnType<typeof setTimeout>[] = []
+
+    BOOT_STEPS.forEach(({ delay, lines }) => {
+      timers.push(setTimeout(() => appendOutput(lines), delay))
+    })
+
+    // Auto-run whois after boot text appears
+    timers.push(
+      setTimeout(() => {
+        const result = executeCommand('whois adgapar')
+        appendOutput(result.lines ?? [])
+      }, 1100)
+    )
+
+    // Enable input
+    timers.push(setTimeout(() => {
+      enableInput()
+      setTimeout(() => inputRef.current?.focus(), 50)
+    }, 1300))
+
+    return () => timers.forEach(clearTimeout)
+  }, [appendOutput, enableInput])
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus()
@@ -52,13 +87,9 @@ export default function Terminal({ onNavigate, skipBoot = false }: Props) {
         appendOutput(result.lines ?? [], input)
 
         if (result.type === 'navigate' && result.href) {
-          setTimeout(() => {
-            onNavigate?.(result.href!)
-          }, 400)
+          setTimeout(() => onNavigate?.(result.href!), 400)
         } else if (result.type === 'open' && result.href) {
-          setTimeout(() => {
-            window.open(result.href!, '_blank', 'noopener,noreferrer')
-          }, 400)
+          setTimeout(() => window.open(result.href!, '_blank', 'noopener,noreferrer'), 400)
         }
       }
     },
@@ -82,7 +113,6 @@ export default function Terminal({ onNavigate, skipBoot = false }: Props) {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              autoFocus
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"

@@ -1,9 +1,6 @@
 import PageLayout from '@/components/layout/PageLayout'
+import { photosPage } from '@/lib/sessions'
 
 export default function PhotosPage() {
-  return (
-    <PageLayout section="photos">
-      <p className="text-[var(--muted)]">— content coming soon —</p>
-    </PageLayout>
-  )
+  return <PageLayout session={photosPage} />
 }

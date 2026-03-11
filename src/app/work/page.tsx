@@ -1,9 +1,5 @@
-import PageLayout from '@/components/layout/PageLayout'
+import { redirect } from 'next/navigation'
 
 export default function WorkPage() {
-  return (
-    <PageLayout section="work">
-      <p className="text-[var(--muted)]">— content coming soon —</p>
-    </PageLayout>
-  )
+  redirect('/cv')
 }

@@ -1,9 +1,6 @@
 import PageLayout from '@/components/layout/PageLayout'
+import { contactPage } from '@/lib/sessions'
 
 export default function ContactPage() {
-  return (
-    <PageLayout section="contact">
-      <p className="text-[var(--muted)]">— content coming soon —</p>
-    </PageLayout>
-  )
+  return <PageLayout session={contactPage} />
 }

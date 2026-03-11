@@ -3,33 +3,36 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const sections = ['about', 'work', 'projects', 'blog', 'newsletter', 'photos', 'contact']
+const sections = [
+  { name: 'about',      href: '/' },
+  { name: 'cv',         href: '/cv' },
+  { name: 'writing',    href: '/writing' },
+  { name: 'photos',     href: '/photos' },
+  { name: 'contact',    href: '/contact' },
+]
 
 export default function SiteNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-sm font-mono border-b border-[var(--border)]">
-      <Link
-        href="/"
-        className="text-[var(--accent)] hover:opacity-80 transition-opacity"
-      >
+    <nav className="flex flex-wrap items-center gap-x-6 gap-y-1 px-10 py-4">
+      <span className="text-[11px] tracking-widest text-[var(--muted)] select-none">
         ~/adilet
-      </Link>
-      {sections.map((section, i) => {
-        const isActive = pathname === `/${section}`
+      </span>
+      {sections.map(({ name, href }) => {
+        const isActive = pathname === href
         return (
-          <span key={section} className="flex items-center gap-x-3">
-            {i > 0 && <span className="text-[var(--muted)] select-none">·</span>}
-            <Link
-              href={`/${section}`}
-              className={`transition-colors hover:text-[var(--accent)] ${
-                isActive ? 'text-[var(--accent)]' : 'text-[var(--fg)]'
-              }`}
-            >
-              [{section}]
-            </Link>
-          </span>
+          <Link
+            key={href}
+            href={href}
+            className={`text-[11px] tracking-widest transition-colors duration-200 ${
+              isActive
+                ? 'text-[var(--accent)]'
+                : 'text-[var(--muted)] hover:text-[var(--fg)]'
+            }`}
+          >
+            {name}
+          </Link>
         )
       })}
     </nav>

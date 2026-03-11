@@ -10,9 +10,9 @@ export interface HistoryEntry {
 }
 
 interface TerminalState {
-  // Boot log accumulates during boot, then is replaced by single command output
-  bootLines: TerminalLine[]
-  output: TerminalLine[] | null   // null = show boot lines
+  bootLines: TerminalLine[]       // boot sequence, always visible at top
+  initOutput: TerminalLine[]      // whois output, always visible below boot
+  response: TerminalLine[] | null // latest command response, replaces on each command
   inputValue: string
   commandHistory: string[]
   commandHistoryIndex: number
@@ -22,7 +22,8 @@ interface TerminalState {
 export function useTerminal() {
   const [state, setState] = useState<TerminalState>({
     bootLines: [],
-    output: null,
+    initOutput: [],
+    response: null,
     inputValue: '',
     commandHistory: [],
     commandHistoryIndex: -1,
@@ -33,14 +34,17 @@ export function useTerminal() {
     setState((prev) => ({ ...prev, bootLines: [...prev.bootLines, ...lines] }))
   }, [])
 
-  const setOutput = useCallback((lines: TerminalLine[], command?: string) => {
-    // Add a "$ command" echo line at the top if a command was typed
-    const echo: TerminalLine[] = command ? [{ content: command, style: 'command' }] : []
-    setState((prev) => ({ ...prev, output: [...echo, ...lines] }))
+  const setInitOutput = useCallback((lines: TerminalLine[]) => {
+    setState((prev) => ({ ...prev, initOutput: lines }))
   }, [])
 
-  const clearOutput = useCallback(() => {
-    setState((prev) => ({ ...prev, output: [] }))
+  const setResponse = useCallback((lines: TerminalLine[], command?: string) => {
+    const echo: TerminalLine[] = command ? [{ content: command, style: 'command' }] : []
+    setState((prev) => ({ ...prev, response: [...echo, ...lines] }))
+  }, [])
+
+  const clearResponse = useCallback(() => {
+    setState((prev) => ({ ...prev, response: null }))
   }, [])
 
   const setInputValue = useCallback((value: string) => {
@@ -79,13 +83,15 @@ export function useTerminal() {
 
   return {
     bootLines: state.bootLines,
-    output: state.output,
+    initOutput: state.initOutput,
+    response: state.response,
     inputValue: state.inputValue,
     commandHistory: state.commandHistory,
     inputEnabled: state.inputEnabled,
     appendBoot,
-    setOutput,
-    clearOutput,
+    setInitOutput,
+    setResponse,
+    clearResponse,
     setInputValue,
     enableInput,
     pushCommandHistory,

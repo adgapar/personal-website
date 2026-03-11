@@ -7,6 +7,17 @@ function egg(content: string, style: TerminalLine['style'] = 'muted') {
 
 // git commands
 registerCommand({
+  name: 'git',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [{ content: 'git: specify a subcommand — commit · push · pull · blame · status · log', style: 'muted' }],
+  }),
+})
+
+registerCommand({
   name: 'git commit',
   description: '',
   hidden: true,

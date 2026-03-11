@@ -1,5 +1,7 @@
 import { registerCommand } from './registry'
 import { profile } from '@/data/profile'
+import { projects } from '@/data/projects'
+import { jobs } from '@/data/jobs'
 import type { TerminalLine } from './types'
 
 const DIVIDER: TerminalLine = { content: '─'.repeat(43), style: 'muted' }
@@ -22,7 +24,6 @@ registerCommand({
       { content: '  photos       a visual log', style: 'default' },
       { content: '  contact      get in touch', style: 'default' },
       { content: '  whois        show profile info', style: 'default' },
-      { content: '  cat cv       view résumé', style: 'default' },
       { content: '  ls           list sections', style: 'default' },
       { content: '  clear        clear the terminal', style: 'default' },
       DIVIDER,
@@ -32,7 +33,8 @@ registerCommand({
 })
 
 registerCommand({
-  name: 'whois',
+  name: 'whois adilet',
+  aliases: ['whois adgapar', 'whois'],
   description: 'show profile info',
   type: 'output',
   handler: () => ({
@@ -104,52 +106,194 @@ registerCommand({
   }),
 })
 
+const D: TerminalLine = { content: '', style: 'default' }
+
 registerCommand({
-  name: 'cat cv',
-  description: 'view résumé',
+  name: 'ls work',
+  description: 'list work experience',
   type: 'output',
   handler: () => ({
     type: 'output',
     lines: [
       DIVIDER,
-      { content: '  Adilet Gaparov — CV', style: 'accent' },
+      { content: '  work history', style: 'accent' },
       DIVIDER,
-      { content: '  experience', style: 'accent' },
-      { content: '  ──────────', style: 'muted' },
-      { content: '  Founding AI Engineer · Orbio AI          2024 – present', style: 'default' },
-      { content: '  Building AI agents for recruitment, onboarding & experience', style: 'muted' },
+      { content: '  Founding AI Engineer', style: 'default' },
+      { content: '  Orbio AI                                2024 – present', style: 'muted' },
+      { content: '  Building AI agents for recruitment, onboarding & experience.', style: 'default' },
       { content: '', style: 'default' },
-      { content: '  ML Engineer · Capchase                   2022 – 2024', style: 'default' },
-      { content: '  Risk intelligence and underwriting systems', style: 'muted' },
+      { content: '  ML Engineer', style: 'default' },
+      { content: '  Capchase                                2022 – 2024', style: 'muted' },
+      { content: '  Risk intelligence and underwriting systems for fintech SaaS.', style: 'default' },
       { content: '', style: 'default' },
-      { content: '  ML Engineer · Volvo Cars                 2021 – 2022', style: 'default' },
-      { content: '  Electrification models and ML infrastructure', style: 'muted' },
+      { content: '  ML Engineer', style: 'default' },
+      { content: '  Volvo Cars                              2021 – 2022', style: 'muted' },
+      { content: '  Electrification models and connected car analytics.', style: 'default' },
       { content: '', style: 'default' },
-      { content: '  Cloud Engineer · Microsoft               2019 – 2021', style: 'default' },
-      { content: '  Cloud solutions across enterprise customers', style: 'muted' },
+      { content: '  Cloud Engineer', style: 'default' },
+      { content: '  Microsoft                               2019 – 2021', style: 'muted' },
+      { content: '  Cloud solutions and enterprise customer enablement.', style: 'default' },
+      DIVIDER,
+      { content: "  visit /cv for full résumé", style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'open',
+  description: 'open a project by name',
+  type: 'output',
+  handler: (_flags, rawInput) => {
+    const query = rawInput.replace(/^open\s+/i, '').trim().toLowerCase()
+    if (!query) {
+      return {
+        type: 'output',
+        lines: [{ content: "usage: open <name>  ·  e.g. open orbio  ·  open work/2  ·  open projects/1", style: 'muted' }],
+      }
+    }
+
+    const workMatch = query.match(/^work\/(\d+)$/)
+    if (workMatch) {
+      const idx = parseInt(workMatch[1], 10) - 1
+      const job = jobs[idx]
+      if (job) return { type: 'output', lines: job.details }
+      return { type: 'output', lines: [{ content: `work/${workMatch[1]} not found  ·  valid range: 1–${jobs.length}`, style: 'muted' }] }
+    }
+
+    const projectsMatch = query.match(/^projects\/(\d+)$/)
+    if (projectsMatch) {
+      const idx = parseInt(projectsMatch[1], 10) - 1
+      const project = projects[idx]
+      if (project) return { type: 'output', lines: project.details }
+      return { type: 'output', lines: [{ content: `projects/${projectsMatch[1]} not found  ·  valid range: 1–${projects.length}`, style: 'muted' }] }
+    }
+
+    const job = jobs.find((j) => j.id === query || j.name.toLowerCase().includes(query))
+    if (job) return { type: 'output', lines: job.details }
+
+    const project = projects.find((p) => p.id === query || p.name.toLowerCase().includes(query))
+    if (project) return { type: 'output', lines: project.details }
+
+    return {
+      type: 'output',
+      lines: [{ content: `'${query}' not found  ·  type 'help' to see what's available`, style: 'muted' }],
+    }
+  },
+})
+
+registerCommand({
+  name: 'ls projects',
+  description: 'list projects',
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      DIVIDER,
+      { content: '  projects', style: 'accent' },
+      DIVIDER,
+      { content: '  adgapar.dev', style: 'default' },
+      { content: '  Personal blog — learning, AI, and building in public.', style: 'muted' },
+      { content: '  → adgapar.dev', style: 'info', href: 'https://www.adgapar.dev' },
       { content: '', style: 'default' },
-      { content: '  education', style: 'accent' },
-      { content: '  ─────────', style: 'muted' },
-      { content: '  MSc Data Science · IE School of Science & Technology', style: 'default' },
-      { content: '  Mentor, graduate students', style: 'muted' },
+      { content: '  The Working Prototype', style: 'default' },
+      { content: '  Newsletter on practical AI and building with it.', style: 'muted' },
+      { content: '  → theworkingprototype.substack.com', style: 'info', href: 'https://theworkingprototype.substack.com/' },
+      DIVIDER,
+      { content: '  more coming soon', style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'ls blog',
+  description: 'view blog',
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      DIVIDER,
+      { content: '  blog — adgapar.dev', style: 'accent' },
+      DIVIDER,
+      { content: '  I write about AI, learning, and building in public.', style: 'default' },
+      { content: '  Topics: LLMs · agents · product · personal growth.', style: 'muted' },
       { content: '', style: 'default' },
-      { content: '  skills', style: 'accent' },
-      { content: '  ──────', style: 'muted' },
-      { content: '  Python · TypeScript · LLMs · RAG · Voice AI', style: 'default' },
-      { content: '  Azure · AWS · Next.js · FastAPI · PostgreSQL', style: 'default' },
+      { content: '  → adgapar.dev', style: 'info', href: 'https://www.adgapar.dev' },
       DIVIDER,
     ],
   }),
 })
 
-// alias: "cv" alone hints to use "cat cv"
 registerCommand({
-  name: 'cv',
-  description: 'view résumé',
+  name: 'cat newsletter.txt',
+  description: 'view newsletter info',
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      DIVIDER,
+      { content: '  The Working Prototype', style: 'accent' },
+      DIVIDER,
+      { content: '  A newsletter on practical AI and building with it.', style: 'default' },
+      { content: '  No fluff.', style: 'muted' },
+      { content: '', style: 'default' },
+      { content: '  → theworkingprototype.substack.com', style: 'info', href: 'https://theworkingprototype.substack.com/' },
+      DIVIDER,
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'cat contact.txt',
+  description: 'view contact info',
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      DIVIDER,
+      { content: '  contact', style: 'accent' },
+      DIVIDER,
+      { content: `  github    → github.com/${profile.handle}`, style: 'default', href: profile.links.github },
+      { content: `  twitter   → twitter.com/${profile.handle}`, style: 'default', href: profile.links.twitter },
+      { content: `  linkedin  → linkedin.com/in/adilet-gaparov`, style: 'default', href: profile.links.linkedin },
+      { content: `  threads   → threads.com/@adilet.gaparov`, style: 'default', href: profile.links.threads },
+      { content: `  blog      → adgapar.dev`, style: 'default', href: profile.links.blog },
+      DIVIDER,
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'ls photos',
+  description: 'view photos',
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      DIVIDER,
+      { content: '  photos', style: 'accent' },
+      DIVIDER,
+      { content: '  24 countries · 3 continents · 1 camera', style: 'default' },
+      { content: '  gallery coming soon.', style: 'muted' },
+      DIVIDER,
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'cat about.txt',
+  description: 'about me',
   type: 'output',
   hidden: true,
   handler: () => ({
     type: 'output',
-    lines: [{ content: 'hint: try `cat cv`', style: 'muted' }],
+    lines: [
+      DIVIDER,
+      { content: `  ${profile.name} (${profile.nickname})`, style: 'accent' },
+      DIVIDER,
+      { content: profile.longBio, style: 'default' },
+      { content: '', style: 'default' },
+      { content: `  languages    : ${profile.languages.join(' · ')}`, style: 'muted' },
+      DIVIDER,
+    ],
   }),
 })

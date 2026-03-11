@@ -1,20 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0d0d0d;
-  --fg: #e8e6e3;
-  --accent: #7dd3fc;
-  --muted: #6b7280;
-  --success: #4ade80;
-  --error: #f87171;
-  --info: #94a3b8;
-  --border: #1f1f1f;
+  --bg:      #0c0b0a;
+  --fg:      #d8d4cd;
+  --bright:  #f0ece5;
+  --accent:  #7dd3fc;
+  --muted:   #504e49;
+  --dim:     #252321;
+  --warm:    #fbbf24;
+  --success: #6ee7b7;
+  --error:   #fca5a5;
+  --info:    #8899aa;
+  --border:  #2a2826;
 }
 
 body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @keyframes blink {

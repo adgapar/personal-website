@@ -1,11 +1,13 @@
 import { registerCommand } from './registry'
 
 const sections = [
-  { name: 'about', href: '/about' },
-  { name: 'work', href: '/work' },
-  { name: 'projects', href: '/projects' },
-  { name: 'blog', href: '/blog' },
-  { name: 'newsletter', href: '/newsletter' },
+  { name: 'about', href: '/' },
+  { name: 'cv',   href: '/cv' },
+  { name: 'work', href: '/cv' },
+  { name: 'projects', href: '/work' },
+  { name: 'writing', href: '/writing' },
+  { name: 'blog', href: '/writing' },
+  { name: 'newsletter', href: '/writing' },
   { name: 'photos', href: '/photos' },
   { name: 'contact', href: '/contact' },
 ]

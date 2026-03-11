@@ -39,3 +39,9 @@ export function executeCommand(input: string): CommandResult {
 export function getAllCommands(): Command[] {
   return [...new Set(registry.values())]
 }
+
+export function hasCommand(input: string): boolean {
+  const parts = input.trim().toLowerCase().split(/\s+/)
+  const twoWordKey = parts.slice(0, 2).join(' ')
+  return registry.has(twoWordKey) || registry.has(parts[0])
+}

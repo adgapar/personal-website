@@ -1,23 +1,31 @@
-import WindowChrome from './WindowChrome'
+'use client'
+
+import { useRouter, usePathname } from 'next/navigation'
 import SiteNav from './SiteNav'
+import TerminalSession from '@/components/terminal/TerminalSession'
+import type { PageSession } from '@/lib/sessions'
 
 interface Props {
-  section: string
-  children: React.ReactNode
+  session: PageSession
+  animated?: boolean
 }
 
-export default function PageLayout({ section, children }: Props) {
+export default function PageLayout({ session, animated }: Props) {
+  const router = useRouter()
+  const pathname = usePathname()
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] font-mono text-sm flex flex-col">
-      <div className="max-w-3xl w-full mx-auto flex flex-col flex-1 border-x border-[var(--border)]">
-        <WindowChrome />
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] font-mono text-sm flex flex-col items-center">
+      <div className="max-w-4xl w-full flex flex-col flex-1">
         <SiteNav />
-        <main className="flex-1 p-8">
-          <div className="mb-6 text-[var(--muted)]">
-            <span className="text-[var(--accent)]">$</span> {section}
-          </div>
-          {children}
-        </main>
+        <TerminalSession
+          key={pathname}
+          blocks={session.blocks}
+          commands={session.commands}
+          prompt={session.prompt}
+          placeholder={session.placeholder}
+          animated={animated}
+          onNavigate={(href) => router.push(href)}
+        />
       </div>
     </div>
   )

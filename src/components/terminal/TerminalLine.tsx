@@ -5,22 +5,21 @@ interface Props {
 }
 
 const styleMap: Record<string, string> = {
-  bright:  'text-[var(--bright)]',
   default: 'text-[var(--fg)]',
+  warm:    'text-[var(--warm)]',
   success: 'text-[var(--success)]',
   error:   'text-[var(--error)]',
   info:    'text-[var(--info)]',
   accent:  'text-[var(--accent)]',
   muted:   'text-[var(--muted)]',
   dim:     'text-[var(--dim)]',
-  command: 'text-[var(--fg)]',
   divider: 'text-[var(--border)]',
 }
 
 export default function TerminalLine({ line }: Props) {
   // Key-value row: label + content side by side
   if (line.label !== undefined) {
-    const valueClass = styleMap[line.style ?? 'bright'] ?? styleMap.bright
+    const valueClass = styleMap[line.style ?? 'warm'] ?? styleMap.warm
     return (
       <div className="flex items-baseline gap-5">
         <span className="text-[var(--muted)] text-[10px] tracking-widest uppercase shrink-0 w-20">
@@ -31,7 +30,7 @@ export default function TerminalLine({ line }: Props) {
             href={line.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${valueClass} underline underline-offset-2 hover:text-[var(--accent)] transition-colors duration-200`}
+            className="text-[var(--accent)] underline underline-offset-2 hover:opacity-80 transition-opacity duration-200"
           >
             {line.content}
           </a>
@@ -58,7 +57,7 @@ export default function TerminalLine({ line }: Props) {
     return (
       <div className="flex items-baseline gap-2 tracking-wide">
         <span className="text-[var(--accent)] select-none">$</span>
-        <span className="text-[var(--bright)]">{verb}</span>
+        <span className="text-[var(--fg)]">{verb}</span>
         {args && <span className="text-[var(--warm)]">{args}</span>}
       </div>
     )
@@ -67,7 +66,7 @@ export default function TerminalLine({ line }: Props) {
   // Blockquote — left accent border
   if (line.style === 'quote') {
     return (
-      <div className="border-l border-[var(--muted)] pl-4 text-[var(--bright)] whitespace-pre-wrap break-words leading-relaxed">
+      <div className="border-l border-[var(--muted)] pl-4 text-[var(--fg)] whitespace-pre-wrap break-words leading-relaxed">
         {line.content}
       </div>
     )
@@ -83,7 +82,7 @@ export default function TerminalLine({ line }: Props) {
           href={line.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[var(--warm)] hover:text-[var(--accent)] transition-colors duration-200 text-[10px] tracking-wide"
+          className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-[10px] tracking-wide"
         >
           (link)
         </a>

@@ -169,7 +169,7 @@ export default function TerminalSession({
               return (
                 <div className="flex items-baseline gap-2 mb-3 tracking-wide">
                   <span className="text-[var(--accent)] select-none">$</span>
-                  <span className="text-[var(--bright)]">{verb}</span>
+                  <span className="text-[var(--fg)]">{verb}</span>
                   {args && <span className="text-[var(--warm)]">{args}</span>}
                 </div>
               )
@@ -183,7 +183,7 @@ export default function TerminalSession({
                   {item.meta && (
                     <span className="text-[var(--dim)] text-[11px] shrink-0 w-24">{item.meta}</span>
                   )}
-                  <span className="text-[var(--bright)] text-xs">{item.title}</span>
+                  <span className="text-[var(--warm)] text-xs">{item.title}</span>
                   {item.tag && (() => {
                     const s = item.tagStyle ?? 'muted'
                     const cls =
@@ -219,7 +219,7 @@ export default function TerminalSession({
                     {row.cols.map((col, k) => (
                       <span
                         key={k}
-                        className={`${colClass(k, row.cols.length)} ${k === 0 ? 'text-[var(--bright)]' : statusColor(block.table!.headers[k] ?? '', col)} text-xs`}
+                        className={`${colClass(k, row.cols.length)} ${k === 0 ? 'text-[var(--warm)]' : statusColor(block.table!.headers[k] ?? '', col)} text-xs`}
                       >
                         {col}
                       </span>
@@ -246,12 +246,12 @@ export default function TerminalSession({
                   <div className="flex items-baseline gap-3">
                     <span className="text-[var(--dim)] text-[11px] shrink-0 w-16">{entry.date}</span>
                     {entry.tag && (
-                      <span className="text-[10px] text-[var(--accent)] border border-[var(--accent)] px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70">{entry.tag}</span>
+                      <span className="text-[10px] text-[var(--warm)] border border-[var(--warm)] px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70">{entry.tag}</span>
                     )}
                     <span className="text-[var(--muted)] text-xs">{entry.content}</span>
                     {entry.href && (
                       <a href={entry.href} target="_blank" rel="noopener noreferrer"
-                        className="text-[var(--warm)] hover:text-[var(--accent)] transition-colors duration-200 text-[10px] tracking-wide shrink-0">
+                        className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-[10px] tracking-wide shrink-0">
                         (link)
                       </a>
                     )}
@@ -322,7 +322,7 @@ export default function TerminalSession({
               spellCheck={false}
               placeholder={placeholder}
               aria-label="terminal input"
-              className="flex-1 bg-transparent outline-none font-[inherit] text-xs text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--muted)] placeholder:opacity-30"
+              className="flex-1 bg-transparent outline-none font-[inherit] text-xs text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
             />
           </div>
 

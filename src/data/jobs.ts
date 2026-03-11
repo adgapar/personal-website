@@ -13,7 +13,7 @@ export const jobs: Job[] = [
     id: 'orbio',
     name: 'Orbio AI',
     details: [
-      { label: 'role',    content: 'Founding AI Engineer', style: 'bright' },
+      { label: 'role',    content: 'Founding AI Engineer', style: 'warm' },
       { label: 'company', content: 'Orbio AI', style: 'default' },
       { label: 'period',  content: 'Apr 2025 – present', style: 'muted' },
       { label: 'where',   content: 'Madrid', style: 'muted' },
@@ -26,7 +26,7 @@ export const jobs: Job[] = [
     id: 'ie',
     name: 'IE University',
     details: [
-      { label: 'role',    content: 'Global Mentor', style: 'bright' },
+      { label: 'role',    content: 'Global Mentor', style: 'warm' },
       { label: 'company', content: 'IE University of Science & Technology', style: 'default' },
       { label: 'period',  content: 'Jul 2023 – present', style: 'muted' },
       { label: 'where',   content: 'Madrid', style: 'muted' },
@@ -41,7 +41,7 @@ export const jobs: Job[] = [
     id: 'capchase',
     name: 'Capchase',
     details: [
-      { label: 'role',    content: 'Software Engineer', style: 'bright' },
+      { label: 'role',    content: 'ML Engineer', style: 'warm' },
       { label: 'company', content: 'Capchase', style: 'default' },
       { label: 'period',  content: 'Apr 2022 – Apr 2025', style: 'muted' },
       { label: 'where',   content: 'Madrid', style: 'muted' },
@@ -57,7 +57,7 @@ export const jobs: Job[] = [
     id: 'outpeer',
     name: 'outpeer.kz',
     details: [
-      { label: 'role',    content: 'Bootcamp Instructor & Mentor', style: 'bright' },
+      { label: 'role',    content: 'Bootcamp Instructor & Mentor', style: 'warm' },
       { label: 'company', content: 'outpeer.kz', style: 'default' },
       { label: 'period',  content: 'Aug 2022 – Mar 2025', style: 'muted' },
       { label: 'status',  content: 'past', style: 'muted' },
@@ -71,7 +71,7 @@ export const jobs: Job[] = [
     id: 'volvo',
     name: 'Volvo Cars',
     details: [
-      { label: 'role',    content: 'Data Scientist', style: 'bright' },
+      { label: 'role',    content: 'ML Engineer', style: 'warm' },
       { label: 'company', content: 'Volvo Cars', style: 'default' },
       { label: 'period',  content: 'Aug 2020 – Apr 2022', style: 'muted' },
       { label: 'where',   content: 'Sweden', style: 'muted' },
@@ -87,7 +87,7 @@ export const jobs: Job[] = [
     id: 'microsoft',
     name: 'Microsoft',
     details: [
-      { label: 'role',    content: 'Sales Engineer', style: 'bright' },
+      { label: 'role',    content: 'Sales Engineer', style: 'warm' },
       { label: 'company', content: 'Microsoft', style: 'default' },
       { label: 'period',  content: 'May 2016 – Sep 2018', style: 'muted' },
       { label: 'where',   content: 'Central & Eastern Europe', style: 'muted' },

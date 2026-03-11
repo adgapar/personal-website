@@ -2,11 +2,10 @@
 
 :root {
   --bg:      #0c0b0a;
-  --fg:      #d8d4cd;
-  --bright:  #f0ece5;
+  --fg:      #e4e0d8;
   --accent:  #7dd3fc;
-  --muted:   #504e49;
-  --dim:     #252321;
+  --muted:   #a09d96;
+  --dim:     #706d67;
   --warm:    #fbbf24;
   --success: #6ee7b7;
   --error:   #fca5a5;

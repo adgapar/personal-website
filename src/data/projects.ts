@@ -17,7 +17,7 @@ export const projects: Project[] = [
     tagStyle: 'warm',
     status: 'live',
     details: [
-      { label: 'name',   content: 'adgapar.dev', style: 'bright' },
+      { label: 'name',   content: 'adgapar.dev', style: 'warm' },
       { label: 'type',   content: 'personal blog', style: 'muted' },
       { label: 'status', content: 'live', style: 'success' },
       { label: '',       content: 'Learning, AI, and building in public.', style: 'default' },
@@ -31,7 +31,7 @@ export const projects: Project[] = [
     tagStyle: 'warm',
     status: 'live',
     details: [
-      { label: 'name',   content: 'The Working Prototype', style: 'bright' },
+      { label: 'name',   content: 'The Working Prototype', style: 'warm' },
       { label: 'type',   content: 'newsletter', style: 'muted' },
       { label: 'status', content: 'live', style: 'success' },
       { label: '',       content: 'Newsletter on practical AI and building with it.', style: 'default' },
@@ -45,7 +45,7 @@ export const projects: Project[] = [
     tagStyle: 'muted',
     status: 'past',
     details: [
-      { label: 'name',   content: 'BI Consulting', style: 'bright' },
+      { label: 'name',   content: 'BI Consulting', style: 'warm' },
       { label: 'type',   content: 'consulting', style: 'muted' },
       { label: 'period', content: 'Jan 2024 – Feb 2025', style: 'muted' },
       { label: 'status', content: 'past', style: 'muted' },
@@ -59,7 +59,7 @@ export const projects: Project[] = [
     tagStyle: 'muted',
     status: 'past',
     details: [
-      { label: 'name',   content: 'AI Consulting', style: 'bright' },
+      { label: 'name',   content: 'AI Consulting', style: 'warm' },
       { label: 'type',   content: 'consulting', style: 'muted' },
       { label: 'period', content: 'Jun – Dec 2024', style: 'muted' },
       { label: 'status', content: 'past', style: 'muted' },

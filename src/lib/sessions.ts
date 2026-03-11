@@ -61,11 +61,11 @@ export const homeSession: SessionBlock[] = [
     cmd: 'whois adilet',
     avatar: '/profile.jpg',
     lines: [
-      { label: 'name',     content: `${profile.name}  ·  ${profile.nickname}`, style: 'bright' },
-      { label: 'role',     content: profile.role, style: 'bright' },
+      { label: 'name',     content: `${profile.name}  ·  ${profile.nickname}`, style: 'warm' },
+      { label: 'role',     content: profile.role, style: 'warm' },
       { label: 'org',      content: profile.org, style: 'default' },
       { label: 'location', content: profile.location, style: 'default' },
-      { label: 'focus',    content: 'AI agents · recruitment · voice AI · building in public', style: 'muted' },
+      { label: 'focus',    content: 'AI agents · recruitment · voice AI · building in public', style: 'default' },
     ],
   },
   {
@@ -168,22 +168,20 @@ export const writingSession: SessionBlock[] = [
   {
     cmd: 'cat blog.txt',
     lines: [
-      { label: 'name',    content: 'adgapar.dev', style: 'bright' },
+      { label: 'name',    content: 'adgapar.dev', style: 'warm', href: 'https://www.adgapar.dev' },
       { label: 'topics',  content: 'AI · learning · building in public · career · personal growth', style: 'default' },
       { label: 'format',  content: 'essays · short takes · things I\'m figuring out', style: 'muted' },
       { label: 'cadence', content: 'when inspiration strikes', style: 'muted' },
-      { label: 'url',     content: 'adgapar.dev', style: 'accent', href: 'https://www.adgapar.dev' },
     ],
   },
   {
     cmd: 'cat newsletter.txt',
     lines: [
-      { label: 'name',    content: 'The Working Prototype', style: 'bright' },
+      { label: 'name',    content: 'The Working Prototype', style: 'warm', href: 'https://theworkingprototype.substack.com/' },
       { label: 'about',   content: 'AI alignment for people who ship — no PhD required', style: 'default' },
       { label: 'topics',  content: 'agent design · alignment in practice · production lessons', style: 'muted' },
       { label: 'format',  content: '1000–2000 words · technical enough, accessible enough', style: 'muted' },
       { label: 'cadence', content: 'monthly or more', style: 'muted' },
-      { label: 'url',     content: 'theworkingprototype.substack.com', style: 'accent', href: 'https://theworkingprototype.substack.com/' },
     ],
   },
 ]

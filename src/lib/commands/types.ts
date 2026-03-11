@@ -2,7 +2,7 @@ export type CommandType = 'navigate' | 'output' | 'open' | 'system'
 
 export type LineStyle =
   | 'default'
-  | 'bright'
+  | 'warm'
   | 'success'
   | 'error'
   | 'info'

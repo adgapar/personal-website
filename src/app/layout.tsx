@@ -8,7 +8,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "adgapar",
+  title: "adilet",
   description: "personal website",
 };
 

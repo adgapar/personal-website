@@ -91,10 +91,10 @@ export const homeSession: SessionBlock[] = [
     lines: [],
     log: {
       entries: [
+        { date: '2026-03', tag: 'blog',       content: 'sorry for writing so late',                                      href: 'https://www.adgapar.dev/sorry-for-writing-so-late/' },
         { date: '2026-03', tag: 'newsletter', content: 'in character',                                                   href: 'https://theworkingprototype.substack.com/p/in-character' },
         { date: '2026-02', tag: 'talk',       content: '10,000 interviews without a human 🇰🇿',                         href: 'https://www.youtube.com/watch?v=_5IoO2fA1FM' },
         { date: '2025-12',                    content: 'sister visited Elche — first time together since Chicago, 2017' },
-        { date: '2025-11', tag: 'blog',       content: 'the economy of blame',                                          href: 'https://www.adgapar.dev/the-economy-of-blame/' },
         { date: '2025-02',                    content: 'moved from Madrid to Elche. traded traffic for sunshine.' },
       ],
     },

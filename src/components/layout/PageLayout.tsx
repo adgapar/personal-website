@@ -14,7 +14,7 @@ export default function PageLayout({ session, animated }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] font-mono text-sm flex flex-col items-center">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] font-mono text-base flex flex-col items-center">
       <div className="max-w-4xl w-full flex flex-col flex-1">
         <SiteNav />
         <TerminalSession

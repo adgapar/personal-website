@@ -116,7 +116,7 @@ export default function Terminal({ onNavigate, initCommand = 'whois adgapar', sh
 
   return (
     <div
-      className="flex flex-col flex-1 bg-[var(--bg)] text-[var(--fg)] font-mono text-sm cursor-text"
+      className="flex flex-col flex-1 bg-[var(--bg)] text-[var(--fg)] font-mono text-base cursor-text"
       onClick={focusInput}
     >
       <div className="flex-1 p-8 pb-4 space-y-4">

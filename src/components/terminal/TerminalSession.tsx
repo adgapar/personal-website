@@ -156,7 +156,7 @@ export default function TerminalSession({
 
   return (
     <div
-      className="flex flex-col flex-1 bg-[var(--bg)] text-[var(--fg)] font-mono text-xs cursor-text overflow-y-auto"
+      className="flex flex-col flex-1 bg-[var(--bg)] text-[var(--fg)] font-mono text-sm cursor-text overflow-y-auto"
       onClick={focusInput}
     >
       <div className="px-10 pt-10 pb-64 max-w-2xl w-full mx-auto space-y-8">
@@ -179,11 +179,11 @@ export default function TerminalSession({
             <div className="space-y-3">
               {block.list.items.map((item, j) => (
                 <div key={j} className="flex items-baseline gap-3">
-                  <span className="text-[var(--dim)] w-4 shrink-0 select-none text-xs">{j + 1}</span>
+                  <span className="text-[var(--dim)] w-4 shrink-0 select-none">{j + 1}</span>
                   {item.meta && (
-                    <span className="text-[var(--dim)] text-[11px] shrink-0 w-24">{item.meta}</span>
+                    <span className="text-[var(--dim)] text-xs shrink-0 w-24">{item.meta}</span>
                   )}
-                  <span className="text-[var(--warm)] text-xs">{item.title}</span>
+                  <span className="text-[var(--warm)]">{item.title}</span>
                   {item.tag && (() => {
                     const s = item.tagStyle ?? 'muted'
                     const cls =
@@ -192,21 +192,21 @@ export default function TerminalSession({
                       s === 'success' ? 'text-[var(--success)] border-[var(--success)]' :
                                         'text-[var(--muted)] border-[var(--border)]'
                     return (
-                      <span className={`text-[10px] border px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70 ${cls}`}>{item.tag}</span>
+                      <span className={`text-xs border px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70 ${cls}`}>{item.tag}</span>
                     )
                   })()}
                   {item.status && (
-                    <span className={`text-xs shrink-0 ml-auto ${statusColor('status', item.status)}`}>{item.status}</span>
+                    <span className={`shrink-0 ml-auto ${statusColor('status', item.status)}`}>{item.status}</span>
                   )}
                 </div>
               ))}
               {block.list.hint && (
-                <div className="text-[var(--muted)] text-[10px] pt-1">{block.list.hint}</div>
+                <div className="text-[var(--muted)] text-xs pt-1">{block.list.hint}</div>
               )}
             </div>
           ) : block.table ? (
             <div className="space-y-1">
-              <div className="flex gap-6 text-[var(--muted)] text-[10px] tracking-widest uppercase pb-1 border-b border-[var(--border)]">
+              <div className="flex gap-6 text-[var(--muted)] text-xs tracking-widest uppercase pb-1 border-b border-[var(--border)]">
                 <span className="w-4 shrink-0">#</span>
                 {block.table.headers.map((h, j) => (
                   <span key={j} className={colClass(j, block.table!.headers.length)}>{h}</span>
@@ -215,11 +215,11 @@ export default function TerminalSession({
               {block.table.rows.map((row, j) => {
                 const rowContent = (
                   <>
-                    <span className="w-4 shrink-0 text-[var(--dim)] text-xs select-none">{j + 1}</span>
+                    <span className="w-4 shrink-0 text-[var(--dim)] select-none">{j + 1}</span>
                     {row.cols.map((col, k) => (
                       <span
                         key={k}
-                        className={`${colClass(k, row.cols.length)} ${k === 0 ? 'text-[var(--warm)]' : statusColor(block.table!.headers[k] ?? '', col)} text-xs`}
+                        className={`${colClass(k, row.cols.length)} ${k === 0 ? 'text-[var(--warm)]' : statusColor(block.table!.headers[k] ?? '', col)}`}
                       >
                         {col}
                       </span>
@@ -236,7 +236,7 @@ export default function TerminalSession({
                 )
               })}
               {block.table.hint && (
-                <div className="text-[var(--muted)] text-[10px] pt-1">{block.table.hint}</div>
+                <div className="text-[var(--muted)] text-xs pt-1">{block.table.hint}</div>
               )}
             </div>
           ) : block.log ? (
@@ -244,14 +244,14 @@ export default function TerminalSession({
               {block.log.entries.map((entry, j) => (
                 <div key={j}>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-[var(--dim)] text-[11px] shrink-0 w-16">{entry.date}</span>
+                    <span className="text-[var(--dim)] text-xs shrink-0 w-16">{entry.date}</span>
                     {entry.tag && (
-                      <span className="text-[10px] text-[var(--warm)] border border-[var(--warm)] px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70">{entry.tag}</span>
+                      <span className="text-xs text-[var(--warm)] border border-[var(--warm)] px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70">{entry.tag}</span>
                     )}
-                    <span className="text-[var(--muted)] text-xs">{entry.content}</span>
+                    <span className="text-[var(--muted)]">{entry.content}</span>
                     {entry.href && (
                       <a href={entry.href} target="_blank" rel="noopener noreferrer"
-                        className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-[10px] tracking-wide shrink-0">
+                        className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-xs tracking-wide shrink-0">
                         (link)
                       </a>
                     )}
@@ -322,7 +322,7 @@ export default function TerminalSession({
               spellCheck={false}
               placeholder={placeholder}
               aria-label="terminal input"
-              className="flex-1 bg-transparent outline-none font-[inherit] text-xs text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
+              className="flex-1 bg-transparent outline-none font-[inherit] text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
             />
           </div>
 

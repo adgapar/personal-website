@@ -6,13 +6,13 @@ export const profile = {
   org: 'Orbio AI',
   location: 'Elche, Spain',
   bio: 'Building AI agents that talk to thousands of candidates and make decisions affecting their careers.',
-  longBio: `Founding AI engineer at Orbio AI — building agents for recruitment, onboarding, and experience. My AI agents talk to thousands of candidates, often pass Turing tests in production, and make decisions that affect people's careers.
+  longBio: `Founding AI engineer at Orbio AI, building agents for recruitment, onboarding, and employee experience. They talk to thousands of candidates a day, so reliability and safety aren't optional.
 
-Career path: cloud at Microsoft → ML at Volvo Cars → risk intelligence at Capchase → now AI agents in hiring. Along the way I taught AI to 200+ professionals and still mentor graduate students at IE University.
+Path here: cloud at Microsoft → ML at Volvo Cars → risk intelligence at Capchase → AI agents in hiring. Along the way I taught AI to 200+ professionals and still mentor graduate students at IE University.
 
-Born and raised in historically nomadic Kazakhstan 🇰🇿, currently a kind of digital nomad based in Elche 🇪🇸 with my family of 4. Visited 24 countries, communicate in 4 languages. That cross-cultural lens shapes how I approach problems.
+From Kazakhstan 🇰🇿, now in Elche 🇪🇸 with my family of four. 24 countries, 4 languages.
 
-Currently exploring: AI safety in production systems, voice AI, and what it means to build sustainably in the age of AI.`,
+Currently into: AI reliability in production, multi-agentic systems and voice AI.`,
   languages: ['English', 'French', 'Spanish', 'Russian', 'Kazakh'],
   email: 'me@adgapar.dev',
   links: {

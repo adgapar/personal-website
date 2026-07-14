@@ -91,8 +91,8 @@ export const homeSession: SessionBlock[] = [
     lines: [],
     log: {
       entries: [
-        { date: '2026-04', tag: 'newsletter', content: 'how to do agentic evals',                                         href: 'https://theworkingprototype.substack.com/p/how-to-do-agentic-evals' },
-        { date: '2026-03', tag: 'blog',       content: 'sorry for writing so late',                                      href: 'https://www.adgapar.dev/sorry-for-writing-so-late/' },
+        { date: '2026-07', tag: 'newsletter', content: 'what kind of poker player is an AI',                              href: 'https://theworkingprototype.substack.com/p/what-kind-of-poker-player-is-an-ai' },
+        { date: '2026-06', tag: 'blog',       content: 'riding the wave',                                                 href: 'https://www.adgapar.dev/riding-the-wave/' },
         { date: '2026-02', tag: 'talk',       content: '10,000 interviews without a human 🇰🇿',                         href: 'https://www.youtube.com/watch?v=_5IoO2fA1FM' },
         { date: '2025-12',                    content: 'sister visited Elche — first time together since Chicago, 2017' },
         { date: '2025-02',                    content: 'moved from Madrid to Elche. traded traffic for sunshine.' },

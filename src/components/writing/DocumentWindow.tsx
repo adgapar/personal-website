@@ -58,10 +58,10 @@ export default function DocumentWindow({
             className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-1.5 font-mono select-none"
             style={TITLE_BAR}
           >
-            <span className="truncate text-[10px] tracking-widest text-[var(--muted)]">
+            <span className="min-w-0 flex-1 truncate text-[10px] tracking-widest text-[var(--muted)]">
               {title}.md — {source ? 'source' : 'reader'}
             </span>
-            <div className="ml-auto flex items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
               <button
                 type="button"
                 onClick={copy}
@@ -99,7 +99,7 @@ export default function DocumentWindow({
           </div>
 
       {/* the page — scrolls inside the window, like any reader */}
-      <article className="paper flex-1 overflow-y-auto overscroll-contain px-6 py-10 sm:px-14 sm:py-14">
+      <article className="paper flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-14 sm:py-14">
             <header className="mb-10">
               <div className="mb-4 font-mono text-[10px] tracking-widest text-[#8a8178]">
                 {date}
@@ -142,37 +142,45 @@ export default function DocumentWindow({
               />
             )}
 
-        <footer className="mt-16 border-t border-[#ddd6c8] pt-6 font-mono text-[10px] tracking-widest">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-8">
-            <div className="flex-1">
-              {prev && (
-                <Link href={`/blog/${prev.slug}`} className="group block">
-                  <span className="text-[#a89e8d]">← previous</span>
-                  <span className="mt-1 block font-sans text-[13px] leading-snug text-[#5d564c] group-hover:text-[#1f1b16]">
-                    {prev.title}
-                  </span>
-                </Link>
-              )}
-            </div>
-            <div className="flex-1 sm:text-right">
-              {next && (
-                <Link href={`/blog/${next.slug}`} className="group block">
-                  <span className="text-[#a89e8d]">next →</span>
-                  <span className="mt-1 block font-sans text-[13px] leading-snug text-[#5d564c] group-hover:text-[#1f1b16]">
-                    {next.title}
-                  </span>
-                </Link>
-              )}
-            </div>
-          </div>
-          <Link
-            href="/writing"
-            className="mt-8 inline-block text-[#8a8178] hover:text-[#1f1b16]"
-          >
-            ← all writing
-          </Link>
-        </footer>
       </article>
+
+      {/* navigation is window chrome, not part of the document — and at the
+          foot of the frame it stays reachable without scrolling to the end */}
+      <div
+        className="flex shrink-0 items-center gap-3 border-t border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-widest"
+        style={TITLE_BAR}
+      >
+        <div className="min-w-0 flex-1">
+          {prev && (
+            <Link
+              href={`/blog/${prev.slug}`}
+              className="flex min-w-0 items-center gap-1.5 text-[var(--muted)] hover:text-[var(--accent)]"
+            >
+              <span className="shrink-0">←</span>
+              <span className="truncate">{prev.title}</span>
+            </Link>
+          )}
+        </div>
+
+        <Link
+          href="/writing"
+          className="shrink-0 text-[var(--dim)] hover:text-[var(--fg)]"
+        >
+          all writing
+        </Link>
+
+        <div className="flex min-w-0 flex-1 justify-end">
+          {next && (
+            <Link
+              href={`/blog/${next.slug}`}
+              className="flex min-w-0 items-center gap-1.5 text-[var(--muted)] hover:text-[var(--accent)]"
+            >
+              <span className="truncate">{next.title}</span>
+              <span className="shrink-0">→</span>
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

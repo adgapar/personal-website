@@ -10,12 +10,27 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "adilet",
-  description: "personal website",
+  // absolute URLs for Open Graph and canonicals are derived from this
+  metadataBase: new URL("https://adilet.fyi"),
+  title: {
+    default: "adilet",
+    template: "%s — adilet",
+  },
+  description:
+    "Adilet Gaparov — founding AI engineer at Orbio AI. Writing about AI reliability, agents, and building in public.",
   alternates: {
     types: {
       "text/markdown": "/llms.txt",
     },
+  },
+  openGraph: {
+    type: "website",
+    siteName: "adilet.fyi",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@adgapar",
   },
 };
 

@@ -35,10 +35,10 @@ export default function ReaderShell({
   const pathname = usePathname()
 
   return (
-    <div className="h-screen overflow-hidden bg-[var(--bg)]">
+    <div className="h-[100dvh] overflow-hidden bg-[var(--bg)]">
       <PaperBackground shape="sphere" preset={presetForRoute('/writing')} />
 
-      <div className="relative z-10 flex h-full items-start justify-center gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-8 xl:gap-8">
+      <div className="relative z-10 flex h-full items-start justify-center gap-4 px-2 py-2 sm:gap-6 sm:px-6 sm:py-8 xl:gap-8">
         {/* navigator */}
         <nav
           className="hidden h-full w-full max-w-[15rem] shrink-0 flex-col overflow-hidden lg:flex xl:max-w-xs"

@@ -101,12 +101,11 @@ export const homeSession: SessionBlock[] = [
     mdHeading: 'links',
     linkRow: true,
     lines: [
-      { content: 'github',     href: profile.links.github },
-      { content: 'twitter',   href: profile.links.twitter },
-      { content: 'linkedin',  href: profile.links.linkedin },
-      { content: 'threads',   href: profile.links.threads },
-      { content: 'blog',      href: profile.links.blog },
-      { content: 'newsletter', href: profile.links.newsletter },
+      { content: 'github',   href: profile.links.github },
+      { content: 'twitter',  href: profile.links.twitter },
+      { content: 'linkedin', href: profile.links.linkedin },
+      { content: 'threads',  href: profile.links.threads },
+      { content: 'substack', href: profile.links.newsletter },
     ],
   },
   {
@@ -167,6 +166,14 @@ export const cvSession: SessionBlock[] = [
     },
   },
   {
+    cmd: 'whereis adilet',
+    mdHeading: 'elsewhere',
+    lines: [
+      { label: 'linkedin', content: 'the formal version, with dates', style: 'default', href: profile.links.linkedin },
+      { label: 'github',   content: 'the code', style: 'default', href: profile.links.github },
+    ],
+  },
+  {
     cmd: 'ls education',
     mdHeading: 'education',
     lines: [],
@@ -189,21 +196,9 @@ export const writingSession: SessionBlock[] = [
     cmd: 'cat newsletter.txt',
     mdHeading: 'newsletter',
     lines: [
-      { label: 'name',    content: 'The Working Prototype', style: 'warm', href: 'https://theworkingprototype.substack.com/' },
-      { label: 'about',   content: 'AI reliability, alignment & safety for people building agents — no PhD required', style: 'default' },
-      { label: 'format',  content: '1000–2000 words · technical enough, accessible enough', style: 'muted' },
-      { label: 'cadence', content: 'monthly or more', style: 'muted' },
-      { label: 'read on', content: 'substack  ·  by email', style: 'muted' },
-    ],
-  },
-  {
-    cmd: 'cat blog.txt',
-    mdHeading: 'blog',
-    lines: [
-      { label: 'about',   content: 'Learning, building in public, career, and things I am figuring out', style: 'default' },
-      { label: 'format',  content: 'essays · short takes', style: 'muted' },
-      { label: 'cadence', content: 'when inspiration strikes', style: 'muted' },
-      { label: 'read on', content: 'here  ·  every post below', style: 'muted' },
+      { content: 'The Working Prototype', style: 'warm', href: 'https://theworkingprototype.substack.com/' },
+      { content: 'AI reliability, alignment and safety for people building agents — no PhD required.', style: 'default' },
+      { content: 'monthly or more  ·  on substack, by email', style: 'muted' },
     ],
   },
 ]

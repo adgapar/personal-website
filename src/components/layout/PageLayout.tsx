@@ -43,7 +43,7 @@ export default function PageLayout({ page }: Props) {
             'min-h-screen'
           : // a desktop does not — windows dragged past the edge are clipped,
             // and the terminal has its own scrollback inside the window
-            'h-screen overflow-hidden'
+            'h-[100dvh] overflow-hidden'
       }`}
     >
       {!isAgent && (

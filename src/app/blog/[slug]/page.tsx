@@ -15,10 +15,29 @@ export async function generateMetadata({
   const { slug } = await params
   const post = getPost('blog', slug)
   if (!post) return {}
+  const description = post.subtitle || excerpt(post)
+
   return {
     title: post.title,
-    description: excerpt(post),
-    alternates: { types: { 'text/markdown': `/md/blog/${slug}` } },
+    description,
+    alternates: {
+      canonical: `/blog/${slug}`,
+      types: { 'text/markdown': `/md/blog/${slug}` },
+    },
+    openGraph: {
+      type: 'article',
+      title: post.title,
+      description,
+      url: `/blog/${slug}`,
+      publishedTime: post.date,
+      images: post.image ? [{ url: post.image, width: 1536, height: 1024 }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: post.image ? [post.image] : undefined,
+    },
   }
 }
 

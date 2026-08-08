@@ -26,6 +26,15 @@ export function getWritingPage(): PageMeta {
     },
   }
 
+  const blogAbout: SessionBlock = {
+    cmd: 'cat blog.txt',
+    mdHeading: 'blog',
+    lines: [
+      { content: 'Learning, building in public, career, and things I am figuring out.', style: 'default' },
+      { content: 'when inspiration strikes  ·  every post here', style: 'muted' },
+    ],
+  }
+
   const blogIndex: SessionBlock = {
     cmd: `ls -t blog/  # ${blog.length} posts`,
     mdHeading: 'blog posts',
@@ -40,10 +49,8 @@ export function getWritingPage(): PageMeta {
     },
   }
 
-  const blocks = [...writingPage.blocks]
-  // each index sits under the section it belongs to
-  blocks.splice(2, 0, newsletterIndex)
-  blocks.push(blogIndex)
+  // each list sits directly under the section it belongs to
+  const blocks = [...writingPage.blocks, newsletterIndex, blogAbout, blogIndex]
 
   return {
     slug: 'writing',

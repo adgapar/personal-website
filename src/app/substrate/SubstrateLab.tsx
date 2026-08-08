@@ -66,7 +66,7 @@ function SampleText() {
   )
 }
 
-export default function LabClient() {
+export default function SubstrateLab() {
   const INK = PAPER_PRESETS.find((p) => p.id === 'ink')!
   const [kind, setKind] = useState<LayerKind>('imageDither')
   const [layer, setLayer] = useState<SubstrateLayer>(() => INK.layers[0])

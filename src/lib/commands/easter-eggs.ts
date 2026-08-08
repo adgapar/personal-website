@@ -1,4 +1,4 @@
-import { registerCommand } from './registry'
+import { listCommands, registerCommand } from './registry'
 import type { TerminalLine } from './types'
 import { publishUiEvent } from '@/lib/ui-bus'
 import { setViewMode } from '@/lib/view-mode-store'
@@ -629,7 +629,7 @@ registerCommand({
     type: 'output',
     lines: [
       { content: 'downloading the internet...', style: 'muted' },
-      { content: 'added 1,284 packages, and 3 you will never look at again.', style: 'muted' },
+      { content: 'added 1,284 packages. one of them checks whether a number is even.', style: 'muted' },
     ],
   }),
 })
@@ -740,4 +740,124 @@ registerCommand({
   hidden: true,
   type: 'output',
   handler: () => egg('a pleated collar, 16th century. now: the thing with opinions about your imports.'),
+})
+
+// ─── the rest of the filesystem ──────────────────────────────────────────────
+
+registerCommand({
+  name: 'touch',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('creates an empty file. that is the whole command.'),
+})
+
+registerCommand({
+  name: 'touch grass',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg("it's outside. past the door, left at the terminal."),
+})
+
+registerCommand({
+  name: 'mv',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('moved: kazakhstan → sweden → spain. the command was faster.'),
+})
+
+registerCommand({
+  name: 'cd',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg("there is one directory here, and you're standing in it."),
+})
+
+registerCommand({
+  name: 'mkdir',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('made. empty, like the last one.'),
+})
+
+registerCommand({
+  name: 'chmod',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('you already have permission.'),
+})
+
+registerCommand({
+  name: 'cp',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('copied. now there are two of whatever that was.'),
+})
+
+// ─── the index, for the person who wrote them ────────────────────────────────
+
+/**
+ * Not a secret — this ships in the bundle, so anyone determined can read it.
+ * It is a lock on a door, so the list is not the first thing a visitor trips
+ * over, and so I can check what exists without opening the source.
+ */
+const EGGS_KEY = '42'
+
+registerCommand({
+  name: 'eggs',
+  aliases: ['secrets'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: (args) => {
+    if (args[0] !== EGGS_KEY) {
+      return {
+        type: 'output',
+        lines: [
+          { content: 'eggs: locked.', style: 'muted' },
+          { content: 'usage: eggs <the answer>', style: 'dim' },
+          { content: 'to life, the universe, and everything.', style: 'dim' },
+        ],
+      }
+    }
+
+    const hidden = listCommands()
+      .filter((c) => c.hidden && c.name !== 'eggs')
+      .map((c) => (c.aliases?.length ? `${c.name} (${c.aliases.join(', ')})` : c.name))
+      .sort()
+
+    // six to a row, so a long list stays readable
+    const rows: string[] = []
+    for (let i = 0; i < hidden.length; i += 3) {
+      rows.push('  ' + hidden.slice(i, i + 3).map((n) => n.padEnd(26)).join('').trimEnd())
+    }
+
+    return {
+      type: 'output',
+      lines: [
+        { content: `${hidden.length} hidden commands`, style: 'warm' },
+        { content: '', style: 'muted' },
+        ...rows.map((content) => ({ content, style: 'muted' as const })),
+        { content: '', style: 'muted' },
+        { content: 'two-word ones need both words. aliases in brackets.', style: 'dim' },
+      ],
+    }
+  },
+})
+
+// the original hidden command, from Colossal Cave Adventure (1977). its real
+// response when you use it in the wrong place is exactly this.
+registerCommand({
+  name: 'xyzzy',
+  aliases: ['plugh'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('nothing happens.'),
 })

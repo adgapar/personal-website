@@ -3,4 +3,10 @@ import './output'
 import './navigate'
 import './easter-eggs'
 
-export { executeCommand, getAllCommands, registerCommand, hasCommand } from './registry'
+export {
+  executeCommand,
+  getAllCommands,
+  listCommands,
+  registerCommand,
+  hasCommand,
+} from './registry'

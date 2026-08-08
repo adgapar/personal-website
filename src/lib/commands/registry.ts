@@ -40,6 +40,11 @@ export function getAllCommands(): Command[] {
   return [...new Set(registry.values())]
 }
 
+/** every registered command, deduped — aliases point at the same object */
+export function listCommands(): Command[] {
+  return [...new Set(registry.values())]
+}
+
 export function hasCommand(input: string): boolean {
   const parts = input.trim().toLowerCase().split(/\s+/)
   const twoWordKey = parts.slice(0, 2).join(' ')

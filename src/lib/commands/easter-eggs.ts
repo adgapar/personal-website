@@ -180,8 +180,11 @@ registerCommand({
   hidden: true,
   type: 'output',
   handler: (args) => {
+    if (args[0] === 'adilet.fyi') {
+      return egg("64 bytes from adilet.fyi: icmp_seq=1 ttl=64 time=0.0 ms (it's right here)")
+    }
     if (args[0] === 'adgapar.dev') {
-      return egg('64 bytes from adgapar.dev: icmp_seq=1 ttl=64 time=0.0 ms (it\'s right here)')
+      return egg('64 bytes from adgapar.dev: icmp_seq=1 ttl=64 time=12.4 ms (the blog — different host)')
     }
     return egg('pong')
   },

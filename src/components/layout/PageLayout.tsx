@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import SiteNav from './SiteNav'
 import StatusBar from './StatusBar'
@@ -10,6 +11,7 @@ import { useViewMode } from './ViewModeProvider'
 import AgentView from '@/components/agent/AgentView'
 import TerminalSession from '@/components/terminal/TerminalSession'
 import { presetForRoute, shapeForRoute } from '@/lib/dither'
+import { justBooted } from '@/lib/boot-store'
 import type { PageMeta } from '@/lib/sessions'
 
 // WebGL must not run during SSR
@@ -20,19 +22,22 @@ const PaperBackground = dynamic(
 
 interface Props {
   page: PageMeta
-  animated?: boolean
 }
 
-export default function PageLayout({ page, animated }: Props) {
+export default function PageLayout({ page }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const { mode, shapeOverride } = useViewMode()
 
   const isAgent = mode === 'agent'
+  // plays once, right after the CRT handover
+  const warmingUp = useMemo(() => justBooted(), [])
 
   return (
     <div
       className={`bg-[var(--bg)] text-[var(--fg)] font-mono text-base flex flex-col items-center ${
+        warmingUp ? 'screen-on ' : ''
+      }${
         isAgent
           ? // a document scrolls
             'min-h-screen'
@@ -64,7 +69,6 @@ export default function PageLayout({ page, animated }: Props) {
               commands={page.session.commands}
               prompt={page.session.prompt}
               placeholder={page.session.placeholder}
-              animated={animated}
               onNavigate={(href) => router.push(href)}
             />
             <StatusBar hint={page.session.placeholder} />

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import BootSequence from "@/components/boot/BootSequence";
 import ViewModeProvider from "@/components/layout/ViewModeProvider";
 import "./globals.css";
 
@@ -26,7 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${jetbrainsMono.variable} antialiased`}>
-        <ViewModeProvider>{children}</ViewModeProvider>
+        <ViewModeProvider>
+          <BootSequence />
+          {children}
+        </ViewModeProvider>
       </body>
     </html>
   );

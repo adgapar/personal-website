@@ -10,7 +10,7 @@ import type { TerminalLine } from './commands/types'
  * audiences can never drift apart.
  */
 
-const SITE_URL = 'https://adgapar.dev'
+const SITE_URL = 'https://adilet.fyi'
 
 function escapeCell(value: string): string {
   return value.replace(/\|/g, '\\|')

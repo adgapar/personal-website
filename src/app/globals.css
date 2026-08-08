@@ -22,3 +22,30 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor {
+  animation: blink 1s step-end infinite;
+}
+
+/* CRT handover: the boot screen collapses to a bright line and snaps off */
+@keyframes crt-collapse {
+  0%   { transform: scaleY(1);     filter: brightness(1);   opacity: 1; }
+  45%  { transform: scaleY(0.004); filter: brightness(3.5); opacity: 1; }
+  70%  { transform: scaleY(0.004); filter: brightness(3.5); opacity: 1; }
+  100% { transform: scaleY(0.004); filter: brightness(3.5); opacity: 0; }
+}
+
+/* and the desktop comes up behind it like a tube warming */
+@keyframes screen-on {
+  0%   { opacity: 0; filter: brightness(2.2) contrast(1.4); transform: scale(1.015); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; filter: brightness(1) contrast(1); transform: scale(1); }
+}
+
+.crt-collapse { animation: crt-collapse 560ms cubic-bezier(0.6, 0, 0.8, 0.2) forwards; }
+.screen-on    { animation: screen-on 620ms ease-out both; }

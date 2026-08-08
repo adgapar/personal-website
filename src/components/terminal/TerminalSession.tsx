@@ -2,6 +2,7 @@
 
 import { useRef, useCallback, useEffect, useState, type KeyboardEvent } from 'react'
 import Link from 'next/link'
+import CommandBlock from './CommandBlock'
 import TerminalLine from './TerminalLine'
 import DitheredAvatar from '@/components/visual/DitheredAvatar'
 import { executeCommand, hasCommand } from '@/lib/commands'
@@ -57,7 +58,6 @@ interface Props {
   commands?: PageCommand[]
   prompt?: string
   placeholder?: string
-  animated?: boolean
   onNavigate?: (href: string) => void
 }
 
@@ -66,7 +66,6 @@ export default function TerminalSession({
   commands = [],
   prompt = 'adilet@home:~$',
   placeholder = "type 'help'",
-  animated = false,
   onNavigate,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -76,15 +75,9 @@ export default function TerminalSession({
   const [response, setResponse] = useState<TLine[] | null>(null)
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
-  const [visibleCount, setVisibleCount] = useState(animated ? 0 : blocks.length)
+  const [visibleCount, setVisibleCount] = useState(0)
 
   useEffect(() => {
-    if (!animated) {
-      setVisibleCount(blocks.length)
-      inputRef.current?.focus({ preventScroll: true })
-      return
-    }
-
     // Reset on every mount — handles router cache restoration with stale state
     setVisibleCount(0)
     let cancelled = false
@@ -92,11 +85,11 @@ export default function TerminalSession({
     const timers: ReturnType<typeof setTimeout>[] = []
     blocks.forEach((_, i) => {
       timers.push(
-        setTimeout(() => { if (!cancelled) setVisibleCount(i + 1) }, 150 + i * 380)
+        setTimeout(() => { if (!cancelled) setVisibleCount(i + 1) }, 200 + i * 420)
       )
     })
     timers.push(
-      setTimeout(() => { if (!cancelled) inputRef.current?.focus({ preventScroll: true }) }, 150 + blocks.length * 380 + 100)
+      setTimeout(() => { if (!cancelled) inputRef.current?.focus({ preventScroll: true }) }, 200 + blocks.length * 420 + 120)
     )
     return () => {
       cancelled = true
@@ -185,18 +178,7 @@ export default function TerminalSession({
         {/* Static session blocks */}
         {blocks.slice(0, visibleCount).map((block, i) => (
           <div key={i}>
-            {block.cmd && (() => {
-              const [verb, ...rest] = block.cmd.split(' ')
-              const args = rest.join(' ')
-              return (
-                <div className="flex items-baseline gap-2 mb-3 tracking-wide">
-                  <span className="text-[var(--accent)] select-none">$</span>
-                  <span className="text-[var(--fg)]">{verb}</span>
-                  {args && <span className="text-[var(--warm)]">{args}</span>}
-                </div>
-              )
-            })()}
-
+            <CommandBlock cmd={block.cmd}>
             {block.list ? (
             <div className="space-y-3">
               {block.list.items.map((item, j) => (
@@ -319,6 +301,7 @@ export default function TerminalSession({
                 </div>
               </div>
             )}
+            </CommandBlock>
           </div>
         ))}
 

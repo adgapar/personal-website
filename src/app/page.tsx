@@ -6,5 +6,5 @@ export const metadata = {
 }
 
 export default function Home() {
-  return <PageLayout page={pageMeta.about} animated />
+  return <PageLayout page={pageMeta.about} />
 }

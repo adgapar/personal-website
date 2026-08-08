@@ -64,21 +64,23 @@ body {
   max-width: 66ch;
 }
 .prose-paper p { margin-bottom: 1.35rem; }
+/* headings speak in the same voice as the prose, not in terminal chrome */
 .prose-paper h2 {
-  margin-top: 2.75rem;
-  margin-bottom: 0.85rem;
-  font-family: var(--font-mono), monospace;
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #8a6d3b;
-}
-.prose-paper h3 {
-  margin-top: 2rem;
-  margin-bottom: 0.6rem;
-  font-size: 1.05rem;
+  margin-top: 3rem;
+  margin-bottom: 0.9rem;
+  font-size: 1.4rem;
   font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
   color: #1f1b16;
+}
+.prose-paper h2 + p { margin-top: 0; }
+.prose-paper h3 {
+  margin-top: 2.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #3a332b;
 }
 .prose-paper a {
   color: #1f1b16;
@@ -125,3 +127,15 @@ body {
 .prose-paper hr { margin: 2.5rem 0; border: 0; border-top: 1px solid #ddd6c8; }
 .prose-paper strong { font-weight: 600; color: #1f1b16; }
 .prose-paper em { font-style: italic; }
+
+/* the post's own source, shown in the reader */
+.paper-source {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.78rem;
+  line-height: 1.75;
+  color: #3a332b;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+.paper-source::selection { background: #1f1b16; color: #f5f2ea; }

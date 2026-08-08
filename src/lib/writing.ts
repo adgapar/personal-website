@@ -97,7 +97,25 @@ function read(source: Source, file: string): Post | null {
   }
 }
 
-export function getPosts(source: Source): Post[] {
+/**
+ * Posts cross-link to each other by whatever URL they had when they were
+ * written — the old Ghost domain, or in one case a Substack that never hosted
+ * the post at all. Any link whose final segment is a post we host is pointed at
+ * our copy. Only slugs we actually have are touched, so genuine outbound links
+ * (including newsletter issues that really do live on Substack) are left alone.
+ */
+function relinkPosts(posts: Post[], hosted: Set<string>): Post[] {
+  const EXTERNAL_POST = /\]\(https?:\/\/[^)\s]*?\/(?:p\/)?([a-z0-9-]+)\/?\)/g
+
+  return posts.map((post) => ({
+    ...post,
+    body: post.body.replace(EXTERNAL_POST, (match, slug: string) =>
+      hosted.has(slug) ? `](/blog/${slug})` : match,
+    ),
+  }))
+}
+
+function readAll(source: Source): Post[] {
   const dir = ROOTS[source]
   if (!existsSync(dir)) return []
 
@@ -106,6 +124,17 @@ export function getPosts(source: Source): Post[] {
     .map((f) => read(source, f))
     .filter((p): p is Post => p !== null)
     .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+/** slugs we serve ourselves — blog only; newsletter stays on Substack */
+let hostedSlugs: Set<string> | null = null
+function getHosted(): Set<string> {
+  hostedSlugs ??= new Set(readAll('blog').map((p) => p.slug))
+  return hostedSlugs
+}
+
+export function getPosts(source: Source): Post[] {
+  return relinkPosts(readAll(source), getHosted())
 }
 
 export function getAllPosts(): Post[] {

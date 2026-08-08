@@ -35,6 +35,8 @@ export default function DocumentWindow({
   next?: { slug: string; title: string }
 }) {
   const [copied, setCopied] = useState(false)
+  // the same file, rendered or as source — no reason to leave the window for it
+  const [source, setSource] = useState(false)
 
   async function copy() {
     try {
@@ -57,7 +59,7 @@ export default function DocumentWindow({
             style={TITLE_BAR}
           >
             <span className="truncate text-[10px] tracking-widest text-[var(--muted)]">
-              {title}.md — reader
+              {title}.md — {source ? 'source' : 'reader'}
             </span>
             <div className="ml-auto flex items-center gap-1">
               <button
@@ -72,13 +74,19 @@ export default function DocumentWindow({
               >
                 {copied ? '✓ copied' : '⧉ copy .md'}
               </button>
-              <a
-                href={mdHref}
-                title="view the markdown source"
-                className="border border-[var(--border)] px-1.5 text-[9px] leading-4 text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              <button
+                type="button"
+                onClick={() => setSource((v) => !v)}
+                aria-pressed={source}
+                title={source ? 'back to the rendered post' : 'show the markdown source'}
+                className={`border px-1.5 text-[9px] leading-4 ${
+                  source
+                    ? 'border-[var(--accent)] text-[var(--accent)]'
+                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]'
+                }`}
               >
-                .md
-              </a>
+                {source ? '¶ rendered' : '.md'}
+              </button>
               <Link
                 href="/writing"
                 aria-label="Close"
@@ -106,7 +114,7 @@ export default function DocumentWindow({
               )}
             </header>
 
-            {image && (
+            {image && !source && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={image}
@@ -116,10 +124,23 @@ export default function DocumentWindow({
               />
             )}
 
-            <div
-              className="prose-paper"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
+            {source ? (
+              <>
+                {/* the same bytes are fetchable, which is worth showing */}
+                <a
+                  href={mdHref}
+                  className="mb-6 inline-block font-mono text-[10px] tracking-widest text-[#8a8178] underline underline-offset-4 hover:text-[#1f1b16]"
+                >
+                  GET {mdHref}
+                </a>
+                <pre className="paper-source">{markdown}</pre>
+              </>
+            ) : (
+              <div
+                className="prose-paper"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            )}
 
         <footer className="mt-16 border-t border-[#ddd6c8] pt-6 font-mono text-[10px] tracking-widest">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-8">

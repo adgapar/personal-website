@@ -31,17 +31,17 @@ export const projects: Project[] = [
   },
   {
     id: 'blog',
-    name: 'adgapar.dev',
+    name: 'the blog',
     type: 'writing 🌍',
     tagStyle: 'warm',
     status: 'live',
     summary: 'essays on learning, building in public, and figuring things out',
     details: [
-      { label: 'name',   content: 'adgapar.dev', style: 'warm' },
-      { label: 'type',   content: 'personal blog', style: 'muted' },
+      { label: 'name',   content: 'the blog', style: 'warm' },
+      { label: 'type',   content: 'personal blog  ·  self-hosted', style: 'muted' },
       { label: 'status', content: 'live', style: 'success' },
       { label: '',       content: 'Learning, AI, and building in public.', style: 'default' },
-      { label: 'url',    content: 'adgapar.dev', style: 'accent', href: 'https://www.adgapar.dev' },
+      { label: 'read',   content: 'every post, here', style: 'accent', href: '/writing' },
     ],
   },
   {

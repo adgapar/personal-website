@@ -166,14 +166,6 @@ export const cvSession: SessionBlock[] = [
     },
   },
   {
-    cmd: 'whereis adilet',
-    mdHeading: 'elsewhere',
-    lines: [
-      { label: 'linkedin', content: 'the formal version, with dates', style: 'default', href: profile.links.linkedin },
-      { label: 'github',   content: 'the code', style: 'default', href: profile.links.github },
-    ],
-  },
-  {
     cmd: 'ls education',
     mdHeading: 'education',
     lines: [],
@@ -185,6 +177,14 @@ export const cvSession: SessionBlock[] = [
         { cols: ['Visiting International Student',    'U. of Wisconsin-Madison 🇺🇸', '2015'] },
       ],
     },
+  },
+  {
+    cmd: 'whereis adilet',
+    mdHeading: 'elsewhere',
+    lines: [
+      { label: 'linkedin', content: 'the formal version, with dates', style: 'default', href: profile.links.linkedin },
+      { label: 'github',   content: 'the code', style: 'default', href: profile.links.github },
+    ],
   },
 ]
 
@@ -199,6 +199,21 @@ export const writingSession: SessionBlock[] = [
       { content: 'The Working Prototype', style: 'warm', href: 'https://theworkingprototype.substack.com/' },
       { content: 'AI reliability, alignment and safety for people building agents — no PhD required.', style: 'default' },
       { content: 'monthly or more  ·  on substack, by email', style: 'muted' },
+    ],
+  },
+]
+
+// ─── Play ───────────────────────────────────────────────────────────────────
+// Every other tab arrives full, which reads as "look at this". This one is
+// empty on purpose, so the prompt is the invitation.
+
+export const playSession: SessionBlock[] = [
+  {
+    mdSkip: true,
+    lines: [
+      { content: '→ new shell  ·  nothing loaded', style: 'success' },
+      { content: "→ every command works here. 'help' lists the obvious ones.", style: 'muted' },
+      { content: "→ the rest you find by typing what a terminal would understand.", style: 'muted' },
     ],
   },
 ]
@@ -259,6 +274,13 @@ export const writingPage: PageSession = {
   placeholder: "navigate — type 'help'",
 }
 
+export const playPage: PageSession = {
+  blocks: playSession,
+  prompt: 'adilet@play:~$',
+  commands: [],
+  placeholder: 'type anything — try a tool you use every day',
+}
+
 export const contactPage: PageSession = {
   blocks: contactSession,
   prompt: 'adilet@contact:~$',
@@ -309,6 +331,14 @@ export const pageMeta = {
 } satisfies Record<string, PageMeta>
 
 export const pages: PageMeta[] = Object.values(pageMeta)
+
+export const playMeta: PageMeta = {
+  slug: 'play',
+  route: '/play',
+  title: 'Play',
+  summary: 'An empty shell. Nothing to read — it is for typing in.',
+  session: playPage,
+}
 
 export function pageBySlug(slug: string): PageMeta | undefined {
   return pages.find((p) => p.slug === slug)

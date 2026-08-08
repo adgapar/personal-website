@@ -1,5 +1,6 @@
 import { registerCommand } from './registry'
 import { profile } from '@/data/profile'
+import { blogPosts, newsletterPosts } from '@/data/posts'
 import { projects } from '@/data/projects'
 import { jobs } from '@/data/jobs'
 import type { TerminalLine } from './types'
@@ -19,8 +20,7 @@ registerCommand({
       { content: '  about        who i am', style: 'default' },
       { content: '  work         professional experience', style: 'default' },
       { content: '  projects     things i\'ve built', style: 'default' },
-      { content: '  blog         writing at adgapar.dev', style: 'default' },
-      { content: '  newsletter   the working prototype — substack', style: 'default' },
+      { content: '  writing      blog posts and the newsletter', style: 'default' },
       { content: '  contact      get in touch', style: 'default' },
       { content: '  whois        show profile info', style: 'default' },
       { content: '  ls           list sections', style: 'default' },
@@ -45,8 +45,7 @@ registerCommand({
       { content: `  org         : ${profile.org}`, style: 'default' },
       { content: `  location    : ${profile.location} 🇪🇸`, style: 'default' },
       { content: `  focus       : AI agents · recruitment · voice AI · building in public`, style: 'default' },
-      { content: `  blog        : adgapar.dev`, style: 'default' },
-      { content: `  newsletter  : theworkingprototype.substack.com`, style: 'default' },
+      { content: `  writing     : ${blogPosts.length} posts  ·  ${newsletterPosts.length} newsletter issues`, style: 'default' },
       { content: `  languages   : EN · FR · ES · RU`, style: 'default' },
       DIVIDER,
     ],
@@ -189,34 +188,54 @@ registerCommand({
       DIVIDER,
       { content: '  projects', style: 'accent' },
       DIVIDER,
-      { content: '  adgapar.dev', style: 'default' },
-      { content: '  Personal blog — learning, AI, and building in public.', style: 'muted' },
-      { content: '  → adgapar.dev', style: 'info', href: 'https://www.adgapar.dev' },
-      { content: '', style: 'default' },
-      { content: '  The Working Prototype', style: 'default' },
-      { content: '  Newsletter on practical AI and building with it.', style: 'muted' },
-      { content: '  → theworkingprototype.substack.com', style: 'info', href: 'https://theworkingprototype.substack.com/' },
+      ...projects.flatMap((p) => [
+        { content: `  ${p.name}  ·  ${p.status}`, style: 'warm' as const },
+        { content: `  ${p.summary}`, style: 'muted' as const },
+      ]),
       DIVIDER,
-      { content: '  more coming soon', style: 'muted' },
+      { content: "  type 'open <name>' for detail  ·  e.g. open teya", style: 'muted' },
     ],
   }),
 })
 
 registerCommand({
   name: 'ls blog',
-  description: 'view blog',
+  description: 'list blog posts',
   type: 'output',
   handler: () => ({
     type: 'output',
     lines: [
       DIVIDER,
-      { content: '  blog — adgapar.dev', style: 'accent' },
+      { content: `  blog  ·  ${blogPosts.length} posts`, style: 'accent' },
       DIVIDER,
-      { content: '  I write about AI, learning, and building in public.', style: 'default' },
-      { content: '  Topics: LLMs · agents · product · personal growth.', style: 'muted' },
-      { content: '', style: 'default' },
-      { content: '  → adgapar.dev', style: 'info', href: 'https://www.adgapar.dev' },
+      ...blogPosts.map((post) => ({
+        content: `  ${post.date}   ${post.title}`,
+        style: 'default' as const,
+        href: `/blog/${post.slug}`,
+      })),
       DIVIDER,
+      { content: "  click one, or type 'writing' for the full index", style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'ls newsletter',
+  description: 'list newsletter issues',
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      DIVIDER,
+      { content: `  the working prototype  ·  ${newsletterPosts.length} issues`, style: 'accent' },
+      DIVIDER,
+      ...newsletterPosts.map((post) => ({
+        content: `  ${post.date}   ${post.title}`,
+        style: 'default' as const,
+        href: `https://theworkingprototype.substack.com/p/${post.slug}`,
+      })),
+      DIVIDER,
+      { content: '  published on substack  ·  by email', style: 'muted' },
     ],
   }),
 })
@@ -254,7 +273,7 @@ registerCommand({
       { content: `  twitter   → twitter.com/${profile.handle}`, style: 'default', href: profile.links.twitter },
       { content: `  linkedin  → linkedin.com/in/adilet-gaparov`, style: 'default', href: profile.links.linkedin },
       { content: `  threads   → threads.com/@adilet.gaparov`, style: 'default', href: profile.links.threads },
-      { content: `  blog      → adgapar.dev`, style: 'default', href: profile.links.blog },
+      { content: `  substack  → theworkingprototype.substack.com`, style: 'default', href: profile.links.newsletter },
       DIVIDER,
     ],
   }),

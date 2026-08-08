@@ -183,9 +183,6 @@ registerCommand({
     if (args[0] === 'adilet.fyi') {
       return egg("64 bytes from adilet.fyi: icmp_seq=1 ttl=64 time=0.0 ms (it's right here)")
     }
-    if (args[0] === 'adgapar.dev') {
-      return egg('64 bytes from adgapar.dev: icmp_seq=1 ttl=64 time=12.4 ms (the blog — different host)')
-    }
     return egg('pong')
   },
 })
@@ -421,4 +418,326 @@ registerCommand({
       ],
     }
   },
+})
+
+// ─── what people type into terminals in 2026 ─────────────────────────────────
+// The picture does the work. One line after it, like every other egg here.
+
+registerCommand({
+  name: 'claude',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'Claude Monet  ·  Impression, Sunrise  ·  1872', style: 'warm' },
+      {
+        content: '',
+        image: {
+          src: '/art/monet-impression-sunrise.jpg',
+          alt: 'Claude Monet, Impression, Sunrise, 1872',
+          caption: 'hover for the colours',
+          ratio: 900 / 698,
+        },
+      },
+      { content: 'you probably meant the other Claude. it also makes pictures.', style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'codex',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'codex  ·  a book with pages', style: 'warm' },
+      {
+        content: '',
+        image: {
+          src: '/art/book-of-kells-chi-rho.jpg',
+          alt: 'The Chi Rho page from the Book of Kells, around 800 AD',
+          caption: 'Book of Kells, c. 800  ·  hover for the gold',
+          ratio: 700 / 927,
+        },
+      },
+      { content: 'it replaced scrolls. then we invented scrolling again.', style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'gemini',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'Gemini  ·  the twins', style: 'warm' },
+      {
+        content: '',
+        image: {
+          src: '/art/gemini-uranias-mirror.jpg',
+          alt: "Gemini from Urania's Mirror, 1824",
+          caption: "Urania's Mirror, 1824  ·  hover for the colours",
+          ratio: 900 / 629,
+        },
+      },
+      { content: 'a star sign. up there a few thousand years before the chatbot.', style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'cursor',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('latin for "runner". it slid along a slide rule before it learned to blink.'),
+})
+
+// same joke, one line, no picture needed
+registerCommand({
+  name: 'zoom',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg("you're on mute."),
+})
+
+registerCommand({
+  name: 'go',
+  aliases: ['lfg'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'the board game. 2,500 years old, and it still took a lab to win one.', style: 'muted' },
+      { content: "also, increasingly: let's fucking go.", style: 'warm' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'python',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('still the one I reach for. the snake, though — why would you keep one as a pet?'),
+})
+
+registerCommand({
+  name: 'rust',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('what happens to iron left out. also to my attempt at learning it.'),
+})
+
+registerCommand({
+  name: 'brew',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'coffee is downstairs. always specialty, mostly filter or cold brew.', style: 'muted' },
+      { content: 'once paid €8 for a single cup. no further questions.', style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'docker',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('the shipping container did it first. same box, any ship, any crane.'),
+})
+
+registerCommand({
+  name: 'slack',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('cut me some.'),
+})
+
+registerCommand({
+  name: 'notion',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg("an idea you haven't committed to yet."),
+})
+
+registerCommand({
+  name: 'swift',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('a bird that sleeps mid-flight. months without landing.'),
+})
+
+registerCommand({
+  name: 'java',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('an island first. coffee second.'),
+})
+
+registerCommand({
+  name: 'ruby',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg("the red one. july's stone."),
+})
+
+registerCommand({
+  name: 'perl',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('named after a pearl. the good spelling was taken.'),
+})
+
+// ─── the javascript end of the shelf ─────────────────────────────────────────
+
+registerCommand({
+  name: 'npm',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('officially not an acronym. their own site invents a new expansion every reload.'),
+})
+
+registerCommand({
+  name: 'npm install',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'downloading the internet...', style: 'muted' },
+      { content: 'added 1,284 packages, and 3 you will never look at again.', style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'pnpm',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('npm, but it stops keeping four copies of everything. this site uses it.'),
+})
+
+registerCommand({
+  name: 'node',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('a knot. a joint. a place where lines meet. now: the thing running all of it.'),
+})
+
+registerCommand({
+  name: 'deno',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('node, rearranged. same author, second attempt.'),
+})
+
+registerCommand({
+  name: 'bun',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('bread. small, warm, faster than expected.'),
+})
+
+registerCommand({
+  name: 'javascript',
+  aliases: ['js'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('nothing to do with java. that was a marketing decision in 1995.'),
+})
+
+registerCommand({
+  name: 'typescript',
+  aliases: ['ts'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('javascript that tells you before it fails, instead of after.'),
+})
+
+registerCommand({
+  name: 'react',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('to respond to something. usually an incident. this page is built with it.'),
+})
+
+registerCommand({
+  name: 'vercel',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('where this is deployed. hello from the edge, wherever that is today.'),
+})
+
+// ─── the ones actually in daily use ──────────────────────────────────────────
+
+registerCommand({
+  name: 'uv',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg("ultraviolet: light past what your eyes handle. also the only package manager I never wait for."),
+})
+
+registerCommand({
+  name: 'uv run',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('already finished.'),
+})
+
+registerCommand({
+  name: 'uv sync',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('done. checked again — still done.'),
+})
+
+registerCommand({
+  name: 'uv pip',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('installed before you finished typing it. that is the whole joke.'),
+})
+
+registerCommand({
+  name: 'ruff',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => egg('a pleated collar, 16th century. now: the thing with opinions about your imports.'),
 })

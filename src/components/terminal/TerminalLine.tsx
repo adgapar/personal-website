@@ -1,3 +1,4 @@
+import DitheredPlate from '@/components/visual/DitheredPlate'
 import type { TerminalLine as TerminalLineType } from '@/lib/commands/types'
 
 interface Props {
@@ -17,6 +18,17 @@ const styleMap: Record<string, string> = {
 }
 
 export default function TerminalLine({ line }: Props) {
+  if (line.image) {
+    return (
+      <DitheredPlate
+        src={line.image.src}
+        alt={line.image.alt}
+        caption={line.image.caption}
+        ratio={line.image.ratio}
+      />
+    )
+  }
+
   // Key-value row: label + content side by side
   if (line.label !== undefined) {
     const valueClass = styleMap[line.style ?? 'warm'] ?? styleMap.warm

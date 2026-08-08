@@ -16,7 +16,6 @@ Currently into: AI reliability in production, multi-agentic systems and voice AI
   languages: ['English', 'French', 'Spanish', 'Russian', 'Kazakh'],
   email: 'me@adgapar.dev',
   links: {
-    blog: 'https://www.adgapar.dev',
     newsletter: 'https://theworkingprototype.substack.com/',
     github: 'https://github.com/adgapar',
     twitter: 'https://twitter.com/adgapar',

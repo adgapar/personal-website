@@ -9,7 +9,7 @@ import { executeCommand, hasCommand } from '@/lib/commands'
 import type { TerminalLine as TLine } from '@/lib/commands/types'
 import type { PageCommand, SessionBlock } from '@/lib/sessions'
 
-const NAV_COMMANDS = ['about', 'cv', 'writing', 'contact']
+const NAV_COMMANDS = ['about', 'cv', 'writing', 'contact', 'play']
 
 const COL_WIDTHS = ['w-44 shrink-0', 'w-44 shrink-0', 'w-24 shrink-0', 'w-20 shrink-0']
 function colClass(index: number, total: number, widths?: string[]) {
@@ -49,7 +49,13 @@ function buildHelp(commands: PageCommand[]): TLine[] {
     )
   }
   lines.push(D)
-  lines.push({ label: 'always', content: "help  ·  clear", style: 'muted' })
+  lines.push({ label: 'always', content: 'help  ·  clear', style: 'muted' })
+  lines.push(D)
+  lines.push({
+    label: 'and',
+    content: "it's a terminal — try what you'd type in one. some of it answers back.",
+    style: 'muted',
+  })
   return lines
 }
 
@@ -194,7 +200,7 @@ export default function TerminalSession({
   return (
     <div
       ref={scrollRef}
-      className="flex max-h-[var(--term-max-h,68vh)] flex-1 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
+      className="flex h-[var(--term-max-h,68vh)] shrink-0 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
       onClick={focusInput}
     >
       <div className="px-5 pt-8 pb-12 sm:px-10 max-w-2xl w-full mx-auto space-y-8">

@@ -9,6 +9,7 @@ const sections = [
   { name: 'blog', href: '/writing' },
   { name: 'newsletter', href: '/writing' },
   { name: 'contact', href: '/contact' },
+  { name: 'play', href: '/play' },
 ]
 
 sections.forEach(({ name, href }) => {

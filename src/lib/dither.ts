@@ -498,12 +498,14 @@ export function defaultLayer(kind: LayerKind): BackgroundLayer {
 export const SOURCE_BY_ROUTE: Record<string, SourceFieldId> = {
   // a metro station is a terminal — terminus, terminal, same word
   '/': 'stockholm',
-  // an arena you are watched and measured in — and the most Spanish thing here
-  '/cv': 'bernabeu',
+  // a figure walking away up a lit passage — a career is someone moving
+  '/cv': 'munich',
   // a cloister is where text was copied by hand, before printing existed
   '/writing': 'cloister',
   // a long table with the places already set
   '/contact': 'kitchen',
+  // a stadium is where a game happens
+  '/play': 'bernabeu',
 }
 
 /**

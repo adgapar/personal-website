@@ -15,6 +15,7 @@ const sessions = [
   { name: 'cv', href: '/cv' },
   { name: 'writing', href: '/writing' },
   { name: 'contact', href: '/contact' },
+  { name: 'play', href: '/play' },
 ]
 
 export default function TerminalTabs() {

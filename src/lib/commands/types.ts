@@ -19,6 +19,8 @@ export interface TerminalLine {
   href?: string
   label?: string   // if set, renders as two-column key → value row
   prefix?: string  // if set, renders in accent before content
+  /** if set, the line is a picture — dithered, with the original on hover */
+  image?: { src: string; alt: string; caption?: string; ratio?: number }
 }
 
 export interface CommandResult {

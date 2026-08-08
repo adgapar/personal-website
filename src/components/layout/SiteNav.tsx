@@ -2,14 +2,50 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useViewMode } from './ViewModeProvider'
 
 const sections = [
   { name: 'about',      href: '/' },
   { name: 'cv',         href: '/cv' },
   { name: 'writing',    href: '/writing' },
-  { name: 'photos',     href: '/photos' },
   { name: 'contact',    href: '/contact' },
 ]
+
+function ViewModeToggle() {
+  const { mode, setMode } = useViewMode()
+
+  return (
+    <div
+      className="ml-auto flex items-center gap-1 text-[11px] tracking-widest select-none"
+      role="group"
+      aria-label="Reading mode"
+    >
+      <span className="text-[var(--dim)]">[</span>
+      {(['human', 'agent'] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          onClick={() => setMode(option)}
+          aria-pressed={mode === option}
+          title={
+            option === 'human'
+              ? 'terminal, shaders, the whole thing'
+              : 'clean markdown — also at /llms.txt'
+          }
+          className={`transition-colors duration-200 ${
+            mode === option
+              ? 'text-[var(--accent)]'
+              : 'text-[var(--muted)] hover:text-[var(--fg)]'
+          }`}
+        >
+          {mode === option ? '● ' : '○ '}
+          {option}
+        </button>
+      ))}
+      <span className="text-[var(--dim)]">]</span>
+    </div>
+  )
+}
 
 export default function SiteNav() {
   const pathname = usePathname()
@@ -35,6 +71,7 @@ export default function SiteNav() {
           </Link>
         )
       })}
+      <ViewModeToggle />
     </nav>
   )
 }

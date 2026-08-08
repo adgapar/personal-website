@@ -1,16 +1,30 @@
 'use client'
 
 import { useRef, useCallback, useEffect, useState, type KeyboardEvent } from 'react'
+import Link from 'next/link'
 import TerminalLine from './TerminalLine'
+import DitheredAvatar from '@/components/visual/DitheredAvatar'
 import { executeCommand, hasCommand } from '@/lib/commands'
 import type { TerminalLine as TLine } from '@/lib/commands/types'
 import type { PageCommand, SessionBlock } from '@/lib/sessions'
 
-const NAV_COMMANDS = ['about', 'cv', 'writing', 'photos', 'contact']
+const NAV_COMMANDS = ['about', 'cv', 'writing', 'contact']
 
 const COL_WIDTHS = ['w-44 shrink-0', 'w-44 shrink-0', 'w-24 shrink-0', 'w-20 shrink-0']
-function colClass(index: number, total: number) {
-  return index < total - 1 ? (COL_WIDTHS[index] ?? 'w-24 shrink-0') : ''
+function colClass(index: number, total: number, widths?: string[]) {
+  const scale = widths ?? COL_WIDTHS
+  return index < total - 1 ? (scale[index] ?? 'w-24 shrink-0') : ''
+}
+
+/** in-app routes get client-side navigation; everything else opens away */
+function isInternal(href: string) {
+  return href.startsWith('/')
+}
+
+function externalLinkProps(href: string) {
+  return href.startsWith('mailto:')
+    ? {}
+    : { target: '_blank', rel: 'noopener noreferrer' as const }
 }
 
 function statusColor(header: string, value: string): string {
@@ -156,10 +170,10 @@ export default function TerminalSession({
 
   return (
     <div
-      className="flex flex-col flex-1 bg-[var(--bg)] text-[var(--fg)] font-mono text-sm cursor-text overflow-y-auto"
+      className="flex flex-col text-[var(--fg)] font-mono text-sm cursor-text"
       onClick={focusInput}
     >
-      <div className="px-10 pt-10 pb-64 max-w-2xl w-full mx-auto space-y-8">
+      <div className="px-10 pt-8 pb-12 max-w-2xl w-full mx-auto space-y-8">
         {/* Static session blocks */}
         {blocks.slice(0, visibleCount).map((block, i) => (
           <div key={i}>
@@ -209,7 +223,7 @@ export default function TerminalSession({
               <div className="flex gap-6 text-[var(--muted)] text-xs tracking-widest uppercase pb-1 border-b border-[var(--border)]">
                 <span className="w-4 shrink-0">#</span>
                 {block.table.headers.map((h, j) => (
-                  <span key={j} className={colClass(j, block.table!.headers.length)}>{h}</span>
+                  <span key={j} className={colClass(j, block.table!.headers.length, block.table!.colWidths)}>{h}</span>
                 ))}
               </div>
               {block.table.rows.map((row, j) => {
@@ -219,16 +233,21 @@ export default function TerminalSession({
                     {row.cols.map((col, k) => (
                       <span
                         key={k}
-                        className={`${colClass(k, row.cols.length)} ${k === 0 ? 'text-[var(--warm)]' : statusColor(block.table!.headers[k] ?? '', col)}`}
+                        className={`${colClass(k, row.cols.length, block.table!.colWidths)} ${k === 0 ? 'text-[var(--warm)]' : statusColor(block.table!.headers[k] ?? '', col)}`}
                       >
                         {col}
                       </span>
                     ))}
                   </>
                 )
-                return row.href ? (
-                  <a key={j} href={row.href} target="_blank" rel="noopener noreferrer"
-                    className="flex gap-6 items-baseline hover:text-[var(--accent)] transition-colors duration-200 group">
+                const rowClass =
+                  'flex gap-6 items-baseline hover:text-[var(--accent)] transition-colors duration-200 group'
+                return row.href && isInternal(row.href) ? (
+                  <Link key={j} href={row.href} className={rowClass}>
+                    {rowContent}
+                  </Link>
+                ) : row.href ? (
+                  <a key={j} href={row.href} {...externalLinkProps(row.href)} className={rowClass}>
                     {rowContent}
                   </a>
                 ) : (
@@ -284,13 +303,7 @@ export default function TerminalSession({
               </div>
             ) : (
               <div className={block.avatar ? 'flex gap-5 items-start' : undefined}>
-                {block.avatar && (
-                  <img
-                    src={block.avatar}
-                    alt="profile"
-                    className="w-36 h-36 rounded-sm object-cover shrink-0"
-                  />
-                )}
+                {block.avatar && <DitheredAvatar src={block.avatar} />}
                 <div className="space-y-1.5">
                   {block.lines.map((line, j) => (
                     <TerminalLine key={j} line={line} />

@@ -21,7 +21,6 @@ registerCommand({
       { content: '  projects     things i\'ve built', style: 'default' },
       { content: '  blog         writing at adgapar.dev', style: 'default' },
       { content: '  newsletter   the working prototype — substack', style: 'default' },
-      { content: '  photos       a visual log', style: 'default' },
       { content: '  contact      get in touch', style: 'default' },
       { content: '  whois        show profile info', style: 'default' },
       { content: '  ls           list sections', style: 'default' },
@@ -73,7 +72,6 @@ registerCommand({
       { content: 'drwxr-xr-x  projects/', style: 'default' },
       { content: 'drwxr-xr-x  blog/', style: 'default' },
       { content: 'drwxr-xr-x  newsletter/', style: 'default' },
-      { content: 'drwxr-xr-x  photos/', style: 'default' },
       { content: 'drwxr-xr-x  contact/', style: 'default' },
       { content: '-rw-r--r--  cv', style: 'default' },
     ],
@@ -107,7 +105,6 @@ registerCommand({
   }),
 })
 
-const D: TerminalLine = { content: '', style: 'default' }
 
 registerCommand({
   name: 'ls work',
@@ -258,23 +255,6 @@ registerCommand({
       { content: `  linkedin  → linkedin.com/in/adilet-gaparov`, style: 'default', href: profile.links.linkedin },
       { content: `  threads   → threads.com/@adilet.gaparov`, style: 'default', href: profile.links.threads },
       { content: `  blog      → adgapar.dev`, style: 'default', href: profile.links.blog },
-      DIVIDER,
-    ],
-  }),
-})
-
-registerCommand({
-  name: 'ls photos',
-  description: 'view photos',
-  type: 'output',
-  handler: () => ({
-    type: 'output',
-    lines: [
-      DIVIDER,
-      { content: '  photos', style: 'accent' },
-      DIVIDER,
-      { content: '  24 countries · 3 continents · 1 camera', style: 'default' },
-      { content: '  gallery coming soon.', style: 'muted' },
       DIVIDER,
     ],
   }),

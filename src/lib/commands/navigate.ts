@@ -8,7 +8,6 @@ const sections = [
   { name: 'writing', href: '/writing' },
   { name: 'blog', href: '/writing' },
   { name: 'newsletter', href: '/writing' },
-  { name: 'photos', href: '/photos' },
   { name: 'contact', href: '/contact' },
 ]
 

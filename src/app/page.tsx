@@ -1,8 +1,10 @@
-'use client'
-
 import PageLayout from '@/components/layout/PageLayout'
-import { aboutPage } from '@/lib/sessions'
+import { pageMeta } from '@/lib/sessions'
+
+export const metadata = {
+  alternates: { types: { 'text/markdown': '/md/about' } },
+}
 
 export default function Home() {
-  return <PageLayout session={aboutPage} animated />
+  return <PageLayout page={pageMeta.about} animated />
 }

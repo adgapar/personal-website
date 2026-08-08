@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import ViewModeProvider from "@/components/layout/ViewModeProvider";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -10,6 +11,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "adilet",
   description: "personal website",
+  alternates: {
+    types: {
+      "text/markdown": "/llms.txt",
+    },
+  },
 };
 
 export default function RootLayout({
@@ -20,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${jetbrainsMono.variable} antialiased`}>
-        {children}
+        <ViewModeProvider>{children}</ViewModeProvider>
       </body>
     </html>
   );

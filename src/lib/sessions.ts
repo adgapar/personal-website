@@ -8,6 +8,8 @@ export type LogEntry = { date: string; tag?: string; content: string; href?: str
 
 export type SessionBlock = {
   cmd?: string        // if set, renders "$ cmd" above output
+  mdHeading?: string  // section heading used by the markdown/agent view
+  mdSkip?: boolean    // terminal-only chrome, omitted from markdown
   lines: TerminalLine[]
   linkRow?: boolean   // render lines as inline text links
   avatar?: string     // if set, renders a small profile image above lines
@@ -15,6 +17,7 @@ export type SessionBlock = {
     headers: string[]
     rows: TableRow[]
     hint?: string
+    colWidths?: string[]  // override the default column widths
   }
   list?: {            // two-line list: title + meta row + optional status
     items: ListItem[]
@@ -37,10 +40,9 @@ export type PageSession = {
   placeholder?: string
 }
 
-const D: TerminalLine = { content: '', style: 'default' }
-
 function sectionHeader(page: string): SessionBlock {
   return {
+    mdSkip: true,
     lines: [
       { content: `→ loading ${page}...  done`, style: 'success' },
       { content: "→ type 'help' for available commands", style: 'muted' },
@@ -52,6 +54,7 @@ function sectionHeader(page: string): SessionBlock {
 
 export const homeSession: SessionBlock[] = [
   {
+    mdSkip: true,
     lines: [
       { content: '→ starting session...  done', style: 'success' },
       { content: "→ type 'help' for available commands", style: 'muted' },
@@ -59,6 +62,7 @@ export const homeSession: SessionBlock[] = [
   },
   {
     cmd: 'whois adilet',
+    mdHeading: 'profile',
     avatar: '/profile.jpg',
     lines: [
       { label: 'name',     content: `${profile.name}  ·  ${profile.nickname}`, style: 'warm' },
@@ -70,12 +74,14 @@ export const homeSession: SessionBlock[] = [
   },
   {
     cmd: 'cat about.txt',
+    mdHeading: 'about',
     lines: [
       { content: profile.longBio, style: 'quote' },
     ],
   },
   {
     cmd: 'cat links.txt',
+    mdHeading: 'links',
     linkRow: true,
     lines: [
       { content: 'github',     href: profile.links.github },
@@ -88,6 +94,7 @@ export const homeSession: SessionBlock[] = [
   },
   {
     cmd: 'tail -n 5 updates.log',
+    mdHeading: 'recent',
     lines: [],
     log: {
       entries: [
@@ -111,6 +118,7 @@ export const cvSession: SessionBlock[] = [
   sectionHeader('cv'),
   {
     cmd: 'ls work',
+    mdHeading: 'work',
     lines: [],
     list: {
       items: [
@@ -126,6 +134,7 @@ export const cvSession: SessionBlock[] = [
   },
   {
     cmd: 'ls -l ./projects/',
+    mdHeading: 'projects',
     lines: [],
     list: {
       items: projects.map((p) => ({ title: p.name, tag: p.type, tagStyle: p.tagStyle, meta: '', status: p.status })),
@@ -134,6 +143,7 @@ export const cvSession: SessionBlock[] = [
   },
   {
     cmd: 'ls education',
+    mdHeading: 'education',
     lines: [],
     table: {
       headers: ['degree', 'school', 'period'],
@@ -146,27 +156,13 @@ export const cvSession: SessionBlock[] = [
   },
 ]
 
-// ─── Projects ────────────────────────────────────────────────────────────────
-
-export const projectsSession: SessionBlock[] = [
-  sectionHeader('projects'),
-  {
-    cmd: 'ls -l ./projects/',
-    lines: [],
-    table: {
-      headers: ['name', 'type', 'status'],
-      rows: projects.map((p) => ({ cols: [p.name, p.type, p.status] })),
-      hint: "type 'open 1' or 'open <name>' for details",
-    },
-  },
-]
-
 // ─── Writing (blog + newsletter) ─────────────────────────────────────────────
 
 export const writingSession: SessionBlock[] = [
   sectionHeader('writing'),
   {
     cmd: 'cat blog.txt',
+    mdHeading: 'blog',
     lines: [
       { label: 'name',    content: 'adgapar.dev', style: 'warm', href: 'https://www.adgapar.dev' },
       { label: 'topics',  content: 'AI · learning · building in public · career · personal growth', style: 'default' },
@@ -176,6 +172,7 @@ export const writingSession: SessionBlock[] = [
   },
   {
     cmd: 'cat newsletter.txt',
+    mdHeading: 'newsletter',
     lines: [
       { label: 'name',    content: 'The Working Prototype', style: 'warm', href: 'https://theworkingprototype.substack.com/' },
       { label: 'about',   content: 'AI reliability, alignment & safety for people building agents — no PhD required', style: 'default' },
@@ -186,30 +183,19 @@ export const writingSession: SessionBlock[] = [
   },
 ]
 
-// ─── Photos ───────────────────────────────────────────────────────────────────
-
-export const photosSession: SessionBlock[] = [
-  sectionHeader('photos'),
-  {
-    cmd: 'ls photos/',
-    lines: [
-      { content: '24 countries  ·  3 continents  ·  1 camera', style: 'default' },
-      { content: 'gallery coming soon', style: 'muted' },
-    ],
-  },
-]
-
 // ─── Contact ─────────────────────────────────────────────────────────────────
 
 export const contactSession: SessionBlock[] = [
   sectionHeader('contact'),
   {
     cmd: 'nmap adgapar',
+    mdHeading: 'contact',
     lines: [
       { content: 'host is up  ·  open to network, collaboration, discussions, AI conversations', style: 'success' },
     ],
   },
   {
+    mdHeading: 'channels',
     lines: [],
     table: {
       headers: ['port', 'state', 'service'],
@@ -226,15 +212,6 @@ export const contactSession: SessionBlock[] = [
 ]
 
 // ─── Page sessions (blocks + prompt + available commands) ────────────────────
-
-export const homePage: PageSession = {
-  blocks: homeSession,
-  prompt: 'adilet@home:~$',
-  commands: [
-    { name: 'whois adilet', description: 'show profile info' },
-  ],
-  placeholder: "try 'whois adilet' or navigate — type 'help'",
-}
 
 export const aboutPage: PageSession = {
   blocks: aboutSession,
@@ -255,25 +232,9 @@ export const cvPage: PageSession = {
   placeholder: "try 'open orbio' — type 'help'",
 }
 
-export const projectsPage: PageSession = {
-  blocks: projectsSession,
-  prompt: 'adilet@projects:~$',
-  commands: [
-    { name: 'open', description: 'open a project  ·  e.g. open blog' },
-  ],
-  placeholder: "try 'open 1' or navigate — type 'help'",
-}
-
 export const writingPage: PageSession = {
   blocks: writingSession,
   prompt: 'adilet@writing:~$',
-  commands: [],
-  placeholder: "navigate — type 'help'",
-}
-
-export const photosPage: PageSession = {
-  blocks: photosSession,
-  prompt: 'adilet@photos:~$',
   commands: [],
   placeholder: "navigate — type 'help'",
 }
@@ -283,4 +244,52 @@ export const contactPage: PageSession = {
   prompt: 'adilet@contact:~$',
   commands: [],
   placeholder: "navigate — type 'help'",
+}
+
+// ─── Page registry ───────────────────────────────────────────────────────────
+// One list every consumer reads from: the agent view, /llms.txt and /md/<slug>.
+
+export type PageMeta = {
+  slug: string
+  route: string
+  title: string
+  summary: string
+  session: PageSession
+}
+
+export const pageMeta = {
+  about: {
+    slug: 'about',
+    route: '/',
+    title: profile.name,
+    summary: profile.bio,
+    session: aboutPage,
+  },
+  cv: {
+    slug: 'cv',
+    route: '/cv',
+    title: 'CV',
+    summary: 'Work history, projects and education.',
+    session: cvPage,
+  },
+  writing: {
+    slug: 'writing',
+    route: '/writing',
+    title: 'Writing',
+    summary: 'Blog and newsletter.',
+    session: writingPage,
+  },
+  contact: {
+    slug: 'contact',
+    route: '/contact',
+    title: 'Contact',
+    summary: 'How to reach me.',
+    session: contactPage,
+  },
+} satisfies Record<string, PageMeta>
+
+export const pages: PageMeta[] = Object.values(pageMeta)
+
+export function pageBySlug(slug: string): PageMeta | undefined {
+  return pages.find((p) => p.slug === slug)
 }

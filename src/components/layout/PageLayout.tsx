@@ -1,32 +1,67 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useRouter, usePathname } from 'next/navigation'
 import SiteNav from './SiteNav'
+import StatusBar from './StatusBar'
+import TerminalTabs from './TerminalTabs'
+import WindowChrome from './WindowChrome'
+import { useViewMode } from './ViewModeProvider'
+import AgentView from '@/components/agent/AgentView'
 import TerminalSession from '@/components/terminal/TerminalSession'
-import type { PageSession } from '@/lib/sessions'
+import { presetForRoute, shapeForRoute } from '@/lib/dither'
+import type { PageMeta } from '@/lib/sessions'
+
+// WebGL must not run during SSR
+const PaperBackground = dynamic(
+  () => import('@/components/visual/PaperBackground'),
+  { ssr: false },
+)
 
 interface Props {
-  session: PageSession
+  page: PageMeta
   animated?: boolean
 }
 
-export default function PageLayout({ session, animated }: Props) {
+export default function PageLayout({ page, animated }: Props) {
   const router = useRouter()
   const pathname = usePathname()
+  const { mode, shapeOverride } = useViewMode()
+
+  const isAgent = mode === 'agent'
+
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] font-mono text-base flex flex-col items-center">
-      <div className="max-w-4xl w-full flex flex-col flex-1">
-        <SiteNav />
-        <TerminalSession
-          key={pathname}
-          blocks={session.blocks}
-          commands={session.commands}
-          prompt={session.prompt}
-          placeholder={session.placeholder}
-          animated={animated}
-          onNavigate={(href) => router.push(href)}
+      {!isAgent && (
+        <PaperBackground
+          shape={shapeOverride ?? shapeForRoute(pathname)}
+          preset={presetForRoute(pathname)}
         />
-      </div>
+      )}
+
+      {isAgent ? (
+        <div className="relative z-10 max-w-4xl w-full flex flex-col flex-1">
+          <SiteNav />
+          <AgentView page={page} />
+        </div>
+      ) : (
+        // the photo behind is wallpaper; this is a window sitting on it
+        <div className="relative z-10 flex w-full justify-center px-4 py-6 sm:px-8 sm:py-10">
+          <WindowChrome title={`${page.session.prompt}  —  terminal`}>
+            <TerminalTabs />
+            <TerminalSession
+              key={pathname}
+              blocks={page.session.blocks}
+              commands={page.session.commands}
+              prompt={page.session.prompt}
+              placeholder={page.session.placeholder}
+              animated={animated}
+              onNavigate={(href) => router.push(href)}
+            />
+            <StatusBar hint={page.session.placeholder} />
+          </WindowChrome>
+        </div>
+      )}
     </div>
   )
 }

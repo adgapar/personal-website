@@ -1,6 +1,10 @@
 import PageLayout from '@/components/layout/PageLayout'
-import { contactPage } from '@/lib/sessions'
+import { pageMeta } from '@/lib/sessions'
+
+export const metadata = {
+  alternates: { types: { 'text/markdown': '/md/contact' } },
+}
 
 export default function ContactPage() {
-  return <PageLayout session={contactPage} />
+  return <PageLayout page={pageMeta.contact} />
 }

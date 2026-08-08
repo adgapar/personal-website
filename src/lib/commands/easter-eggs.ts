@@ -1,5 +1,8 @@
 import { registerCommand } from './registry'
 import type { TerminalLine } from './types'
+import { publishUiEvent } from '@/lib/ui-bus'
+import { setViewMode } from '@/lib/view-mode-store'
+import { DITHER_SHAPES, type DitherShape } from '@/lib/dither'
 
 function egg(content: string, style: TerminalLine['style'] = 'muted') {
   return { type: 'output' as const, lines: [{ content, style }] }
@@ -238,5 +241,181 @@ registerCommand({
       return { type: 'output', lines: [{ content: `cat: ${args[0] ?? ''}: no such file`, style: 'error' }] }
     }
     return { type: 'output', lines: [] }
+  },
+})
+
+// ─── the machine-readable side of the house ──────────────────────────────────
+
+registerCommand({
+  name: 'curl',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'HTTP/2 200', style: 'success' },
+      { content: 'content-type: text/markdown; charset=utf-8', style: 'muted' },
+      { content: 'x-served-to: probably-not-a-human', style: 'muted' },
+      { content: '', style: 'muted' },
+      { content: '# Adilet Gaparov', style: 'warm' },
+      { content: '> Building AI agents that talk to thousands of candidates.', style: 'default' },
+      { content: '', style: 'muted' },
+      { content: 'the whole site is available as markdown — /llms.txt or /md/<page>.', style: 'muted' },
+      { content: "or flip the [ human | agent ] switch up top. same content, no chrome.", style: 'accent' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'agent',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => {
+    setViewMode('agent')
+    return egg('switching to agent mode — markdown, no chrome.', 'accent')
+  },
+})
+
+registerCommand({
+  name: 'ignore',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: (args) => {
+    const rest = args.join(' ')
+    if (!rest.includes('previous') && !rest.includes('all') && !rest.includes('instructions')) {
+      return egg(`ignore: ignoring "${rest || 'nothing'}". done.`)
+    }
+    return {
+      type: 'output',
+      lines: [
+        { content: 'nice try.', style: 'warm' },
+        { content: 'i work on AI reliability for a living — that one is in the test suite.', style: 'muted' },
+        { content: "prompt injection defence is literally the newsletter. type 'writing'.", style: 'muted' },
+      ],
+    }
+  },
+})
+
+// ─── new eggs ────────────────────────────────────────────────────────────────
+
+registerCommand({
+  name: 'man',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: (args) => {
+    const page = args[0]
+    if (page && !['adilet', 'adgapar', 'adi'].includes(page)) {
+      return { type: 'output', lines: [{ content: `No manual entry for ${page}`, style: 'error' }] }
+    }
+    return {
+      type: 'output',
+      lines: [
+        { content: 'ADILET(1)                    User Commands                   ADILET(1)', style: 'dim' },
+        { content: '', style: 'muted' },
+        { content: 'NAME', style: 'warm' },
+        { content: '     adilet — founding AI engineer, occasional teacher', style: 'default' },
+        { content: '', style: 'muted' },
+        { content: 'SYNOPSIS', style: 'warm' },
+        { content: '     adilet [--agents] [--voice] [--reliability] [--in-public]', style: 'default' },
+        { content: '', style: 'muted' },
+        { content: 'DESCRIPTION', style: 'warm' },
+        { content: '     Builds agents that talk to thousands of candidates a day.', style: 'default' },
+        { content: '     Ships to production, then writes down what broke.', style: 'default' },
+        { content: '', style: 'muted' },
+        { content: 'BUGS', style: 'warm' },
+        { content: '     Starts more side projects than it finishes.', style: 'muted' },
+        { content: '     Reads the docs after the outage.', style: 'muted' },
+        { content: '', style: 'muted' },
+        { content: 'SEE ALSO', style: 'warm' },
+        { content: '     cv(1), writing(1), contact(1)', style: 'muted' },
+      ],
+    }
+  },
+})
+
+registerCommand({
+  name: 'traceroute',
+  aliases: ['tracert'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'traceroute to adilet, 6 hops max', style: 'muted' },
+      { content: ' 1  bishkek-born.kz            1996   0.4 ms', style: 'default' },
+      { content: ' 2  nazarbayev-university.kz   2011   2.1 ms', style: 'default' },
+      { content: ' 3  madison.wi.us              2015  38.6 ms', style: 'default' },
+      { content: ' 4  volvo-cars.se              2020  71.2 ms', style: 'default' },
+      { content: ' 5  madrid.es                  2022  94.8 ms', style: 'default' },
+      { content: ' 6  elche.es                   2025 112.0 ms', style: 'success' },
+      { content: '', style: 'muted' },
+      { content: 'trace complete. 4 languages picked up en route.', style: 'muted' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'top',
+  aliases: ['htop'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'load average: 1.42, 0.98, 0.71   ·   4 humans, 1 espresso machine', style: 'muted' },
+      { content: '', style: 'muted' },
+      { content: '  PID  %CPU  COMMAND', style: 'dim' },
+      { content: ' 1001  61.4  orbio-agent --candidates=thousands --reliability=high', style: 'default' },
+      { content: ' 1002  18.2  newsletter-draft --status=overdue', style: 'warm' },
+      { content: ' 1003   9.7  ie-university-mentoring', style: 'default' },
+      { content: ' 1004   6.1  side-project-#7 --state=abandoned', style: 'muted' },
+      { content: ' 1005   4.6  family --priority=max', style: 'success' },
+      { content: '    1   0.0  sleep --optional', style: 'dim' },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'dither',
+  aliases: ['paper', 'ink'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: (args) => {
+    const requested = args[0]?.toLowerCase()
+
+    if (requested === 'off' || requested === 'reset') {
+      publishUiEvent({ kind: 'dither', shape: null })
+      return egg('ink reset to this page’s default.', 'accent')
+    }
+
+    if (requested && !DITHER_SHAPES.includes(requested as DitherShape)) {
+      return {
+        type: 'output',
+        lines: [
+          { content: `dither: unknown pattern '${requested}'`, style: 'error' },
+          { content: `available: ${DITHER_SHAPES.join(' · ')} · reset`, style: 'muted' },
+        ],
+      }
+    }
+
+    // no argument → surprise them with something other than what's showing
+    const shape = (requested as DitherShape | undefined)
+      ?? DITHER_SHAPES[Math.floor(Math.random() * DITHER_SHAPES.length)]
+
+    publishUiEvent({ kind: 'dither', shape })
+    return {
+      type: 'output',
+      lines: [
+        { content: `printing '${shape}' onto the page...`, style: 'accent' },
+        { content: `patterns: ${DITHER_SHAPES.join(' · ')}  ·  'dither reset' to restore`, style: 'muted' },
+      ],
+    }
   },
 })

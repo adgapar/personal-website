@@ -1,7 +1,7 @@
 import type { SourceFieldId } from './source-field'
 
 /**
- * Background substrate definitions. Kept free of React and the shader library
+ * Background definitions. Kept free of React and the shader library
  * so commands and routes can import it without pulling WebGL into their bundles.
  *
  * Most of the library's good looks are *image filters* — they need a source.
@@ -118,7 +118,7 @@ export type PaperLayer = {
   opacity: number
 }
 
-export type SubstrateLayer =
+export type BackgroundLayer =
   | DitherLayer
   | ImageDitherLayer
   | HalftoneLayer
@@ -132,7 +132,7 @@ export type PaperPreset = {
   /** colour field fed to the image filters; omit for generative-only presets */
   source?: SourceFieldId
   /** rendered back to front */
-  layers: SubstrateLayer[]
+  layers: BackgroundLayer[]
   /** alpha of the CSS scanline pass; 0 disables it */
   scanlines: number
   /** vignette alpha at centre / mid / edge — keeps the text column readable */
@@ -143,7 +143,7 @@ export type PaperPreset = {
    */
   scrim?: number
   /**
-   * Post-processing on the whole substrate. The shaders have no saturation
+   * Post-processing on the whole background. The shaders have no saturation
    * control, so vividness has to come from CSS. 1 = untouched.
    */
   saturate?: number
@@ -178,7 +178,7 @@ export const PAPER_PRESETS: PaperPreset[] = [
     // pattern = source, pixel size = size, levels = colorSteps, amount = opacity
     id: 'ink',
     name: 'ink',
-    note: 'the site substrate — per-page photo, posterised to a few tones',
+    note: 'the site background — per-page photo, posterised to a few tones',
     source: 'stockholm',
     layers: [
       {
@@ -410,7 +410,7 @@ export const LAYER_KINDS = [
 export type LayerKind = (typeof LAYER_KINDS)[number]
 
 /** starting point when you switch filter family in the playground */
-export function defaultLayer(kind: LayerKind): SubstrateLayer {
+export function defaultLayer(kind: LayerKind): BackgroundLayer {
   switch (kind) {
     case 'imageDither':
       return {
@@ -491,7 +491,7 @@ export function defaultLayer(kind: LayerKind): SubstrateLayer {
   }
 }
 
-// ─── Per-route substrate ─────────────────────────────────────────────────────
+// ─── Per-route background ─────────────────────────────────────────────────────
 // One treatment across the whole site — same ink, pixel size, levels and amount.
 // Only the *subject* changes, and each one is meant to be about its page.
 

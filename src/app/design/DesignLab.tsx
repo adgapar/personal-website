@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useMemo, useState } from 'react'
-import { Color, Select, Slider, Toggle } from '@/components/lab/Controls'
+import { Color, Select, Slider, Toggle } from '@/components/design/Controls'
 import {
   DITHER_SHAPES,
   LAYER_KINDS,
@@ -16,7 +16,7 @@ import {
   type LayerKind,
   type PaperLayer,
   type PaperPreset,
-  type SubstrateLayer,
+  type BackgroundLayer,
 } from '@/lib/dither'
 import {
   FIELD_NOTES,
@@ -66,10 +66,10 @@ function SampleText() {
   )
 }
 
-export default function SubstrateLab() {
+export default function DesignLab() {
   const INK = PAPER_PRESETS.find((p) => p.id === 'ink')!
   const [kind, setKind] = useState<LayerKind>('imageDither')
-  const [layer, setLayer] = useState<SubstrateLayer>(() => INK.layers[0])
+  const [layer, setLayer] = useState<BackgroundLayer>(() => INK.layers[0])
   const [palette, setPalette] = useState<SourceFieldId>(INK.source ?? 'contour')
   const [shape, setShape] = useState<DitherShape>('sphere')
   const [scanlines, setScanlines] = useState(INK.scanlines)
@@ -102,8 +102,8 @@ export default function SubstrateLab() {
   }
 
   /** patch the current layer, keeping its discriminant */
-  function patch<T extends SubstrateLayer>(changes: Partial<T>) {
-    setLayer((prev) => ({ ...prev, ...changes }) as SubstrateLayer)
+  function patch<T extends BackgroundLayer>(changes: Partial<T>) {
+    setLayer((prev) => ({ ...prev, ...changes }) as BackgroundLayer)
   }
 
   const preset: PaperPreset = useMemo(

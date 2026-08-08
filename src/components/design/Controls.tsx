@@ -1,6 +1,6 @@
 'use client'
 
-/** Small control kit for the substrate playground. Terminal-flavoured, dense. */
+/** Small control kit for the design playground. Terminal-flavoured, dense. */
 
 export function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (

@@ -13,12 +13,12 @@ import {
   presetById,
   type DitherShape,
   type PaperPreset,
-  type SubstrateLayer,
+  type BackgroundLayer,
 } from '@/lib/dither'
 import { sourceField } from '@/lib/source-field'
 
 /**
- * The page substrate: one or more shader layers over a generated colour field,
+ * The page background: one or more shader layers over a generated colour field,
  * an optional CSS scanline pass and a vignette that protects the text column.
  */
 
@@ -46,7 +46,7 @@ function Layer({
   quality,
   still,
 }: {
-  layer: SubstrateLayer
+  layer: BackgroundLayer
   shape: DitherShape
   image: string
   quality: number

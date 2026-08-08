@@ -84,7 +84,8 @@ export default function TerminalSession({
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const [inputValue, setInputValue] = useState('')
-  const [response, setResponse] = useState<TLine[] | null>(null)
+  /** what has been run in this session — echoed command plus its output */
+  const [entries, setEntries] = useState<{ input: string; lines: TLine[] }[]>([])
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [visibleCount, setVisibleCount] = useState(instant ? blocks.length : 0)
@@ -117,15 +118,20 @@ export default function TerminalSession({
   useEffect(() => {
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [response, visibleCount])
+  }, [entries, visibleCount])
 
   const focusInput = useCallback(() => inputRef.current?.focus({ preventScroll: true }), [])
+
+  /** append a command and its output to the scrollback */
+  const echo = useCallback((input: string, lines: TLine[]) => {
+    setEntries((prev) => [...prev, { input, lines }])
+  }, [])
 
   /** clicking a list row runs its command, same path as typing it */
   const runCommand = useCallback(
     (input: string) => {
       const result = executeCommand(input)
-      setResponse(result.lines ?? [])
+      echo(input, result.lines ?? [])
       setCommandHistory((prev) => [input, ...prev].slice(0, 100))
       if (result.type === 'navigate' && result.href) {
         setTimeout(() => onNavigate?.(result.href!), 400)
@@ -133,7 +139,7 @@ export default function TerminalSession({
         setTimeout(() => window.open(result.href!, '_blank', 'noopener,noreferrer'), 400)
       }
     },
-    [onNavigate],
+    [onNavigate, echo],
   )
 
   const handleKeyDown = useCallback(
@@ -157,18 +163,18 @@ export default function TerminalSession({
         setInputValue('')
 
         if (input === 'help') {
-          setResponse(buildHelp(commands))
+          echo(input, buildHelp(commands))
           return
         }
 
         if (input === 'clear') {
-          setResponse(null)
+          setEntries([])
           return
         }
 
         const staticCmds = blocks.flatMap((b) => (b.cmd ? [b.cmd] : []))
         if (staticCmds.includes(input)) {
-          setResponse([{ content: '↑ already shown above', style: 'muted' }])
+          echo(input, [{ content: '↑ already shown above', style: 'muted' }])
           return
         }
 
@@ -178,14 +184,14 @@ export default function TerminalSession({
         )
 
         if (!isAllowed && !hasCommand(input)) {
-          setResponse([
+          echo(input, [
             { content: `not available here  ·  type 'help' to see what's possible`, style: 'muted' },
           ])
           return
         }
 
         const result = executeCommand(input)
-        setResponse(result.lines ?? [])
+        echo(input, result.lines ?? [])
 
         if (result.type === 'navigate' && result.href) {
           setTimeout(() => onNavigate?.(result.href!), 400)
@@ -194,7 +200,7 @@ export default function TerminalSession({
         }
       }
     },
-    [inputValue, historyIndex, commandHistory, commands, blocks, onNavigate]
+    [inputValue, historyIndex, commandHistory, commands, blocks, onNavigate, echo]
   )
 
   return (
@@ -354,7 +360,26 @@ export default function TerminalSession({
           </div>
         ))}
 
-        {/* Input + response in a tight group */}
+        {/* scrollback: each command above the output it produced */}
+        {entries.map((entry, i) => (
+          <div key={i} className="space-y-2">
+            <div className="flex items-baseline gap-3">
+              <span className="text-[var(--accent)] text-[10px] tracking-widest select-none shrink-0">
+                {prompt}
+              </span>
+              <span className="text-[var(--fg)]">{entry.input}</span>
+            </div>
+            {entry.lines.length > 0 && (
+              <div className="space-y-1.5">
+                {entry.lines.map((line, j) => (
+                  <TerminalLine key={j} line={line} />
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* the live prompt, always last */}
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <span className="text-[var(--accent)] text-[10px] tracking-widest select-none shrink-0">
@@ -384,14 +409,6 @@ export default function TerminalSession({
               />
             )}
           </div>
-
-          {response !== null && response.length > 0 && (
-            <div className="space-y-1.5">
-              {response.map((line, i) => (
-                <TerminalLine key={i} line={line} />
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>

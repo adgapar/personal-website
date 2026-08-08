@@ -55,6 +55,11 @@ function buildHelp(commands: PageCommand[]): TLine[] {
 
 interface Props {
   blocks: SessionBlock[]
+  /**
+   * Render as an already-finished session: no typing, no reveal, and no stealing
+   * focus. For a window that is on screen but not the one being driven.
+   */
+  instant?: boolean
   commands?: PageCommand[]
   prompt?: string
   placeholder?: string
@@ -63,6 +68,7 @@ interface Props {
 
 export default function TerminalSession({
   blocks,
+  instant = false,
   commands = [],
   prompt = 'adilet@home:~$',
   placeholder = "type 'help'",
@@ -75,9 +81,11 @@ export default function TerminalSession({
   const [response, setResponse] = useState<TLine[] | null>(null)
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
-  const [visibleCount, setVisibleCount] = useState(0)
+  const [visibleCount, setVisibleCount] = useState(instant ? blocks.length : 0)
 
   useEffect(() => {
+    if (instant) return
+
     // Reset on every mount — handles router cache restoration with stale state
     setVisibleCount(0)
     let cancelled = false
@@ -106,6 +114,21 @@ export default function TerminalSession({
   }, [response, visibleCount])
 
   const focusInput = useCallback(() => inputRef.current?.focus({ preventScroll: true }), [])
+
+  /** clicking a list row runs its command, same path as typing it */
+  const runCommand = useCallback(
+    (input: string) => {
+      const result = executeCommand(input)
+      setResponse(result.lines ?? [])
+      setCommandHistory((prev) => [input, ...prev].slice(0, 100))
+      if (result.type === 'navigate' && result.href) {
+        setTimeout(() => onNavigate?.(result.href!), 400)
+      } else if (result.type === 'open' && result.href) {
+        setTimeout(() => window.open(result.href!, '_blank', 'noopener,noreferrer'), 400)
+      }
+    },
+    [onNavigate],
+  )
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -174,20 +197,25 @@ export default function TerminalSession({
       className="flex max-h-[var(--term-max-h,68vh)] flex-1 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
       onClick={focusInput}
     >
-      <div className="px-10 pt-8 pb-12 max-w-2xl w-full mx-auto space-y-8">
+      <div className="px-5 pt-8 pb-12 sm:px-10 max-w-2xl w-full mx-auto space-y-8">
         {/* Static session blocks */}
         {blocks.slice(0, visibleCount).map((block, i) => (
           <div key={i}>
-            <CommandBlock cmd={block.cmd}>
+            <CommandBlock cmd={block.cmd} instant={instant}>
             {block.list ? (
             <div className="space-y-3">
               {block.list.items.map((item, j) => (
-                <div key={j} className="flex items-baseline gap-3">
+                <div
+                  key={j}
+                  onClick={item.run ? (e) => { e.stopPropagation(); runCommand(item.run!) } : undefined}
+                  className={item.run ? 'group -mx-2 rounded-sm px-2 py-0.5 hover:bg-white/[0.03]' : undefined}
+                >
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <span className="text-[var(--dim)] w-4 shrink-0 select-none">{j + 1}</span>
                   {item.meta && (
                     <span className="text-[var(--dim)] text-xs shrink-0 w-24">{item.meta}</span>
                   )}
-                  <span className="text-[var(--warm)]">{item.title}</span>
+                  <span className={`text-[var(--warm)] ${item.run ? 'group-hover:text-[var(--accent)]' : ''}`}>{item.title}</span>
                   {item.tag && (() => {
                     const s = item.tagStyle ?? 'muted'
                     const cls =
@@ -203,13 +231,17 @@ export default function TerminalSession({
                     <span className={`shrink-0 ml-auto ${statusColor('status', item.status)}`}>{item.status}</span>
                   )}
                 </div>
+                {item.summary && (
+                  <div className="pl-7 text-xs text-[var(--muted)]">{item.summary}</div>
+                )}
+                </div>
               ))}
               {block.list.hint && (
                 <div className="text-[var(--muted)] text-xs pt-1">{block.list.hint}</div>
               )}
             </div>
           ) : block.table ? (
-            <div className="space-y-1">
+            <div className="space-y-1 overflow-x-auto">
               <div className="flex gap-6 text-[var(--muted)] text-xs tracking-widest uppercase pb-1 border-b border-[var(--border)]">
                 <span className="w-4 shrink-0">#</span>
                 {block.table.headers.map((h, j) => (
@@ -252,18 +284,29 @@ export default function TerminalSession({
             <div>
               {block.log.entries.map((entry, j) => (
                 <div key={j}>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-[var(--dim)] text-xs shrink-0 w-16">{entry.date}</span>
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="text-[var(--dim)] text-xs shrink-0 whitespace-nowrap w-[5.5rem]">{entry.date}</span>
                     {entry.tag && (
                       <span className="text-xs text-[var(--warm)] border border-[var(--warm)] px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70">{entry.tag}</span>
                     )}
                     <span className="text-[var(--muted)]">{entry.content}</span>
-                    {entry.href && (
-                      <a href={entry.href} target="_blank" rel="noopener noreferrer"
-                        className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-xs tracking-wide shrink-0">
-                        (link)
-                      </a>
-                    )}
+                    {entry.href &&
+                      (isInternal(entry.href) ? (
+                        <Link
+                          href={entry.href}
+                          className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-xs tracking-wide shrink-0"
+                        >
+                          (read)
+                        </Link>
+                      ) : (
+                        <a
+                          href={entry.href}
+                          {...externalLinkProps(entry.href)}
+                          className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-xs tracking-wide shrink-0"
+                        >
+                          (link ↗)
+                        </a>
+                      ))}
                   </div>
                   {j < block.log!.entries.length - 1 && (
                     <div className="border-t border-[var(--border)] my-2 opacity-40" />
@@ -311,23 +354,29 @@ export default function TerminalSession({
             <span className="text-[var(--accent)] text-[10px] tracking-widest select-none shrink-0">
               {prompt}
             </span>
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={(e) => {
-                setInputValue(e.target.value)
-                setHistoryIndex(-1)
-              }}
-              onKeyDown={handleKeyDown}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              placeholder={placeholder}
-              aria-label="terminal input"
-              className="flex-1 bg-transparent outline-none font-[inherit] text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
-            />
+            {instant ? (
+              // an unfocused window has no live prompt to type into, and must
+              // not sit in the tab order
+              <span className="cursor inline-block h-3 w-1.5 bg-[var(--dim)]" aria-hidden />
+            ) : (
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={(e) => {
+                  setInputValue(e.target.value)
+                  setHistoryIndex(-1)
+                }}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                placeholder={placeholder}
+                aria-label="terminal input"
+                className="flex-1 bg-transparent outline-none font-[inherit] text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
+              />
+            )}
           </div>
 
           {response !== null && response.length > 0 && (

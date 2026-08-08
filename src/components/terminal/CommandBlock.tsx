@@ -13,9 +13,12 @@ import TypedText from './TypedText'
 export default function CommandBlock({
   cmd,
   children,
+  instant = false,
 }: {
   cmd?: string
   children: React.ReactNode
+  /** already-run: show the command and its output with no typing */
+  instant?: boolean
 }) {
   const [typed, setTyped] = useState(false)
 
@@ -24,6 +27,19 @@ export default function CommandBlock({
   const [verb, ...rest] = cmd.split(' ')
   const args = rest.join(' ')
   const MS = 15
+
+  if (instant) {
+    return (
+      <>
+        <div className="flex items-baseline gap-2 mb-3 tracking-wide">
+          <span className="text-[var(--accent)] select-none">$</span>
+          <span className="text-[var(--fg)]">{verb}</span>
+          {args && <span className="text-[var(--warm)]">{args}</span>}
+        </div>
+        {children}
+      </>
+    )
+  }
 
   return (
     <>

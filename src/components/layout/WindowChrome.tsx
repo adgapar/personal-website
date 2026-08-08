@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
+import { TITLE_BAR, WINDOW_FRAME, WINDOW_FRAME_LIFTED } from '@/lib/window-style'
 import {
   getServerSnapshot,
   getSnapshot,
@@ -111,24 +112,17 @@ export default function WindowChrome({ title, children }: Props) {
       }
       style={{
         // the terminal body reads this for its scroll height
-        ['--term-max-h' as string]: fullscreen
-          ? 'calc(100vh - 6.75rem)'
-          : '68vh',
-        transform: fullscreen
-          ? undefined
-          : `translate(${offset.x}px, ${offset.y}px)`,
-        // bevel: light above, dark below, like a raised surface
-        border: '1px solid var(--border)',
-        borderTopColor: fullscreen ? 'transparent' : '#3a3733',
-        borderLeftColor: fullscreen ? 'transparent' : '#332f2b',
-        borderBottomColor: fullscreen ? 'transparent' : '#141210',
-        borderRightColor: fullscreen ? 'transparent' : '#141210',
-        boxShadow: fullscreen
-          ? 'none'
-          : dragging
-          ? '0 40px 90px -10px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
-          : '0 24px 70px -12px rgba(0,0,0,0.85), 0 2px 8px rgba(0,0,0,0.5)',
-        background: fullscreen ? 'rgba(12,11,10,0.97)' : 'rgba(12,11,10,0.93)',
+        ['--term-max-h' as string]: fullscreen ? 'calc(100vh - 6.75rem)' : '68vh',
+        ...(dragging ? WINDOW_FRAME_LIFTED : WINDOW_FRAME),
+        transform: fullscreen ? undefined : `translate(${offset.x}px, ${offset.y}px)`,
+        ...(fullscreen
+          ? {
+              // nothing to be raised above when it fills the screen
+              borderColor: 'transparent',
+              boxShadow: 'none',
+              background: 'rgba(12,11,10,0.97)',
+            }
+          : {}),
       }}
     >
       <div
@@ -141,10 +135,7 @@ export default function WindowChrome({ title, children }: Props) {
         className={`flex touch-none items-center gap-2 border-b border-[var(--border)] px-3 py-1.5 select-none ${
           fullscreen ? '' : dragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
-        style={{
-          background:
-            'linear-gradient(to bottom, rgba(45,41,37,0.95), rgba(26,24,21,0.95))',
-        }}
+        style={TITLE_BAR}
       >
         <span className="text-[10px] tracking-widest text-[var(--muted)]">
           {title}

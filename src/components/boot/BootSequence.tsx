@@ -102,21 +102,21 @@ export default function BootSequence() {
       aria-label="Starting up"
       onClick={waiting ? beginHandover : undefined}
     >
-      <div className="mx-auto max-w-xl space-y-0.5">
+      <div className="mx-auto max-w-xl space-y-1 sm:space-y-0.5">
         {LINES.slice(0, shown).map((line, i) => (
-          <div key={i} className="flex gap-2">
+          <div key={i} className="flex flex-col gap-x-2 sm:flex-row">
             <span className="shrink-0 text-[var(--muted)]">{line.label}</span>
-            {/* dot leader, like a real POST report */}
+            {/* dot leader, like a real POST report — no room for it on a phone */}
             <span
               aria-hidden
-              className="min-w-4 flex-1 overflow-hidden text-[var(--border)] select-none"
+              className="hidden min-w-4 flex-1 overflow-hidden text-[var(--border)] select-none sm:inline"
             >
               {'.'.repeat(120)}
             </span>
             <TypedText
               text={line.value}
               msPerChar={10}
-              className={`shrink-0 ${COLOR[line.style ?? 'dim']}`}
+              className={`pl-3 break-words sm:shrink-0 sm:pl-0 ${COLOR[line.style ?? 'dim']}`}
             />
           </div>
         ))}

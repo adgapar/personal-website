@@ -1,10 +1,10 @@
 import PageLayout from '@/components/layout/PageLayout'
-import { pageMeta } from '@/lib/sessions'
+import { getWritingPage } from '@/lib/writing-page'
 
 export const metadata = {
   alternates: { types: { 'text/markdown': '/md/writing' } },
 }
 
 export default function WritingPage() {
-  return <PageLayout page={pageMeta.writing} />
+  return <PageLayout page={getWritingPage()} />
 }

@@ -21,8 +21,8 @@ export default function TerminalLine({ line }: Props) {
   if (line.label !== undefined) {
     const valueClass = styleMap[line.style ?? 'warm'] ?? styleMap.warm
     return (
-      <div className="flex items-baseline gap-5">
-        <span className="text-[var(--muted)] text-[10px] tracking-widest uppercase shrink-0 w-20">
+      <div className="flex flex-col gap-x-5 sm:flex-row sm:items-baseline">
+        <span className="text-[var(--muted)] text-[10px] tracking-widest uppercase shrink-0 sm:w-20">
           {line.label}
         </span>
         {line.href ? (

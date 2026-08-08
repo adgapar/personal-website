@@ -3,8 +3,25 @@ import { projects } from '@/data/projects'
 import type { TerminalLine } from './commands/types'
 
 export type TableRow = { cols: string[]; href?: string }
-export type ListItem = { title: string; tag?: string; tagStyle?: 'accent' | 'warm' | 'success' | 'muted'; meta: string; status?: string }
-export type LogEntry = { date: string; tag?: string; content: string; href?: string }
+export type ListItem = {
+  title: string
+  tag?: string
+  tagStyle?: 'accent' | 'warm' | 'success' | 'muted'
+  meta: string
+  status?: string
+  /** second line, so a list reads without opening anything */
+  summary?: string
+  /** clicking the row runs this command */
+  run?: string
+}
+export type LogEntry = {
+  date: string
+  tag?: string
+  content: string
+  href?: string
+  /** used instead of href in the markdown views, so agents get the source */
+  mdHref?: string
+}
 
 export type SessionBlock = {
   cmd?: string        // if set, renders "$ cmd" above output
@@ -99,7 +116,7 @@ export const homeSession: SessionBlock[] = [
     log: {
       entries: [
         { date: '2026-07', tag: 'newsletter', content: 'what kind of poker player is an AI',                              href: 'https://theworkingprototype.substack.com/p/what-kind-of-poker-player-is-an-ai' },
-        { date: '2026-06', tag: 'blog',       content: 'riding the wave',                                                 href: 'https://www.adgapar.dev/riding-the-wave/' },
+        { date: '2026-06', tag: 'blog',       content: 'riding the wave',                                                 href: '/blog/riding-the-wave' },
         { date: '2026-02', tag: 'talk',       content: '10,000 interviews without a human 🇰🇿',                         href: 'https://www.youtube.com/watch?v=_5IoO2fA1FM' },
         { date: '2025-12',                    content: 'sister visited Elche — first time together since Chicago, 2017' },
         { date: '2025-02',                    content: 'moved from Madrid to Elche. traded traffic for sunshine.' },
@@ -137,8 +154,16 @@ export const cvSession: SessionBlock[] = [
     mdHeading: 'projects',
     lines: [],
     list: {
-      items: projects.map((p) => ({ title: p.name, tag: p.type, tagStyle: p.tagStyle, meta: '', status: p.status })),
-      hint: "type 'open <name>' or 'open projects/<n>'  ·  e.g. open blog  ·  open projects/1",
+      items: projects.map((p) => ({
+        title: p.name,
+        tag: p.type,
+        tagStyle: p.tagStyle,
+        meta: '',
+        status: p.status,
+        summary: p.summary,
+        run: `open ${p.id}`,
+      })),
+      hint: "click a row for detail  ·  or type 'open <name>'  ·  e.g. open teya",
     },
   },
   {
@@ -161,24 +186,24 @@ export const cvSession: SessionBlock[] = [
 export const writingSession: SessionBlock[] = [
   sectionHeader('writing'),
   {
-    cmd: 'cat blog.txt',
-    mdHeading: 'blog',
-    lines: [
-      { label: 'name',    content: 'adgapar.dev', style: 'warm', href: 'https://www.adgapar.dev' },
-      { label: 'topics',  content: 'AI · learning · building in public · career · personal growth', style: 'default' },
-      { label: 'format',  content: 'essays · short takes · things I\'m figuring out', style: 'muted' },
-      { label: 'cadence', content: 'when inspiration strikes', style: 'muted' },
-    ],
-  },
-  {
     cmd: 'cat newsletter.txt',
     mdHeading: 'newsletter',
     lines: [
       { label: 'name',    content: 'The Working Prototype', style: 'warm', href: 'https://theworkingprototype.substack.com/' },
       { label: 'about',   content: 'AI reliability, alignment & safety for people building agents — no PhD required', style: 'default' },
-      { label: 'topics',  content: 'production lessons · research in builder language · system experiments', style: 'muted' },
       { label: 'format',  content: '1000–2000 words · technical enough, accessible enough', style: 'muted' },
       { label: 'cadence', content: 'monthly or more', style: 'muted' },
+      { label: 'read on', content: 'substack  ·  by email', style: 'muted' },
+    ],
+  },
+  {
+    cmd: 'cat blog.txt',
+    mdHeading: 'blog',
+    lines: [
+      { label: 'about',   content: 'Learning, building in public, career, and things I am figuring out', style: 'default' },
+      { label: 'format',  content: 'essays · short takes', style: 'muted' },
+      { label: 'cadence', content: 'when inspiration strikes', style: 'muted' },
+      { label: 'read on', content: 'here  ·  every post below', style: 'muted' },
     ],
   },
 ]

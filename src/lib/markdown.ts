@@ -71,13 +71,14 @@ function blockToMarkdown(block: SessionBlock): string | null {
         .map((v) => v?.trim())
         .filter(Boolean)
         .join(' · ')
-      return detail ? `- **${item.title}** — ${detail}` : `- **${item.title}**`
+      const head = detail ? `- **${item.title}** — ${detail}` : `- **${item.title}**`
+      return item.summary ? `${head}\n  ${item.summary}` : head
     })
     parts.push(items.join('\n'))
   } else if (block.log) {
     const entries = block.log.entries.map((entry) => {
       const label = entry.tag ? `*${entry.tag}* — ` : ''
-      return `- \`${entry.date}\` ${label}${link(entry.content, entry.href)}`
+      return `- \`${entry.date}\` ${label}${link(entry.content, entry.mdHref ?? entry.href)}`
     })
     parts.push(entries.join('\n'))
   } else {
@@ -109,18 +110,25 @@ export function pageToMarkdown(page: PageMeta): string {
     .concat('\n')
 }
 
-/** Every page in one document, for /llms.txt. */
-export function siteToMarkdown(): string {
+/**
+ * Every page in one document, for /llms.txt.
+ *
+ * Takes the page list so a server route can pass a version with the real post
+ * index in it — this module stays filesystem-free because AgentView imports it.
+ */
+export function siteToMarkdown(pageList: PageMeta[] = pages): string {
   const header = [
     `# ${profile.name}`,
     `> ${profile.bio}`,
     `${profile.role} at ${profile.org}. ${profile.location}.`,
-    'This file is the machine-readable version of ' +
-      `${SITE_URL}. Individual pages are also available as markdown at ` +
-      `${SITE_URL}/md/<slug>.`,
+    [
+      `This file is the machine-readable version of ${SITE_URL}.`,
+      `Individual pages: ${SITE_URL}/md/<slug>. Blog posts: ${SITE_URL}/md/blog/<slug>.`,
+      `Every post inline, in one file: ${SITE_URL}/llms-full.txt`,
+    ].join('\n'),
   ].join('\n\n')
 
-  const body = pages
+  const body = pageList
     .map((page) => [`# ${page.title}  (${SITE_URL}${page.route})`, sessionBodyToMarkdown(page)].join('\n\n'))
     .join('\n\n---\n\n')
 

@@ -1,5 +1,6 @@
 import { pageToMarkdown } from '@/lib/markdown'
 import { pageBySlug, pages } from '@/lib/sessions'
+import { getWritingPage } from '@/lib/writing-page'
 
 export const dynamic = 'force-static'
 
@@ -12,7 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params
-  const page = pageBySlug(slug)
+  const page = slug === 'writing' ? getWritingPage() : pageBySlug(slug)
 
   if (!page) {
     const available = pages.map((p) => `/md/${p.slug}`).join('\n')

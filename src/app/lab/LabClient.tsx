@@ -74,6 +74,8 @@ export default function LabClient() {
   const [shape, setShape] = useState<DitherShape>('sphere')
   const [scanlines, setScanlines] = useState(INK.scanlines)
   const [vig, setVig] = useState<[number, number, number]>(INK.vignette)
+  const [sat, setSat] = useState(INK.saturate ?? 1)
+  const [bright, setBright] = useState(INK.brightness ?? 1)
   const [panelOpen, setPanelOpen] = useState(true)
   const [copied, setCopied] = useState(false)
   // how the terminal column sits over the background
@@ -113,8 +115,10 @@ export default function LabClient() {
       layers: [layer],
       scanlines,
       vignette: vig,
+      saturate: sat,
+      brightness: bright,
     }),
-    [layer, palette, scanlines, vig],
+    [layer, palette, scanlines, vig, sat, bright],
   )
 
   async function copyConfig() {
@@ -123,6 +127,8 @@ export default function LabClient() {
       layer,
       scanlines,
       vignette: vig,
+      saturate: sat,
+      brightness: bright,
       column: {
         style: column,
         width: columnWidth,
@@ -448,6 +454,10 @@ export default function LabClient() {
 
             <Slider label="amount" value={layer.opacity} min={0} max={1} step={0.01}
               onChange={(v) => patch({ opacity: v })} />
+            <Slider label="saturate" value={sat} min={0} max={2.5} step={0.05}
+              onChange={setSat} />
+            <Slider label="brightness" value={bright} min={0.3} max={2} step={0.02}
+              onChange={setBright} />
             <Slider label="scanlines" value={scanlines} min={0} max={0.8} step={0.01}
               onChange={setScanlines} />
             <Slider label="vig centre" value={vig[0]} min={0} max={1} step={0.01}

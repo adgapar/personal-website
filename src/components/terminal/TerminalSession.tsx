@@ -70,6 +70,7 @@ export default function TerminalSession({
   onNavigate,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const [inputValue, setInputValue] = useState('')
   const [response, setResponse] = useState<TLine[] | null>(null)
@@ -80,7 +81,7 @@ export default function TerminalSession({
   useEffect(() => {
     if (!animated) {
       setVisibleCount(blocks.length)
-      inputRef.current?.focus()
+      inputRef.current?.focus({ preventScroll: true })
       return
     }
 
@@ -95,7 +96,7 @@ export default function TerminalSession({
       )
     })
     timers.push(
-      setTimeout(() => { if (!cancelled) inputRef.current?.focus() }, 150 + blocks.length * 380 + 100)
+      setTimeout(() => { if (!cancelled) inputRef.current?.focus({ preventScroll: true }) }, 150 + blocks.length * 380 + 100)
     )
     return () => {
       cancelled = true
@@ -105,7 +106,13 @@ export default function TerminalSession({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const focusInput = useCallback(() => inputRef.current?.focus(), [])
+  // new output should bring the prompt into view — inside the window
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [response, visibleCount])
+
+  const focusInput = useCallback(() => inputRef.current?.focus({ preventScroll: true }), [])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -170,7 +177,8 @@ export default function TerminalSession({
 
   return (
     <div
-      className="flex flex-col text-[var(--fg)] font-mono text-sm cursor-text"
+      ref={scrollRef}
+      className="flex max-h-[var(--term-max-h,68vh)] flex-1 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
       onClick={focusInput}
     >
       <div className="px-10 pt-8 pb-12 max-w-2xl w-full mx-auto space-y-8">

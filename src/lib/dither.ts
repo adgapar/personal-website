@@ -142,6 +142,12 @@ export type PaperPreset = {
    * No edges, so it reads as shade rather than a panel. 0 disables it.
    */
   scrim?: number
+  /**
+   * Post-processing on the whole substrate. The shaders have no saturation
+   * control, so vividness has to come from CSS. 1 = untouched.
+   */
+  saturate?: number
+  brightness?: number
 }
 
 // ─── Presets ─────────────────────────────────────────────────────────────────
@@ -185,15 +191,19 @@ export const PAPER_PRESETS: PaperPreset[] = [
         originalColors: true,
         inverted: false,
         type: '8x8',
-        size: 2,
-        // few levels: recognisable subject without full photographic colour
-        colorSteps: 3,
-        opacity: 0.34,
+        // coarser grid and more tone levels: the dither reads as a rendering of
+        // the photo rather than noise over it, which is where the colour lives
+        size: 6,
+        colorSteps: 8,
+        opacity: 0.6,
       },
     ],
     scanlines: 0,
     // the window handles legibility, so the wallpaper can stay open
     vignette: [0, 0, 0.35],
+    // vividness comes from here, not from turning the whole layer up
+    saturate: 1.75,
+    brightness: 1.18,
   },
   {
     id: 'natural',
@@ -488,8 +498,8 @@ export function defaultLayer(kind: LayerKind): SubstrateLayer {
 export const SOURCE_BY_ROUTE: Record<string, SourceFieldId> = {
   // a metro station is a terminal — terminus, terminal, same word
   '/': 'stockholm',
-  // a person walking away up a lit passage — a career is someone moving
-  '/cv': 'munich',
+  // an arena you are watched and measured in — and the most Spanish thing here
+  '/cv': 'bernabeu',
   // a cloister is where text was copied by hand, before printing existed
   '/writing': 'cloister',
   // a long table with the places already set
@@ -507,6 +517,7 @@ export function presetForRoute(pathname: string): PaperPreset {
   const source = SOURCE_BY_ROUTE[pathname]
   if (!source) return base
 
+  // one treatment, unified across every page — only the subject changes
   return { ...base, source }
 }
 

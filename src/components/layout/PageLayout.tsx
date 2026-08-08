@@ -31,7 +31,16 @@ export default function PageLayout({ page, animated }: Props) {
   const isAgent = mode === 'agent'
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] font-mono text-base flex flex-col items-center">
+    <div
+      className={`bg-[var(--bg)] text-[var(--fg)] font-mono text-base flex flex-col items-center ${
+        isAgent
+          ? // a document scrolls
+            'min-h-screen'
+          : // a desktop does not — windows dragged past the edge are clipped,
+            // and the terminal has its own scrollback inside the window
+            'h-screen overflow-hidden'
+      }`}
+    >
       {!isAgent && (
         <PaperBackground
           shape={shapeOverride ?? shapeForRoute(pathname)}
@@ -46,7 +55,7 @@ export default function PageLayout({ page, animated }: Props) {
         </div>
       ) : (
         // the photo behind is wallpaper; this is a window sitting on it
-        <div className="relative z-10 flex w-full justify-center px-4 py-6 sm:px-8 sm:py-10">
+        <div className="relative z-10 flex h-full w-full justify-center overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
           <WindowChrome title={`${page.session.prompt}  —  terminal`}>
             <TerminalTabs />
             <TerminalSession

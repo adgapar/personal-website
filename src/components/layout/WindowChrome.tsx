@@ -1,6 +1,18 @@
 'use client'
 
-import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useCallback,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
+import {
+  getServerSnapshot,
+  getSnapshot,
+  setWindowState,
+  subscribe,
+} from '@/lib/window-state-store'
 
 /**
  * The terminal as a window on a desktop — the photo behind is wallpaper.
@@ -8,6 +20,9 @@ import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent }
  * Draggable by the title bar, so whether the window covers the wallpaper's
  * subject is the reader's decision rather than something we have to design
  * around. Double-click the title bar to put it back.
+ *
+ * Position and min/max state live in window-state-store, not here — every route
+ * renders its own PageLayout, so this component remounts on each tab click.
  *
  * Deliberately not a Win95 pastiche: one bevel, one shadow, a title bar. Enough
  * to say "window" without dragging in grey plastic that would fight the palette.
@@ -21,17 +36,28 @@ interface Props {
 type Offset = { x: number; y: number }
 
 export default function WindowChrome({ title, children }: Props) {
-  const [minimized, setMinimized] = useState(false)
-  const [maximized, setMaximized] = useState(false)
+  const { minimized, maximized, offset } = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  )
+  const setMinimized = (v: boolean) => setWindowState({ minimized: v })
+  const setOffset = (v: Offset) => setWindowState({ offset: v })
+
   const [nagging, setNagging] = useState(false)
-  const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 })
   const [dragging, setDragging] = useState(false)
+
+  // a minimized window collapses to its title bar — filling the screen with an
+  // empty frame is not a state anyone wants. `maximized` is remembered, so
+  // restoring puts it back to fullscreen.
+  const fullscreen = maximized && !minimized
 
   const frame = useRef<HTMLDivElement>(null)
   const origin = useRef<{ pointer: Offset; offset: Offset } | null>(null)
 
   const onPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (fullscreen) return
       // let the window buttons be buttons
       if ((e.target as HTMLElement).closest('button')) return
       origin.current = {
@@ -41,7 +67,7 @@ export default function WindowChrome({ title, children }: Props) {
       setDragging(true)
       e.currentTarget.setPointerCapture(e.pointerId)
     },
-    [offset],
+    [offset, fullscreen],
   )
 
   const onPointerMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
@@ -76,21 +102,33 @@ export default function WindowChrome({ title, children }: Props) {
   return (
     <div
       ref={frame}
-      className={`relative flex w-full flex-col self-start ${
-        maximized ? 'max-w-none' : 'max-w-4xl'
-      } ${dragging ? '' : 'transition-[max-width,transform] duration-300'}`}
+      className={
+        fullscreen
+          ? 'fixed inset-0 z-40 flex flex-col'
+          : `relative flex w-full max-w-4xl flex-col self-start ${
+              dragging ? '' : 'transition-[max-width,transform] duration-300'
+            }`
+      }
       style={{
-        transform: `translate(${offset.x}px, ${offset.y}px)`,
+        // the terminal body reads this for its scroll height
+        ['--term-max-h' as string]: fullscreen
+          ? 'calc(100vh - 6.75rem)'
+          : '68vh',
+        transform: fullscreen
+          ? undefined
+          : `translate(${offset.x}px, ${offset.y}px)`,
         // bevel: light above, dark below, like a raised surface
         border: '1px solid var(--border)',
-        borderTopColor: '#3a3733',
-        borderLeftColor: '#332f2b',
-        borderBottomColor: '#141210',
-        borderRightColor: '#141210',
-        boxShadow: dragging
+        borderTopColor: fullscreen ? 'transparent' : '#3a3733',
+        borderLeftColor: fullscreen ? 'transparent' : '#332f2b',
+        borderBottomColor: fullscreen ? 'transparent' : '#141210',
+        borderRightColor: fullscreen ? 'transparent' : '#141210',
+        boxShadow: fullscreen
+          ? 'none'
+          : dragging
           ? '0 40px 90px -10px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
           : '0 24px 70px -12px rgba(0,0,0,0.85), 0 2px 8px rgba(0,0,0,0.5)',
-        background: 'rgba(12,11,10,0.93)',
+        background: fullscreen ? 'rgba(12,11,10,0.97)' : 'rgba(12,11,10,0.93)',
       }}
     >
       <div
@@ -99,9 +137,9 @@ export default function WindowChrome({ title, children }: Props) {
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onDoubleClick={() => setOffset({ x: 0, y: 0 })}
-        title="drag to move · double-click to recentre"
+        title={fullscreen ? undefined : 'drag to move · double-click to recentre'}
         className={`flex touch-none items-center gap-2 border-b border-[var(--border)] px-3 py-1.5 select-none ${
-          dragging ? 'cursor-grabbing' : 'cursor-grab'
+          fullscreen ? '' : dragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         style={{
           background:
@@ -121,7 +159,7 @@ export default function WindowChrome({ title, children }: Props) {
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setMinimized((v) => !v)}
+            onClick={() => setMinimized(!minimized)}
             aria-label={minimized ? 'Restore' : 'Minimize'}
             className="h-4 w-5 border border-[var(--border)] text-[9px] leading-none text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
           >
@@ -129,10 +167,9 @@ export default function WindowChrome({ title, children }: Props) {
           </button>
           <button
             type="button"
-            onClick={() => {
-              setMaximized((v) => !v)
-              setOffset({ x: 0, y: 0 })
-            }}
+            onClick={() =>
+              setWindowState({ maximized: !maximized, offset: { x: 0, y: 0 } })
+            }
             aria-label={maximized ? 'Restore size' : 'Maximize'}
             className="h-4 w-5 border border-[var(--border)] text-[9px] leading-none text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
           >
@@ -152,7 +189,11 @@ export default function WindowChrome({ title, children }: Props) {
         </div>
       </div>
 
-      {!minimized && <div className="flex flex-col">{children}</div>}
+      {!minimized && (
+        <div className={fullscreen ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-col'}>
+          {children}
+        </div>
+      )}
     </div>
   )
 }

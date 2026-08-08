@@ -178,7 +178,7 @@ export default function PaperBackground({
   quality = 1,
 }: Props) {
   const still = usePrefersReducedMotion()
-  const { source, layers, scanlines, vignette, scrim } = preset
+  const { source, layers, scanlines, vignette, scrim, saturate, brightness } = preset
   const [vIn, vMid, vOut] = vignette
 
   // canvas-generated, so it can only be built in the browser
@@ -191,18 +191,28 @@ export default function PaperBackground({
       aria-hidden
       className={`pointer-events-none ${position} inset-0 z-0 overflow-hidden`}
     >
-      {layers.map((layer, i) => (
+      <div
+        className="absolute inset-0"
+        style={{
+          filter:
+            saturate !== undefined || brightness !== undefined
+              ? `saturate(${saturate ?? 1}) brightness(${brightness ?? 1})`
+              : undefined,
+        }}
+      >
+        {layers.map((layer, i) => (
         // keyed by source: swapping the colour field must rebuild the texture,
         // updating the uniform in place does not reliably re-upload it
-        <Layer
-          key={`${i}:${layer.kind}:${source ?? 'none'}`}
-          layer={layer}
-          shape={shape}
-          image={image}
-          quality={quality}
-          still={still}
-        />
-      ))}
+          <Layer
+            key={`${i}:${layer.kind}:${source ?? 'none'}`}
+            layer={layer}
+            shape={shape}
+            image={image}
+            quality={quality}
+            still={still}
+          />
+        ))}
+      </div>
 
       {/* pure CSS, so the retro read survives even without WebGL */}
       {scanlines > 0 && (

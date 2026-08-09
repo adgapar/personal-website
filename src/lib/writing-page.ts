@@ -21,7 +21,8 @@ export function getWritingPage(): PageMeta {
       entries: newsletter.map((post) => ({
         date: post.date,
         content: post.title,
-        href: post.canonical,
+        href: `/newsletter/${post.slug}`,
+        mdHref: `/md/newsletter/${post.slug}`,
       })),
     },
   }

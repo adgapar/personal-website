@@ -20,6 +20,8 @@ export default function DocumentWindow({
   mdHref,
   image,
   markdown,
+  source = 'blog',
+  canonical,
   prev,
   next,
 }: {
@@ -31,12 +33,15 @@ export default function DocumentWindow({
   image?: string
   /** the post's own source, for the clipboard */
   markdown: string
+  /** newsletter issues live here as a reading copy; Substack is canonical */
+  source?: 'blog' | 'newsletter'
+  canonical?: string
   prev?: { slug: string; title: string }
   next?: { slug: string; title: string }
 }) {
   const [copied, setCopied] = useState(false)
   // the same file, rendered or as source — no reason to leave the window for it
-  const [source, setSource] = useState(false)
+  const [showSource, setShowSource] = useState(false)
 
   async function copy() {
     try {
@@ -59,7 +64,7 @@ export default function DocumentWindow({
             style={TITLE_BAR}
           >
             <span className="min-w-0 flex-1 truncate text-[10px] tracking-widest text-[var(--muted)]">
-              {title}.md — {source ? 'source' : 'reader'}
+              {title}.md — {showSource ? 'source' : 'reader'}
             </span>
             <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
               <button
@@ -76,16 +81,16 @@ export default function DocumentWindow({
               </button>
               <button
                 type="button"
-                onClick={() => setSource((v) => !v)}
-                aria-pressed={source}
-                title={source ? 'back to the rendered post' : 'show the markdown source'}
+                onClick={() => setShowSource((v) => !v)}
+                aria-pressed={showSource}
+                title={showSource ? 'back to the rendered post' : 'show the markdown source'}
                 className={`border px-1.5 text-[9px] leading-4 ${
-                  source
+                  showSource
                     ? 'border-[var(--accent)] text-[var(--accent)]'
                     : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]'
                 }`}
               >
-                {source ? '¶ rendered' : '.md'}
+                {showSource ? '¶ rendered' : '.md'}
               </button>
               <Link
                 href="/writing"
@@ -101,8 +106,22 @@ export default function DocumentWindow({
       {/* the page — scrolls inside the window, like any reader */}
       <article className="paper flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-14 sm:py-14">
             <header className="mb-10">
-              <div className="mb-4 font-mono text-[10px] tracking-widest text-[#8a8178]">
-                {date}
+              <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] tracking-widest text-[#8a8178]">
+                <span>{date}</span>
+                {canonical && (
+                  <>
+                    <span>·</span>
+                    <span>first published on substack</span>
+                    <a
+                      href={canonical}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-4 hover:text-[#1f1b16]"
+                    >
+                      read there ↗
+                    </a>
+                  </>
+                )}
               </div>
               <h1 className="text-[1.75rem] leading-tight font-semibold text-[#1f1b16]">
                 {title}
@@ -114,7 +133,7 @@ export default function DocumentWindow({
               )}
             </header>
 
-            {image && !source && (
+            {image && !showSource && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={image}
@@ -124,7 +143,7 @@ export default function DocumentWindow({
               />
             )}
 
-            {source ? (
+            {showSource ? (
               <>
                 {/* the same bytes are fetchable, which is worth showing */}
                 <a
@@ -153,7 +172,7 @@ export default function DocumentWindow({
         <div className="min-w-0 flex-1">
           {prev && (
             <Link
-              href={`/blog/${prev.slug}`}
+              href={`/${source}/${prev.slug}`}
               className="flex min-w-0 items-center gap-1.5 text-[var(--muted)] hover:text-[var(--accent)]"
             >
               <span className="shrink-0">←</span>
@@ -172,7 +191,7 @@ export default function DocumentWindow({
         <div className="flex min-w-0 flex-1 justify-end">
           {next && (
             <Link
-              href={`/blog/${next.slug}`}
+              href={`/${source}/${next.slug}`}
               className="flex min-w-0 items-center gap-1.5 text-[var(--muted)] hover:text-[var(--accent)]"
             >
               <span className="truncate">{next.title}</span>

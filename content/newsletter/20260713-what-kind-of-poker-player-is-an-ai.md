@@ -125,4 +125,4 @@ If one of them sat down at the offsite, I couldn't tell you in advance whether i
 
 ---
 
-Experiment code, the full set of spots, and every number: https://github.com/adgapar/the-working-prototype/tree/main/experiments/llm-risk-preference
+Experiment code, the full set of spots, and every number: [GitHub](https://github.com/adgapar/the-working-prototype/tree/main/experiments/llm-risk-preference)

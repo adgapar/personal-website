@@ -1,5 +1,5 @@
 import WritingShell from '@/components/writing/WritingShell'
 
-export default function BlogLayout({ children }: { children: React.ReactNode }) {
+export default function NewsletterLayout({ children }: { children: React.ReactNode }) {
   return <WritingShell>{children}</WritingShell>
 }

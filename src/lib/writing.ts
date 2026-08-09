@@ -158,3 +158,8 @@ export function excerpt(post: Post, max = 180): string {
   const clean = first.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*_`]/g, '').trim()
   return clean.length > max ? `${clean.slice(0, max).trimEnd()}…` : clean
 }
+
+/** a wide table should scroll inside the page rather than break the measure */
+export function wrapTables(html: string): string {
+  return html.replace(/<table>/g, '<div class="table-scroll"><table>').replace(/<\/table>/g, '</table></div>')
+}

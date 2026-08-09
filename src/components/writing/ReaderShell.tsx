@@ -23,13 +23,15 @@ const PaperBackground = dynamic(
  * reader is open, what you want beside it is the other posts.
  */
 
-export type NavPost = { slug: string; title: string; date: string }
+export type NavPost = { slug: string; title: string; date: string; href: string }
 
 export default function ReaderShell({
-  posts,
+  blog,
+  newsletter,
   children,
 }: {
-  posts: NavPost[]
+  blog: NavPost[]
+  newsletter: NavPost[]
   children: React.ReactNode
 }) {
   const pathname = usePathname()
@@ -49,38 +51,51 @@ export default function ReaderShell({
             style={TITLE_BAR}
           >
             <span className="text-[10px] tracking-widest text-[var(--muted)]">
-              ~/blog
+              ~/writing
             </span>
             <span className="ml-auto text-[10px] tracking-widest text-[var(--dim)]">
-              {posts.length}
+              {blog.length + newsletter.length}
             </span>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-3 font-mono">
-            {posts.map((post) => {
-              const active = pathname === `/blog/${post.slug}`
-              return (
-                <Link
-                  key={post.slug}
-                  href={`/blog/${post.slug}`}
-                  aria-current={active ? 'page' : undefined}
-                  className={`block rounded-sm px-2 py-1.5 text-xs leading-snug transition-colors ${
-                    active
-                      ? 'bg-white/[0.05] text-[var(--accent)]'
-                      : 'text-[var(--muted)] hover:bg-white/[0.03] hover:text-[var(--fg)]'
-                  }`}
-                >
-                  <span className="block text-[10px] text-[var(--dim)]">
-                    {post.date}
+            {[
+              { label: 'blog', items: blog },
+              { label: 'newsletter', items: newsletter },
+            ].map(({ label, items }) => (
+              <div key={label} className="mb-4">
+                <div className="mb-1 flex items-center gap-2 border-b border-[var(--border)] px-2 pb-1">
+                  <span className="text-[10px] tracking-widest text-[var(--warm)] uppercase">
+                    {label}
                   </span>
-                  {post.title}
-                </Link>
-              )
-            })}
+                  <span className="ml-auto text-[10px] text-[var(--dim)]">
+                    {items.length}
+                  </span>
+                </div>
+                {items.map((post) => {
+                  const active = pathname === post.href
+                  return (
+                    <Link
+                      key={post.href}
+                      href={post.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={`block rounded-sm px-2 py-1.5 text-xs leading-snug transition-colors ${
+                        active
+                          ? 'bg-white/[0.05] text-[var(--accent)]'
+                          : 'text-[var(--muted)] hover:bg-white/[0.03] hover:text-[var(--fg)]'
+                      }`}
+                    >
+                      <span className="block text-[10px] text-[var(--dim)]">{post.date}</span>
+                      {post.title}
+                    </Link>
+                  )
+                })}
+              </div>
+            ))}
           </div>
 
           <Link
-            href="/writing"
+            href="/"
             className="border-t border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-widest text-[var(--muted)] hover:text-[var(--accent)]"
             style={TITLE_BAR}
           >

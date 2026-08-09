@@ -2,15 +2,17 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { TITLE_BAR, WINDOW_FRAME } from '@/lib/window-style'
+import { TITLE_BAR } from '@/lib/window-style'
 
 /**
- * A post opens as a document on the same desktop — a page of paper rather than
+ * A post, in the reader's right-hand pane — a page of paper rather than
  * terminal output. Prose wants ink on light, a measure of about 65 characters,
  * and a serif; the terminal's chrome is the wrong instrument for a thousand
  * words.
  *
- * Closing it returns to the writing session, so the window metaphor holds.
+ * A pane, not a window: the frame and title bar belong to ReaderShell, and this
+ * carries only what changes with the document — its name, its two view buttons,
+ * and the piece before and after it.
  */
 export default function DocumentWindow({
   title,
@@ -54,13 +56,10 @@ export default function DocumentWindow({
   }
 
   return (
-    <div
-      className="flex max-h-full w-full flex-col overflow-hidden"
-      style={WINDOW_FRAME}
-        >
-          {/* title bar, same instrument as the terminal window */}
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+          {/* the document's own toolbar — under the app's title bar */}
           <div
-            className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-1.5 font-mono select-none"
+            className="flex shrink-0 items-center gap-2 border-b border-[var(--border)] px-3 py-1.5 font-mono select-none"
             style={TITLE_BAR}
           >
             <span className="min-w-0 flex-1 truncate text-[10px] tracking-widest text-[var(--muted)]">
@@ -71,10 +70,12 @@ export default function DocumentWindow({
                 type="button"
                 onClick={copy}
                 title="copy this post as markdown"
-                className={`border px-1.5 text-[9px] leading-4 ${
+                // these are the two things you can do to a document, so they
+                // read as buttons at rest rather than only under the pointer
+                className={`border px-2 py-0.5 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
                   copied
-                    ? 'border-[var(--success)] text-[var(--success)]'
-                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]'
+                    ? 'border-[var(--success)] bg-[rgba(110,231,183,0.14)] text-[var(--success)]'
+                    : 'border-[rgba(125,211,252,0.4)] bg-[rgba(125,211,252,0.08)] text-[rgba(125,211,252,0.9)] hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--bg)]'
                 }`}
               >
                 {copied ? '✓ copied' : '⧉ copy .md'}
@@ -84,27 +85,21 @@ export default function DocumentWindow({
                 onClick={() => setShowSource((v) => !v)}
                 aria-pressed={showSource}
                 title={showSource ? 'back to the rendered post' : 'show the markdown source'}
-                className={`border px-1.5 text-[9px] leading-4 ${
+                // pressed is filled, not outlined — a toggle should say which
+                // of its two states you are in without reading the label
+                className={`border px-2 py-0.5 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
                   showSource
-                    ? 'border-[var(--accent)] text-[var(--accent)]'
-                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]'
+                    ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]'
+                    : 'border-[rgba(125,211,252,0.4)] bg-[rgba(125,211,252,0.08)] text-[rgba(125,211,252,0.9)] hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--bg)]'
                 }`}
               >
                 {showSource ? '¶ rendered' : '.md'}
               </button>
-              <Link
-                href="/writing"
-                aria-label="Close"
-                title="back to writing"
-                className="border border-[var(--border)] px-1.5 text-[9px] leading-4 text-[var(--muted)] hover:border-[var(--error)] hover:text-[var(--error)]"
-              >
-                ✕
-              </Link>
             </div>
           </div>
 
-      {/* the page — scrolls inside the window, like any reader */}
-      <article className="paper flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-14 sm:py-14">
+      {/* the page — scrolls inside the pane, like any reader */}
+      <article className="paper min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-14 sm:py-14">
             <header className="mb-10">
               <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] tracking-widest text-[#8a8178]">
                 <span>{date}</span>
@@ -163,8 +158,8 @@ export default function DocumentWindow({
 
       </article>
 
-      {/* navigation is window chrome, not part of the document — and at the
-          foot of the frame it stays reachable without scrolling to the end */}
+      {/* navigation is chrome, not part of the document — and at the foot of
+          the pane it stays reachable without scrolling to the end */}
       <div
         className="flex shrink-0 items-center gap-3 border-t border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-widest"
         style={TITLE_BAR}
@@ -182,10 +177,10 @@ export default function DocumentWindow({
         </div>
 
         <Link
-          href="/writing"
+          href="/reader"
           className="shrink-0 text-[var(--dim)] hover:text-[var(--fg)]"
         >
-          all writing
+          contents
         </Link>
 
         <div className="flex min-w-0 flex-1 justify-end">

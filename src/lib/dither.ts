@@ -26,6 +26,7 @@ const SHAPE_BY_ROUTE: Record<string, DitherShape> = {
   '/': 'sphere',
   '/cv': 'sphere',
   '/writing': 'sphere',
+  '/reader': 'sphere',
   '/contact': 'sphere',
 }
 
@@ -500,8 +501,10 @@ export const SOURCE_BY_ROUTE: Record<string, SourceFieldId> = {
   '/': 'stockholm',
   // a figure walking away up a lit passage — a career is someone moving
   '/cv': 'munich',
-  // a cloister is where text was copied by hand, before printing existed
+  // a cloister is where text was copied by hand, before printing existed —
+  // the writing tab and the reader it opens share the one subject
   '/writing': 'cloister',
+  '/reader': 'cloister',
   // a long table with the places already set
   '/contact': 'kitchen',
   // a stadium is where a game happens

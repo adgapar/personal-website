@@ -16,6 +16,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: page.slug === 'writing' && newest ? new Date(newest) : new Date(),
       priority: page.route === '/' ? 1 : 0.8,
     })),
+    {
+      // the reader app's contents page — a real destination, not just a view
+      url: `${SITE}/reader`,
+      lastModified: newest ? new Date(newest) : new Date(),
+      priority: 0.8,
+    },
     ...posts.map((post) => ({
       url: `${SITE}/blog/${post.slug}`,
       lastModified: new Date(post.date),

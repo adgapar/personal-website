@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
-/** The index lives on the writing tab, alongside the newsletter. */
+/** The index for both sources is the reader's contents page. */
 export default function BlogIndex() {
-  redirect('/writing')
+  redirect('/reader')
 }

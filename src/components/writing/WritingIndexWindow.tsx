@@ -1,15 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import TerminalTabs from '@/components/layout/TerminalTabs'
-import { TITLE_BAR, WINDOW_FRAME } from '@/lib/window-style'
 
 /**
- * The writing section as a contents page rather than a terminal listing.
+ * The reader's home screen — a contents page rather than a terminal listing,
+ * shown in the same right-hand pane a post would open in.
  *
- * The navigator beside it is for jumping; this is the overview, so it carries
- * what a sidebar cannot — subtitles, and the difference between something
- * published here and something published on Substack.
+ * The frame, the title bar and the left pane belong to ReaderShell. The list on
+ * the left is for jumping; this is the overview, so it carries what a sidebar
+ * cannot — subtitles, and the difference between something published here and
+ * something published on Substack.
  */
 
 export type IndexPost = {
@@ -35,7 +35,11 @@ function Row({ post }: { post: IndexPost }) {
     </>
   )
 
-  const className = 'group block space-y-0.5 border-b border-[#e5ded0] py-3 last:border-0'
+  // break-inside-avoid: in the two-column layout a row must not be split down
+  // the middle, with its date at the foot of one column and its title at the
+  // head of the next
+  const className =
+    'group block space-y-0.5 break-inside-avoid border-b border-[#e5ded0] py-3 last:border-0'
 
   return post.external ? (
     <a href={post.href} target="_blank" rel="noopener noreferrer" className={className}>
@@ -56,22 +60,11 @@ export default function WritingIndexWindow({
   newsletter: IndexPost[]
 }) {
   return (
-    <div
-      className="flex max-h-full w-full flex-col overflow-hidden"
-      style={WINDOW_FRAME}
-    >
-      <div
-        className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-1.5 font-mono select-none"
-        style={TITLE_BAR}
-      >
-        <span className="truncate text-[10px] tracking-widest text-[var(--muted)]">
-          ~/writing — {blog.length + newsletter.length} pieces
-        </span>
-      </div>
-
-      <TerminalTabs />
-
-      <article className="paper flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-14 sm:py-12">
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+      <article className="paper min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-14 sm:py-12">
+        {/* the contents page has the window to itself, so it sets its own
+            measure — a title stretched over 1000px is not a contents page */}
+        <div className="mx-auto w-full max-w-2xl lg:max-w-none">
         <header className="mb-10">
           <h1 className="text-[1.75rem] leading-tight font-semibold text-[#1f1b16]">
             Writing
@@ -88,7 +81,9 @@ export default function WritingIndexWindow({
               {blog.length} posts · here
             </span>
           </div>
-          <div>
+          {/* two columns only where there is width for them — on a phone this
+              stays one column, which is the only thing that reads there */}
+          <div className="lg:columns-2 lg:gap-x-12">
             {blog.map((post) => (
               <Row key={post.slug} post={post} />
             ))}
@@ -110,6 +105,7 @@ export default function WritingIndexWindow({
             ))}
           </div>
         </section>
+        </div>
       </article>
     </div>
   )

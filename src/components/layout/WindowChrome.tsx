@@ -104,9 +104,11 @@ export default function WindowChrome({ title, children }: Props) {
     <div
       ref={frame}
       className={
+        // pointer-events-auto: the wrapper disables them so the desktop behind
+        // stays reachable, and the window takes them back for itself
         fullscreen
-          ? 'fixed inset-0 z-40 flex flex-col'
-          : `relative flex w-full max-w-4xl flex-col self-start ${
+          ? 'pointer-events-auto fixed inset-0 z-40 flex flex-col'
+          : `pointer-events-auto relative flex w-full max-w-4xl flex-col self-start ${
               dragging ? '' : 'transition-[max-width,transform] duration-300'
             }`
       }
@@ -173,18 +175,33 @@ export default function WindowChrome({ title, children }: Props) {
               setTimeout(() => setNagging(false), 2200)
             }}
             aria-label="Close"
-            className="h-4 w-5 border border-[var(--border)] text-[9px] leading-none text-[var(--muted)] hover:border-[var(--error)] hover:text-[var(--error)]"
+            // the only button that carries colour at rest: close is the one
+            // action with a consequence, and red is what people scan for. Held
+            // back to a tint so the title bar stays quiet until you reach for it
+            className="h-4 w-5 border border-[rgba(252,165,165,0.35)] text-[9px] leading-none text-[rgba(252,165,165,0.65)] transition-colors duration-200 hover:border-[var(--error)] hover:text-[var(--error)]"
           >
             ✕
           </button>
         </div>
       </div>
 
-      {!minimized && (
-        <div className={fullscreen ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-col'}>
-          {children}
-        </div>
-      )}
+      {/* Hidden, not unmounted. A minimized window that threw away the session
+          would be a reset button with a "─" on it — the scrollback, the command
+          history and the reveal animation all live in React state below here. */}
+      <div
+        // `hidden` as a class, not the attribute: Tailwind's `flex` is an author
+        // rule and would win over the attribute's display:none
+        className={
+          minimized
+            ? 'hidden'
+            : fullscreen
+              ? 'flex min-h-0 flex-1 flex-col'
+              : 'flex flex-col'
+        }
+        aria-hidden={minimized || undefined}
+      >
+        {children}
+      </div>
     </div>
   )
 }

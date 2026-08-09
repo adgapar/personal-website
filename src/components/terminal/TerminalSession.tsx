@@ -80,7 +80,7 @@ interface Props {
 }
 
 export default function TerminalSession({
-  blocks,
+  blocks: allBlocks,
   instant = false,
   commands = [],
   prompt = 'adilet@home:~$',
@@ -89,6 +89,10 @@ export default function TerminalSession({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // some blocks exist for the markdown and agent views only — a full post index
+  // is worth indexing but would bury the session it sits in
+  const blocks = useMemo(() => allBlocks.filter((b) => !b.termSkip), [allBlocks])
 
   const [inputValue, setInputValue] = useState('')
   /** what has been run in this session — echoed command plus its output */
@@ -262,7 +266,20 @@ export default function TerminalSession({
         {blocks.slice(0, visibleCount).map((block, i) => (
           <div key={i}>
             <CommandBlock cmd={block.cmd} instant={instant}>
-            {block.list ? (
+            {block.action ? (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); runCommand(block.action!.run) }}
+                  className="border border-[var(--accent)] px-2.5 py-1 text-xs tracking-widest text-[var(--accent)] transition-colors duration-200 hover:bg-[var(--accent)] hover:text-[var(--bg)]"
+                >
+                  {block.action.label}
+                </button>
+                {block.action.hint && (
+                  <span className="text-xs text-[var(--muted)]">{block.action.hint}</span>
+                )}
+              </div>
+            ) : block.list ? (
             <div className="space-y-3">
               {block.list.items.map((item, j) => (
                 <div

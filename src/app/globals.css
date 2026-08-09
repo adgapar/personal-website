@@ -61,8 +61,21 @@ body {
   font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', Palatino, serif;
   font-size: 1.0625rem;
   line-height: 1.75;
-  max-width: 66ch;
 }
+
+/* The measure belongs to the prose, not to the column. Capping the container
+   shrank code blocks, images and tables to the width of a line of text, which
+   is the wrong width for all three — a code block is read by scanning, not by
+   the eye returning to the left margin. Text keeps its 66ch; anything you look
+   at rather than read gets the full pane. */
+.prose-paper > p,
+.prose-paper > h2,
+.prose-paper > h3,
+.prose-paper > h4,
+.prose-paper > ul,
+.prose-paper > ol,
+.prose-paper > blockquote { max-width: 66ch; }
+
 .prose-paper p { margin-bottom: 1.35rem; }
 /* headings speak in the same voice as the prose, not in terminal chrome */
 .prose-paper h2 {

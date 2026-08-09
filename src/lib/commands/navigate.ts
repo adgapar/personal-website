@@ -24,3 +24,17 @@ sections.forEach(({ name, href }) => {
     }),
   })
 })
+
+// The reader is an app rather than a section, so it gets its own verb — and it
+// launches from any prompt, not only from the writing tab.
+registerCommand({
+  name: 'reader',
+  aliases: ['read'],
+  description: 'open the reader — posts as pages, not terminal output',
+  type: 'navigate',
+  handler: () => ({
+    type: 'navigate',
+    href: '/reader',
+    lines: [{ content: '→ opening reader...', style: 'accent' }],
+  }),
+})

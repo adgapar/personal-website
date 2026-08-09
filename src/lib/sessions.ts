@@ -27,7 +27,12 @@ export type SessionBlock = {
   cmd?: string        // if set, renders "$ cmd" above output
   mdHeading?: string  // section heading used by the markdown/agent view
   mdSkip?: boolean    // terminal-only chrome, omitted from markdown
+  /** the mirror of mdSkip: agents get it, the terminal does not. For content
+   *  that is worth indexing in full but would bury a session in listing. */
+  termSkip?: boolean
   lines: TerminalLine[]
+  /** a button in the output — runs a command, the way clicking a list row does */
+  action?: { label: string; run: string; hint?: string }
   linkRow?: boolean   // render lines as inline text links
   avatar?: string     // if set, renders a small profile image above lines
   table?: {           // columnar table
@@ -190,18 +195,9 @@ export const cvSession: SessionBlock[] = [
 
 // ─── Writing (blog + newsletter) ─────────────────────────────────────────────
 
-export const writingSession: SessionBlock[] = [
-  sectionHeader('writing'),
-  {
-    cmd: 'cat newsletter.txt',
-    mdHeading: 'newsletter',
-    lines: [
-      { content: 'The Working Prototype', style: 'warm', href: 'https://theworkingprototype.substack.com/' },
-      { content: 'AI reliability, alignment and safety for people building agents — no PhD required.', style: 'default' },
-      { content: 'monthly or more  ·  on substack, by email', style: 'muted' },
-    ],
-  },
-]
+// Deliberately only the header here: every other block needs the post counts,
+// which come off the filesystem in ./writing-page.
+export const writingSession: SessionBlock[] = [sectionHeader('writing')]
 
 // ─── Play ───────────────────────────────────────────────────────────────────
 // Every other tab arrives full, which reads as "look at this". This one is
@@ -270,8 +266,10 @@ export const cvPage: PageSession = {
 export const writingPage: PageSession = {
   blocks: writingSession,
   prompt: 'adilet@writing:~$',
-  commands: [],
-  placeholder: "navigate — type 'help'",
+  commands: [
+    { name: 'reader', description: 'open the reader — the posts, as pages' },
+  ],
+  placeholder: "try 'reader' — type 'help'",
 }
 
 export const playPage: PageSession = {

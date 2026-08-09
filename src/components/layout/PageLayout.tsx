@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import DesktopIcons from './DesktopIcons'
 import SiteNav from './SiteNav'
 import StatusBar from './StatusBar'
 import TerminalTabs from './TerminalTabs'
@@ -35,7 +36,7 @@ export default function PageLayout({ page }: Props) {
 
   return (
     <div
-      className={`bg-[var(--bg)] text-[var(--fg)] font-mono text-base flex flex-col items-center ${
+      className={`relative bg-[var(--bg)] text-[var(--fg)] font-mono text-base flex flex-col items-center ${
         warmingUp ? 'screen-on ' : ''
       }${
         isAgent
@@ -53,14 +54,18 @@ export default function PageLayout({ page }: Props) {
         />
       )}
 
+      {!isAgent && <DesktopIcons />}
+
       {isAgent ? (
         <div className="relative z-10 max-w-4xl w-full flex flex-col flex-1">
           <SiteNav />
           <AgentView page={page} />
         </div>
       ) : (
-        // the photo behind is wallpaper; this is a window sitting on it
-        <div className="relative z-10 flex h-full w-full justify-center overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
+        // The photo behind is wallpaper; this is a window sitting on it.
+        // pointer-events-none so the desktop underneath stays clickable — this
+        // wrapper spans the viewport but only the window itself is solid.
+        <div className="pointer-events-none relative z-10 flex h-full w-full justify-center overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
           <WindowChrome title={`${page.session.prompt}  —  terminal`}>
             <TerminalTabs />
             <TerminalSession

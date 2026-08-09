@@ -100,12 +100,25 @@ function indexOf(dir, source) {
         meta[m[1].toLowerCase()] = m[2].trim()
       }
       const [, y, mo, d, slug] = file.match(/^(\d{4})(\d{2})(\d{2})-(.+)\.md$/)
+
+      // enough prose for search to be useful without shipping every post
+      const body = raw
+        .split('\n')
+        .filter((l) => !/^[A-Z][A-Za-z ]*:/.test(l) && !/^-{3,}\s*$/.test(l))
+        .join(' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/[#*_`>]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+
       return {
         source,
         slug,
         date: meta.date || `${y}-${mo}-${d}`,
         title: meta.title || slug.replace(/-/g, ' '),
         subtitle: meta.subtitle || undefined,
+        excerpt: body.slice(0, 400),
       }
     })
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -127,6 +140,7 @@ export type PostRef = {
   date: string
   title: string
   subtitle?: string
+  excerpt: string
 }
 
 export const posts: PostRef[] = ${JSON.stringify(index, null, 2)}

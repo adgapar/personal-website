@@ -1,6 +1,6 @@
 import { registerCommand } from './registry'
 import { profile } from '@/data/profile'
-import { blogPosts, newsletterPosts } from '@/data/posts'
+import { posts, blogPosts, newsletterPosts, type PostRef } from '@/data/posts'
 import { projects } from '@/data/projects'
 import { jobs } from '@/data/jobs'
 import type { TerminalLine } from './types'
@@ -296,4 +296,142 @@ registerCommand({
       DIVIDER,
     ],
   }),
+})
+
+// ─── search ──────────────────────────────────────────────────────────────────
+
+const STOP = new Set([
+  'the','a','an','and','or','but','of','to','in','on','for','is','are','was',
+  'what','how','why','who','when','where','do','does','did','you','your','i',
+  'me','my','it','this','that','with','about','can','tell','show',
+])
+
+function postHref(post: PostRef): string {
+  return post.source === 'blog'
+    ? `/blog/${post.slug}`
+    : `https://theworkingprototype.substack.com/p/${post.slug}`
+}
+
+function haystack(post: PostRef): string {
+  return `${post.title} ${post.subtitle ?? ''} ${post.excerpt}`.toLowerCase()
+}
+
+/** the sentence around the first hit, so a match shows its context */
+function context(post: PostRef, term: string): string | null {
+  const text = `${post.subtitle ?? ''} ${post.excerpt}`.trim()
+  const at = text.toLowerCase().indexOf(term)
+  if (at === -1) return null
+  const from = Math.max(0, at - 60)
+  const slice = text.slice(from, at + term.length + 60).trim()
+  return `${from > 0 ? '…' : ''}${slice}…`
+}
+
+registerCommand({
+  name: 'grep',
+  description: 'search everything written  ·  e.g. grep agents',
+  type: 'output',
+  handler: (args) => {
+    const term = args.join(' ').trim().toLowerCase()
+    if (!term) {
+      return {
+        type: 'output',
+        lines: [{ content: 'usage: grep <term>  ·  e.g. grep reliability', style: 'muted' }],
+      }
+    }
+
+    const hits = posts.filter((p) => haystack(p).includes(term))
+    if (hits.length === 0) {
+      return {
+        type: 'output',
+        lines: [{ content: `no matches for '${term}' in ${posts.length} pieces.`, style: 'muted' }],
+      }
+    }
+
+    return {
+      type: 'output',
+      lines: [
+        { content: `${hits.length} of ${posts.length} match '${term}'`, style: 'warm' },
+        ...hits.flatMap((post) => {
+          const line = context(post, term)
+          return [
+            {
+              content: `${post.date}  ${post.title}`,
+              style: 'default' as const,
+              href: postHref(post),
+            },
+            ...(line ? [{ content: `   ${line}`, style: 'dim' as const }] : []),
+          ]
+        }),
+      ],
+    }
+  },
+})
+
+registerCommand({
+  name: 'ask',
+  description: 'find what I have written on something  ·  e.g. ask about evals',
+  type: 'output',
+  handler: (args) => {
+    const question = args.join(' ').trim()
+    if (!question) {
+      return {
+        type: 'output',
+        lines: [
+          { content: 'usage: ask <question>  ·  e.g. ask how do you test agents', style: 'muted' },
+        ],
+      }
+    }
+
+    const terms = question
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !STOP.has(w))
+
+    if (terms.length === 0) {
+      return {
+        type: 'output',
+        lines: [{ content: 'that is all filler words. try a noun.', style: 'muted' }],
+      }
+    }
+
+    // title hits count for more than body hits
+    const scored = posts
+      .map((post) => {
+        const title = post.title.toLowerCase()
+        const body = haystack(post)
+        const score = terms.reduce(
+          (sum, term) => sum + (title.includes(term) ? 3 : 0) + (body.includes(term) ? 1 : 0),
+          0,
+        )
+        return { post, score }
+      })
+      .filter((s) => s.score > 0)
+      .sort((a, b) => b.score - a.score || b.post.date.localeCompare(a.post.date))
+      .slice(0, 4)
+
+    if (scored.length === 0) {
+      return {
+        type: 'output',
+        lines: [
+          { content: 'nothing written on that yet.', style: 'muted' },
+          { content: "type 'contact' and ask me directly.", style: 'dim' },
+        ],
+      }
+    }
+
+    return {
+      type: 'output',
+      lines: [
+        { content: `closest ${scored.length} of ${posts.length}:`, style: 'warm' },
+        ...scored.map(({ post }) => ({
+          content: `${post.date}  ${post.title}`,
+          style: 'default' as const,
+          href: postHref(post),
+        })),
+        { content: '', style: 'muted' },
+        { content: 'no model here — this is grep with manners.', style: 'dim' },
+      ],
+    }
+  },
 })

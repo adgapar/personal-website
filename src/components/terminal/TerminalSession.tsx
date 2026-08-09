@@ -1,11 +1,18 @@
 'use client'
 
-import { useRef, useCallback, useEffect, useState, type KeyboardEvent } from 'react'
+import {
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type KeyboardEvent,
+} from 'react'
 import Link from 'next/link'
 import CommandBlock from './CommandBlock'
 import TerminalLine from './TerminalLine'
 import DitheredAvatar from '@/components/visual/DitheredAvatar'
-import { executeCommand, hasCommand } from '@/lib/commands'
+import { executeCommand, hasCommand, listCommands } from '@/lib/commands'
 import type { TerminalLine as TLine } from '@/lib/commands/types'
 import type { PageCommand, SessionBlock } from '@/lib/sessions'
 
@@ -88,6 +95,10 @@ export default function TerminalSession({
   const [entries, setEntries] = useState<{ input: string; lines: TLine[] }[]>([])
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
+  // Tab cycles against what was typed, not against what it just inserted —
+  // otherwise accepting `git blame` leaves nothing that still starts with it.
+  const [cycle, setCycle] = useState(0)
+  const [base, setBase] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(instant ? blocks.length : 0)
 
   useEffect(() => {
@@ -122,6 +133,29 @@ export default function TerminalSession({
 
   const focusInput = useCallback(() => inputRef.current?.focus({ preventScroll: true }), [])
 
+  /**
+   * What Tab will complete — everything, hidden commands included. Seventy-five
+   * of them that nobody finds is a worse outcome than a slightly smaller
+   * surprise, and typing `sudo` blind still answers back.
+   */
+  const completions = useMemo(() => {
+    const registered = listCommands().map((c) => c.name)
+    return [...new Set([...NAV_COMMANDS, ...commands.map((c) => c.name), ...registered])].sort()
+  }, [commands])
+
+  const matches = useMemo(() => {
+    const typed = (base ?? inputValue).toLowerCase()
+    // two characters minimum, so one letter does not dump the whole set
+    if (typed.trim().length < 2) return []
+    return completions.filter((c) => c.startsWith(typed))
+  }, [base, inputValue, completions])
+
+  /** the greyed-out remainder shown after the cursor */
+  const ghost =
+    base === null && matches.length > 0 && matches[0] !== inputValue
+      ? matches[cycle % matches.length].slice(inputValue.length)
+      : ''
+
   /** append a command and its output to the scrollback */
   const echo = useCallback((input: string, lines: TLine[]) => {
     setEntries((prev) => [...prev, { input, lines }])
@@ -144,6 +178,18 @@ export default function TerminalSession({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Tab') {
+        e.preventDefault()
+        if (matches.length === 0) return
+
+        // first Tab pins what was typed, each one after moves to the next match
+        const next = base === null ? 0 : (cycle + 1) % matches.length
+        if (base === null) setBase(inputValue)
+        setCycle(next)
+        setInputValue(matches[next])
+        return
+      }
+
       if (e.key === 'ArrowUp') {
         e.preventDefault()
         const newIdx = Math.min(historyIndex + 1, commandHistory.length - 1)
@@ -161,6 +207,8 @@ export default function TerminalSession({
         setCommandHistory((prev) => [input, ...prev].slice(0, 100))
         setHistoryIndex(-1)
         setInputValue('')
+        setBase(null)
+        setCycle(0)
 
         if (input === 'help') {
           echo(input, buildHelp(commands))
@@ -200,7 +248,7 @@ export default function TerminalSession({
         }
       }
     },
-    [inputValue, historyIndex, commandHistory, commands, blocks, onNavigate, echo]
+    [inputValue, historyIndex, commandHistory, commands, blocks, onNavigate, echo, matches, cycle, base]
   )
 
   return (
@@ -390,25 +438,75 @@ export default function TerminalSession({
               // not sit in the tab order
               <span className="cursor inline-block h-3 w-1.5 bg-[var(--dim)]" aria-hidden />
             ) : (
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => {
-                  setInputValue(e.target.value)
-                  setHistoryIndex(-1)
-                }}
-                onKeyDown={handleKeyDown}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                placeholder={placeholder}
-                aria-label="terminal input"
-                className="flex-1 bg-transparent outline-none font-[inherit] text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
-              />
+              <span className="relative flex-1">
+                {/* the completion, drawn under the caret in the same metrics —
+                    the typed part is invisible so the ghost lines up exactly */}
+                {(ghost || (base !== null && matches.length > 1)) && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 whitespace-pre text-[var(--fg)]"
+                  >
+                    <span className="invisible">{inputValue}</span>
+                    <span className="text-[var(--dim)]">{ghost}</span>
+
+                  </span>
+                )}
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => {
+                    setInputValue(e.target.value)
+                    setHistoryIndex(-1)
+                    setCycle(0)
+                    // typing abandons whatever Tab was cycling through,
+                    // otherwise the menu keeps answering the previous prefix
+                    setBase(null)
+                  }}
+                  onKeyDown={handleKeyDown}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  placeholder={placeholder}
+                  aria-label="terminal input"
+                  className="relative w-full bg-transparent outline-none font-[inherit] text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
+                />
+              </span>
             )}
           </div>
+
+          {/* the candidates, visible rather than hidden behind a keystroke */}
+          {matches.length > 1 && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-1 text-[11px]">
+              {matches.map((name, i) => {
+                const active = base !== null && i === cycle % matches.length
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setBase(inputValue)
+                      setCycle(i)
+                      setInputValue(name)
+                      inputRef.current?.focus({ preventScroll: true })
+                    }}
+                    className={
+                      active
+                        ? 'text-[var(--accent)]'
+                        : 'text-[var(--dim)] hover:text-[var(--fg)]'
+                    }
+                  >
+                    {name}
+                  </button>
+                )
+              })}
+              <span className="text-[10px] tracking-widest text-[var(--dim)]">
+                tab to cycle
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

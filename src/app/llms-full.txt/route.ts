@@ -15,27 +15,35 @@ export const dynamic = 'force-static'
 export function GET() {
   const withPosts = pages.map((p) => (p.slug === 'writing' ? getWritingPage() : p))
 
-  const posts = getPosts('blog')
-    .map((post) =>
-      [
-        `# ${post.title}`,
-        post.subtitle ? `> ${post.subtitle}` : '',
-        `*${post.date}  ·  https://adilet.fyi/blog/${post.slug}*`,
-        post.body,
-      ]
-        .filter(Boolean)
-        .join('\n\n'),
-    )
-    .join('\n\n---\n\n')
+  const section = (source: 'blog' | 'newsletter') =>
+    getPosts(source)
+      .map((post) =>
+        [
+          `# ${post.title}`,
+          post.subtitle ? `> ${post.subtitle}` : '',
+          post.canonical
+            ? `*${post.date}  ·  canonical: ${post.canonical}*`
+            : `*${post.date}  ·  https://adilet.fyi/blog/${post.slug}*`,
+          post.body,
+        ]
+          .filter(Boolean)
+          .join('\n\n'),
+      )
+      .join('\n\n---\n\n')
 
   const body = [
     siteToMarkdown(withPosts),
     '---',
     '# Blog posts, in full',
     '',
-    'Newsletter issues are published on Substack and are not reproduced here.',
+    section('blog'),
+    '---',
+    '# Newsletter issues, in full',
     '',
-    posts,
+    'Published first on Substack, which stays canonical. Reproduced here so the',
+    'whole archive is readable in one place.',
+    '',
+    section('newsletter'),
   ].join('\n\n')
 
   return new Response(body, {

@@ -23,7 +23,9 @@ export default function TerminalTabs() {
 
   return (
     <div
-      className="flex items-end gap-px overflow-x-auto border-b border-[var(--border)] px-2 pt-1.5"
+      // no scroll container: the row is as tall and wide as the tabs need, and
+      // wraps rather than scrolling if a window ever gets narrow enough
+      className="flex flex-wrap items-end gap-px border-b border-[var(--border)] px-2 pt-1.5"
       style={{ background: 'rgba(20,18,16,0.6)' }}
     >
       {sessions.map(({ name, href }) => {

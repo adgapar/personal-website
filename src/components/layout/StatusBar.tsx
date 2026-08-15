@@ -10,14 +10,11 @@ export default function StatusBar({ hint }: { hint?: string }) {
   const { mode, setMode } = useViewMode()
 
   return (
-    <div
-      className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--border)] px-3 py-1.5 text-[10px] tracking-widest select-none"
-      style={{ background: 'rgba(20,18,16,0.6)' }}
-    >
-      {hint && <span className="text-[var(--dim)]">{hint}</span>}
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--border)] bg-[var(--surface)] px-6 py-2 text-[10px] tracking-widest select-none sm:px-8">
+      {hint && <span className="text-[var(--chrome)]">{hint}</span>}
 
-      <div className="ml-auto flex items-center gap-1" role="group" aria-label="Reading mode">
-        <span className="text-[var(--dim)]">[</span>
+      <div className="ml-auto flex items-center gap-3" role="group" aria-label="Reading mode">
+        {/* no brackets and no bullets — two words, and the live one is darker */}
         {(['human', 'agent'] as const).map((option) => (
           <button
             key={option}
@@ -26,20 +23,18 @@ export default function StatusBar({ hint }: { hint?: string }) {
             aria-pressed={mode === option}
             title={
               option === 'human'
-                ? 'terminal, wallpaper, the whole thing'
+                ? 'the terminal, the desk, the whole thing'
                 : 'clean markdown — also at /llms.txt'
             }
             className={`transition-colors duration-200 ${
               mode === option
-                ? 'text-[var(--accent)]'
-                : 'text-[var(--muted)] hover:text-[var(--fg)]'
+                ? 'text-[var(--fg)]'
+                : 'text-[var(--chrome)] hover:text-[var(--fg)]'
             }`}
           >
-            {mode === option ? '● ' : '○ '}
             {option}
           </button>
         ))}
-        <span className="text-[var(--dim)]">]</span>
       </div>
     </div>
   )

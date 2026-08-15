@@ -61,7 +61,7 @@ export default function AgentView({ page }: { page: PageMeta }) {
         </div>
       </div>
 
-      <pre className="overflow-x-auto whitespace-pre-wrap break-words border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_92%,#fff)] p-5 text-xs leading-relaxed text-[var(--fg)] selection:bg-[var(--accent)] selection:text-[var(--bg)]">
+      <pre className="overflow-x-auto whitespace-pre-wrap break-words border border-[var(--border)] bg-[var(--surface)] p-5 text-xs leading-relaxed text-[var(--fg)] selection:bg-[var(--accent)] selection:text-[var(--surface)]">
         {markdown}
       </pre>
     </div>

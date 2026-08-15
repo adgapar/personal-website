@@ -129,11 +129,18 @@ export default function TerminalSession({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // new output should bring the prompt into view — inside the window
+  // New output should bring the prompt into view. The reveal animation must not:
+  // scrolling on every block meant every page opened at the bottom, with the
+  // first line cut in half under the tab bar.
+  const settled = useRef(false)
   useEffect(() => {
+    if (!settled.current) {
+      settled.current = true
+      return
+    }
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [entries, visibleCount])
+  }, [entries])
 
   const focusInput = useCallback(() => inputRef.current?.focus({ preventScroll: true }), [])
 
@@ -258,10 +265,12 @@ export default function TerminalSession({
   return (
     <div
       ref={scrollRef}
-      className="flex h-[var(--term-max-h,68vh)] shrink-0 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
+      // a ceiling, not a height: four lines of output should be four lines tall
+      className="flex max-h-[var(--term-max-h,70vh)] shrink-0 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
       onClick={focusInput}
     >
-      <div className="px-5 pt-8 pb-12 sm:px-10 max-w-2xl w-full mx-auto space-y-8">
+      {/* the same left edge as the title bar, the tabs and the status bar */}
+      <div className="w-full space-y-8 px-6 pt-7 pb-9 sm:px-8">
         {/* Static session blocks */}
         {blocks.slice(0, visibleCount).map((block, i) => (
           <div key={i}>
@@ -285,25 +294,23 @@ export default function TerminalSession({
                 <div
                   key={j}
                   onClick={item.run ? (e) => { e.stopPropagation(); runCommand(item.run!) } : undefined}
-                  className={item.run ? 'group -mx-2 rounded-sm px-2 py-0.5 hover:bg-white/[0.03]' : undefined}
+                  className={item.run ? 'group -mx-2 rounded-sm px-2 py-0.5 hover:bg-black/[0.035]' : undefined}
                 >
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <span className="text-[var(--dim)] w-4 shrink-0 select-none">{j + 1}</span>
                   {item.meta && (
                     <span className="text-[var(--dim)] text-xs shrink-0 w-24">{item.meta}</span>
                   )}
-                  <span className={`text-[var(--warm)] ${item.run ? 'group-hover:text-[var(--accent)]' : ''}`}>{item.title}</span>
-                  {item.tag && (() => {
-                    const s = item.tagStyle ?? 'muted'
-                    const cls =
-                      s === 'accent'  ? 'text-[var(--accent)] border-[var(--accent)]' :
-                      s === 'warm'    ? 'text-[var(--warm)] border-[var(--warm)]' :
-                      s === 'success' ? 'text-[var(--success)] border-[var(--success)]' :
-                                        'text-[var(--muted)] border-[var(--border)]'
-                    return (
-                      <span className={`text-xs border px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70 ${cls}`}>{item.tag}</span>
-                    )
-                  })()}
+                  {/* the title is the content of the row, so it is ink — amber
+                      is reserved for one job now: arguments in a command */}
+                  <span className={item.run ? 'group-hover:text-[var(--accent)]' : undefined}>{item.title}</span>
+                  {/* a tag is a word. The box around it was one more shape to
+                      count in a list that already has five columns. */}
+                  {item.tag && (
+                    <span className="shrink-0 text-xs tracking-wide text-[var(--muted)]">
+                      {item.tag}
+                    </span>
+                  )}
                   {item.status && (
                     <span className={`shrink-0 ml-auto ${statusColor('status', item.status)}`}>{item.status}</span>
                   )}
@@ -332,7 +339,7 @@ export default function TerminalSession({
                     {row.cols.map((col, k) => (
                       <span
                         key={k}
-                        className={`${colClass(k, row.cols.length, block.table!.colWidths)} ${k === 0 ? 'text-[var(--warm)]' : statusColor(block.table!.headers[k] ?? '', col)}`}
+                        className={`${colClass(k, row.cols.length, block.table!.colWidths)} ${k === 0 ? '' : statusColor(block.table!.headers[k] ?? '', col)}`}
                       >
                         {col}
                       </span>
@@ -364,7 +371,7 @@ export default function TerminalSession({
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <span className="text-[var(--dim)] text-xs shrink-0 whitespace-nowrap w-[5.5rem]">{entry.date}</span>
                     {entry.tag && (
-                      <span className="text-xs text-[var(--warm)] border border-[var(--warm)] px-1.5 py-px rounded-sm tracking-wide shrink-0 opacity-70">{entry.tag}</span>
+                      <span className="shrink-0 text-xs tracking-wide text-[var(--muted)]">{entry.tag}</span>
                     )}
                     <span className="text-[var(--muted)]">{entry.content}</span>
                     {entry.href &&

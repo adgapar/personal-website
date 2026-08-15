@@ -66,8 +66,9 @@ function sectionHeader(page: string): SessionBlock {
   return {
     mdSkip: true,
     lines: [
-      { content: `→ loading ${page}...  done`, style: 'success' },
-      { content: "→ type 'help' for available commands", style: 'muted' },
+      // the machine clearing its throat — chrome, so it stays quiet
+      { content: `→ loading ${page}...  done`, style: 'dim' },
+      { content: "→ type 'help' for available commands", style: 'dim' },
     ],
   }
 }
@@ -78,8 +79,8 @@ export const homeSession: SessionBlock[] = [
   {
     mdSkip: true,
     lines: [
-      { content: '→ starting session...  done', style: 'success' },
-      { content: "→ type 'help' for available commands", style: 'muted' },
+      { content: '→ starting session...  done', style: 'dim' },
+      { content: "→ type 'help' for available commands", style: 'dim' },
     ],
   },
   {

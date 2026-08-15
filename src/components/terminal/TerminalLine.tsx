@@ -31,7 +31,13 @@ export default function TerminalLine({ line }: Props) {
 
   // Key-value row: label + content side by side
   if (line.label !== undefined) {
-    const valueClass = styleMap[line.style ?? 'warm'] ?? styleMap.warm
+    // A value in a key/value row is content, so it is ink. Amber here was
+    // decoration — five rows, two of them coloured for no reason a reader can
+    // see. `warm` keeps its meaning everywhere else: command arguments.
+    const valueClass =
+      line.style && line.style !== 'warm'
+        ? (styleMap[line.style] ?? styleMap.default)
+        : styleMap.default
     return (
       <div className="flex flex-col gap-x-5 sm:flex-row sm:items-baseline">
         <span className="text-[var(--muted)] text-[10px] tracking-widest uppercase shrink-0 sm:w-20">

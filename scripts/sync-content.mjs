@@ -118,6 +118,12 @@ function indexOf(dir, source) {
         date: meta.date || `${y}-${mo}-${d}`,
         title: meta.title || slug.replace(/-/g, ' '),
         subtitle: meta.subtitle || undefined,
+        // the served path of the header image, so client code can show a cover
+        // without guessing it from the slug — four newsletter images are named
+        // nothing like their post
+        cover: meta.image
+          ? `/writing/${source}/${meta.image.replace(/^\.?\//, '')}`
+          : undefined,
         excerpt: body.slice(0, 400),
       }
     })
@@ -140,6 +146,8 @@ export type PostRef = {
   date: string
   title: string
   subtitle?: string
+  /** served path of the header image, when the post has one */
+  cover?: string
   excerpt: string
 }
 

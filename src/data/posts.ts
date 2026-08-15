@@ -7,6 +7,8 @@ export type PostRef = {
   date: string
   title: string
   subtitle?: string
+  /** served path of the header image, when the post has one */
+  cover?: string
   excerpt: string
 }
 
@@ -17,6 +19,7 @@ export const posts: PostRef[] = [
     "date": "2026-07-16",
     "title": "how and why i built a home ai assistant",
     "subtitle": "the AI was the easy part.",
+    "cover": "/writing/blog/background-images/teya-intro.png",
     "excerpt": "We've had an Alexa at home for years, wired into our Sonos speakers, so in the kitchen it plays music and sets timers. That is the whole of what it does. I work with AI models every day, and it was obvious the assistant on our counter could be far more than that. Every one of these works the same way. You set one up, whether it's Alexa or Google or Yandex's Alisa, and from then on your conversatio"
   },
   {
@@ -24,6 +27,7 @@ export const posts: PostRef[] = [
     "slug": "riding-the-wave",
     "date": "2026-06-26",
     "title": "riding the wave",
+    "cover": "/writing/blog/background-images/riding-the-wave.png",
     "excerpt": "I remember when coding interviews happened at a whiteboard, no computer, no internet, just a marker and whatever you could hold in your head. When AI tools arrived, using one in an interview was the red flag. Now the red flag is the candidate who doesn't use AI enough. In about two years, the same tool went from forbidden to expected. And it only gets faster. Every few months another wave rolls in"
   },
   {
@@ -31,6 +35,7 @@ export const posts: PostRef[] = [
     "slug": "sorry-for-writing-so-late",
     "date": "2026-03-15",
     "title": "sorry for writing so late",
+    "cover": "/writing/blog/background-images/sorry-for-writing-so-late.png",
     "excerpt": "In Barcelona, when a restaurant posts a waiter position, five hundred people apply in a week. One HR manager can't call all of them to ask where they live — that's not a bottleneck, it's an impossibility. And that's the whole business case, right there. We built Maria to make that first call. the agent we built Maria lives in WhatsApp. She asks candidates about their experience, their shift prefer"
   },
   {
@@ -38,6 +43,7 @@ export const posts: PostRef[] = [
     "slug": "economy-of-blame",
     "date": "2025-11-15",
     "title": "the economy of blame",
+    "cover": "/writing/blog/background-images/economy-of-blame.png",
     "excerpt": "There's a hidden economy in every team. Not the one where favors are exchanged. The one where trust accumulates or erodes based on how people handle their mistakes. If you move fast enough, you will always break things. Some people break things constantly but somehow leave with more credibility than they started with. Others go bankrupt slowly, then suddenly. Not because they break more things, bu"
   },
   {
@@ -45,6 +51,7 @@ export const posts: PostRef[] = [
     "slug": "prince-of-constraints",
     "date": "2025-11-03",
     "title": "prince of constraints",
+    "cover": "/writing/blog/background-images/prince-of-constraints.png",
     "excerpt": "I picked up Jordan Mechner's journals on making Prince of Persia (later PoP) expecting game development nostalgia. I played PoP as a kid and wanted to read how it was made. What I got instead was some of the clearest articulations of building principles I've read. Project management. User motivation. Learning strategy. Location decisions. The same questions I've been writing about lately. I'm 32 n"
   },
   {
@@ -52,6 +59,7 @@ export const posts: PostRef[] = [
     "slug": "local-maxima",
     "date": "2025-10-27",
     "title": "local maxima",
+    "cover": "/writing/blog/background-images/local-maxima.png",
     "excerpt": "Tomorrow I'm taking the train from Elche to Madrid. Again. Four days with the team, then back - we do this every month now, last week always in the office. As I pack my bag for the seventh time, I can't shake this feeling: I'm solving for the wrong variable. Here I am, optimizing my commute between two Spanish cities, when maybe the real question is whether I should be on a different continent ent"
   },
   {
@@ -59,6 +67,7 @@ export const posts: PostRef[] = [
     "slug": "polyworking",
     "date": "2025-09-20",
     "title": "polyworking: why one job isn't enough anymore",
+    "cover": "/writing/blog/background-images/polyworking.png",
     "excerpt": "2024 was the year of doing everything at once for me. I jiggled a full-time job as an engineer, teaching data science and AI engineering, mentoring, some consulting gigs, attempts at building my own product, a bit of writing. It was exhausting. Also kind of addictive. There's definitely a point where it became overwhelming. I learned that the hard way. But the question isn't whether to avoid multi"
   },
   {
@@ -66,6 +75,7 @@ export const posts: PostRef[] = [
     "slug": "loop-is-all-you-need",
     "date": "2025-06-29",
     "title": "a loop is all you need: building conversational ai agents",
+    "cover": "/writing/blog/background-images/loop-is-all-you-need.png",
     "excerpt": "After months of building AI agents, I've come to a counterintuitive conclusion: those fancy agent frameworks everyone seems to be using? You probably don't need them. Let me explain how I got here. essential complexity is not in tech A few months ago, I joined an AI startup as founding engineer. Coming from years of doing data science, I thought I knew what I was getting into. I'd worked with libr"
   },
   {
@@ -73,6 +83,7 @@ export const posts: PostRef[] = [
     "slug": "debugging-my-twenties",
     "date": "2025-06-10",
     "title": "debugging my twenties: that summer in france",
+    "cover": "/writing/blog/background-images/debugging-my-twenties.png",
     "excerpt": "In summer 2014, after my sophomore year in Kazakhstan, I went to Toulouse for French classes. It was my first time traveling alone, and it completely reset how I saw the world. before going solo Growing up in Kazakhstan, I was lucky to travel with my family. By the time I finished high school, I'd visited 9 countries, but always with adults making the decisions. I'd been learning French since high"
   },
   {
@@ -80,6 +91,7 @@ export const posts: PostRef[] = [
     "slug": "writing-in-public",
     "date": "2025-06-08",
     "title": "writing in public: what i discovered during my 8-month writing break",
+    "cover": "/writing/blog/background-images/writing-in-public.png",
     "excerpt": "Eight months ago, I stopped writing. Not intentionally, it just happened. One week turned into a month, then several, and suddenly I found myself staring at a blog that hadn't been updated since late 2024. In that time, I wrapped up three years at Capchase (it was time to move on), joined an AI startup as their first employee and founding engineer, and relocated from Madrid to Elche. Life moved fa"
   },
   {
@@ -87,6 +99,7 @@ export const posts: PostRef[] = [
     "slug": "is-education-broken",
     "date": "2024-09-29",
     "title": "my take on education and learning",
+    "cover": "/writing/blog/background-images/is-education-broken.png",
     "excerpt": "Why, despite living in an age of unprecedented access to knowledge, do so many people feel that education is fundamentally broken? As someone who has navigated the world of formal education, self-study, and teaching, I’ve picked up insights that I’d like to share. As we all \"stand on the shoulders of giants,\" I’d like to start by recommending a few resources that dive deeper into learning than I c"
   },
   {
@@ -94,6 +107,7 @@ export const posts: PostRef[] = [
     "slug": "sales-lessons",
     "date": "2024-04-22",
     "title": "learn to sell: b2b sales lessons from microsoft",
+    "cover": "/writing/blog/background-images/sales-lessons.png",
     "excerpt": "I haven't written for more than two months now, which means that I broke a \"contract\" with myself of writing and publishing something at least once every week. It has been weird time for me overall, but regardless let's see if I return to good cadence. Back to the topic of this post. In the previous post I talked about how and why I started my career in tech sales. To continue that topic, I will b"
   },
   {
@@ -101,6 +115,7 @@ export const posts: PostRef[] = [
     "slug": "why-sales-engineer",
     "date": "2024-02-15",
     "title": "why i started my tech career as a sales engineer @ microsoft",
+    "cover": "/writing/blog/background-images/why-sales-engineer.png",
     "excerpt": "For the past few years my day-to-day activity was writing code. In 2016? Doing PowerPoint slides and making calls. Lots of calls. I am currently Software Engineer and Data Scientist at Capchase, FinTech scale-up, working mostly on Risk Intelligence. That's what everyone sees on the top of my LinkedIn, but whenever I share my career story with folks, people are surprised to learn my tech career sta"
   },
   {
@@ -108,6 +123,7 @@ export const posts: PostRef[] = [
     "slug": "personal-website",
     "date": "2024-01-12",
     "title": "everyone should have a personal website",
+    "cover": "/writing/blog/background-images/personal-website.png",
     "excerpt": "When everything is googleable, every modern professional already has an online presence. Here some random links that appear when I google my name: From the privacy and security perspective it is not great and I don't like it. However, if you can't make it go away, at least you should try to control the story so that the top 3 links look more like this: The first link is my LinkedIn, the second is "
   },
   {
@@ -115,6 +131,7 @@ export const posts: PostRef[] = [
     "slug": "blog-better-than-cv",
     "date": "2023-12-12",
     "title": "how i got the data science interview with a cool scale-up without cv",
+    "cover": "/writing/blog/background-images/blog-better-than-cv.png",
     "excerpt": "If you want to get a remote job, you need to stand out among global pool of candidates and CV isn't a great tool to achieve that. old way of getting interview which doesn't work anymore I have been using CV in job search since 2014, when I was still at college looking for my first internship ever. I guess we all did and by now know all the rules and how to check all the checkboxes to write \"perfec"
   },
   {
@@ -123,6 +140,7 @@ export const posts: PostRef[] = [
     "date": "2026-07-13",
     "title": "what kind of poker player is an ai?",
     "subtitle": "a small, controlled experiment across models from OpenAI, Anthropic, and Mistral, run out of curiosity",
+    "cover": "/writing/newsletter/background-images/newsletter/poker-ai-player.png",
     "excerpt": "I'm in a WhatsApp group called Poker Nights, a bunch of friends from Kazakhstan who play. I picked up the game there and have loved it since, so when Orbio started planning an offsite, I suggested we play and a few people were keen. As someone who works with language models every day, I got curious what kind of poker player an AI would be. I don't mean whether it could win; it's read more strategy"
   },
   {
@@ -131,6 +149,7 @@ export const posts: PostRef[] = [
     "date": "2026-06-28",
     "title": "context solves alignment?",
     "subtitle": "an agent is only as aligned as the context you give it",
+    "cover": "/writing/newsletter/background-images/newsletter/context-solves-alignment.png",
     "excerpt": "It's the obvious explanation, and it's wrong. An agent that promises too much looks like an agent with the wrong personality, so the fix looks like changing who she is. But the thing that makes an agent fail this way is almost never her character. It's what she knows. the agent has to say something A language model is built to generate a completion, the next likely thing to say, whether or not it "
   },
   {
@@ -139,6 +158,7 @@ export const posts: PostRef[] = [
     "date": "2026-05-18",
     "title": "judgement at scale",
     "subtitle": "applying human judgement to every conversation without a human reading every one",
+    "cover": "/writing/newsletter/background-images/newsletter/judgement-at-scale.png",
     "excerpt": "Every Friday afternoon, our team sits down for a meeting my colleague Antoine called The Watch. A digest in front of us covers the past week — more than a hundred thousand agent conversations — telling us where they failed, where they nearly failed, where the calls fell short of what a careful human reviewer would have wanted. We go through it together: which fixes need engineering time, which are"
   },
   {
@@ -147,6 +167,7 @@ export const posts: PostRef[] = [
     "date": "2026-04-09",
     "title": "how to do agentic evals",
     "subtitle": "what building an eval system for conversational agents actually required",
+    "cover": "/writing/newsletter/background-images/newsletter/how-to-do-agentic-evals.png",
     "excerpt": "When your agent schedules an interview, sends a message to a candidate, or updates an application status, you can't evaluate it the way you test a function. The agent changes the world. Testing whether it changed the world correctly means building a world where it can safely do that. Standard evals don't solve this. Static test environments miss how agents behave when conditions shift. Single runs"
   },
   {
@@ -155,6 +176,7 @@ export const posts: PostRef[] = [
     "date": "2026-04-03",
     "title": "build for reliability",
     "subtitle": "why capable models still fail in production",
+    "cover": "/writing/newsletter/background-images/newsletter/build-for-reliability.png",
     "excerpt": "In July 2025, Replit's AI coding agent deleted a live production database. It had been explicitly instructed not to make changes. Then it lied about whether the data could be recovered. Replit's agent could build software. Millions of people use it, it passed internal evaluations, and none of that made it reliable. This February, a group of Princeton researchers published a study on agent reliabil"
   },
   {
@@ -163,6 +185,7 @@ export const posts: PostRef[] = [
     "date": "2026-03-22",
     "title": "the legible agent",
     "subtitle": "if you can't trace your agent, you can't trust it",
+    "cover": "/writing/newsletter/background-images/newsletter/the-legible-agent.png",
     "excerpt": "This isn't a developer experience complaint. It's an alignment problem. If you can't trace why your agent chose action X on turn N, you can't verify it's doing what you think it's doing. You're trusting an abstraction layer to be aligned on your behalf. I build recruitment AI. Our first agent conducts over ten thousand interviews a week across multiple countries. When I started, I tried the establ"
   },
   {
@@ -171,6 +194,7 @@ export const posts: PostRef[] = [
     "date": "2026-03-15",
     "title": "in character",
     "subtitle": "does conversation history format affect how well an agent stays in role?",
+    "cover": "/writing/newsletter/background-images/newsletter/in-character.png",
     "excerpt": "There's a decision every agent developer makes without much thought: do you pass conversation history as text embedded in the user message, or as a native message array? I'd been using the embedded approach in production — embedding the entire conversation, as a JSON blob or formatted transcript, in the user turn — without ever testing whether it mattered. python embedded: history passed as text i"
   },
   {
@@ -179,6 +203,7 @@ export const posts: PostRef[] = [
     "date": "2026-01-31",
     "title": "from finding bias to fixing it",
     "subtitle": "what data scientists knew before LLMs, and why it still applies",
+    "cover": "/writing/newsletter/background-images/newsletter/from-finding-to-fixing.png",
     "excerpt": "I built a scoring system for job candidates before I ever took a course on AI fairness. When you're building something that affects who gets interviewed and who gets passed over, fairness isn't an afterthought. This is my translation back, for any engineer building LLM-based systems who didn't come up through classical ML. what data scientists already knew A naive model trained on that data learns"
   },
   {
@@ -187,6 +212,7 @@ export const posts: PostRef[] = [
     "date": "2025-11-16",
     "title": "the vulnerable world hypothesis",
     "subtitle": "and what happens if we flip it",
+    "cover": "/writing/newsletter/background-images/newsletter/vulrneable-world-hypo.png",
     "excerpt": "The first paper I read for this newsletter was Nick Bostrom's 2019 \"The Vulnerable World Hypothesis.\" The core idea first, then a thought experiment: what happens if we flip it? the urn metaphor Bostrom asks you to imagine humanity pulling balls from an urn. Each ball represents a possible technological discovery or invention. We don't know what's in the urn before we pull; we just keep pulling th"
   },
   {
@@ -195,6 +221,7 @@ export const posts: PostRef[] = [
     "date": "2025-11-15",
     "title": "why this newsletter exists",
     "subtitle": "for people building AI agents who care about getting them right",
+    "cover": "/writing/newsletter/background-images/newsletter/first-post.png",
     "excerpt": "Most content on AI reliability, alignment, and safety lives at one of two extremes. There's a gap in the middle. For people building AI agents who want intellectual rigor without needing a degree. People who prefer practical frameworks but still want the thinking to hold up. That's where I am. I'm a founding engineer at a growth-stage AI startup, shipping agents and AI systems in production. The s"
   }
 ]

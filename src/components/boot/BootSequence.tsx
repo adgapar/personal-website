@@ -34,10 +34,24 @@ const LINES: Line[] = [
 
 const LINE_MS = 260
 
+/**
+ * The boot screen has its own palette, on purpose. It is the one moment the site
+ * is a switched-off screen rather than a lit desk, so it cannot borrow the
+ * daylight tokens — dark green ink on near-black would be unreadable. Phosphor
+ * green is gone with it: the machine reports in plain white now.
+ */
+const BOOT = {
+  ground: '#0d0d0c',
+  ink: '#e8e6e1',
+  label: '#7b7973',
+  rule: '#26251f',
+  accent: '#7dd3fc',
+}
+
 const COLOR: Record<NonNullable<Line['style']>, string> = {
-  ok: 'text-[var(--success)]',
-  warm: 'text-[var(--warm)]',
-  dim: 'text-[var(--dim)]',
+  ok: 'text-[#e8e6e1]',
+  warm: 'text-[#e8e6e1]',
+  dim: 'text-[#7b7973]',
 }
 
 export default function BootSequence() {
@@ -94,9 +108,10 @@ export default function BootSequence() {
 
   return (
     <div
-      className={`fixed inset-0 z-50 overflow-hidden bg-[#050505] px-6 py-8 font-mono text-xs sm:px-10 sm:py-12 ${
+      className={`fixed inset-0 z-50 overflow-hidden px-6 py-8 font-mono text-xs sm:px-10 sm:py-12 ${
         closing ? 'crt-collapse' : ''
       }`}
+      style={{ background: BOOT.ground, color: BOOT.ink }}
       role="status"
       aria-live="polite"
       aria-label="Starting up"
@@ -105,11 +120,11 @@ export default function BootSequence() {
       <div className="mx-auto max-w-xl space-y-1 sm:space-y-0.5">
         {LINES.slice(0, shown).map((line, i) => (
           <div key={i} className="flex flex-col gap-x-2 sm:flex-row">
-            <span className="shrink-0 text-[var(--muted)]">{line.label}</span>
+            <span className="shrink-0 text-[#7b7973]">{line.label}</span>
             {/* dot leader, like a real POST report — no room for it on a phone */}
             <span
               aria-hidden
-              className="hidden min-w-4 flex-1 overflow-hidden text-[var(--border)] select-none sm:inline"
+              className="hidden min-w-4 flex-1 overflow-hidden text-[#26251f] select-none sm:inline"
             >
               {'.'.repeat(120)}
             </span>
@@ -122,18 +137,18 @@ export default function BootSequence() {
         ))}
 
         {paused && (
-          <div className="pt-3 text-[var(--warm)]">— paused — space to resume</div>
+          <div className="pt-3 text-[#7b7973]">— paused — space to resume</div>
         )}
 
         {waiting && (
           <div className="mt-8 space-y-4">
-            <div className="h-px bg-[var(--border)]" />
+            <div className="h-px bg-[#26251f]" />
             <button
               type="button"
               onClick={beginHandover}
-              className="group flex items-center gap-3 border border-[var(--border)] px-4 py-2 text-[11px] tracking-widest text-[var(--muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              className="group flex items-center gap-3 border border-[#26251f] px-4 py-2 text-[11px] tracking-widest text-[#7b7973] transition-colors hover:border-[#7dd3fc] hover:text-[#7dd3fc]"
             >
-              <span className="cursor text-[var(--accent)]">▊</span>
+              <span className="cursor text-[#7dd3fc]">▊</span>
               press any key to continue
               <span className="transition-transform duration-200 group-hover:translate-x-1">
                 →
@@ -144,15 +159,15 @@ export default function BootSequence() {
       </div>
 
       {!waiting && (
-        <div className="absolute right-6 bottom-6 flex gap-4 text-[10px] tracking-widest text-[var(--dim)] sm:right-10 sm:bottom-8">
+        <div className="absolute right-6 bottom-6 flex gap-4 text-[10px] tracking-widest text-[#7b7973] sm:right-10 sm:bottom-8">
           <button
             type="button"
             onClick={() => setPaused((p) => !p)}
-            className="hover:text-[var(--fg)]"
+            className="hover:text-[#e8e6e1]"
           >
             {paused ? '▶ resume' : '⏸ pause'}
           </button>
-          <button type="button" onClick={finishBoot} className="hover:text-[var(--fg)]">
+          <button type="button" onClick={finishBoot} className="hover:text-[#e8e6e1]">
             skip ✕
           </button>
         </div>

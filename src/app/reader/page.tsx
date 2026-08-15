@@ -19,6 +19,7 @@ export default function ReaderPage() {
       title: post.title,
       date: post.date,
       subtitle: post.subtitle,
+      cover: post.image,
       href: `/${source}/${post.slug}`,
     }))
 

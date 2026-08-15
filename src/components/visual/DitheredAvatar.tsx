@@ -1,14 +1,8 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { useState } from 'react'
-
-// WebGL must not run during SSR
-const ImageDithering = dynamic(
-  () => import('@paper-design/shaders-react').then((m) => m.ImageDithering),
-  { ssr: false },
-)
+import BitmapIcon from './BitmapIcon'
 
 interface Props {
   src: string
@@ -17,8 +11,12 @@ interface Props {
 }
 
 /**
- * The portrait as printed matter: dithered ink by default, resolving to the
- * real photograph on hover or tap. The machine rendering becomes the person.
+ * The portrait as printed matter: one-bit ink by default, resolving to the real
+ * photograph on hover or tap. The machine rendering becomes the person.
+ *
+ * Same construction as every icon on the desk. The shader version rendered three
+ * grey levels, which on a white window read as a heavy grey block rather than as
+ * print — and it spun up a WebGL context to do it.
  */
 export default function DitheredAvatar({
   src,
@@ -36,28 +34,18 @@ export default function DitheredAvatar({
       onFocus={() => setRevealed(true)}
       onBlur={() => setRevealed(false)}
       onClick={() => setRevealed((r) => !r)}
-      className="relative shrink-0 cursor-pointer overflow-hidden rounded-sm bg-[var(--bg)]"
+      className="relative shrink-0 cursor-pointer overflow-hidden rounded-sm bg-[var(--surface)]"
       style={{ width: size, height: size }}
     >
-      <ImageDithering
-        image={src}
-        colorBack="#0c0b0a"
-        colorFront="#e4e0d8"
-        colorHighlight="#fbbf24"
-        type="8x8"
-        size={1.2}
-        colorSteps={3}
-        fit="cover"
-        speed={0}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          transition: 'opacity 400ms ease',
-          opacity: revealed ? 0 : 1,
-        }}
-      />
+      <span
+        className="absolute inset-0 transition-opacity duration-[400ms] ease-out"
+        style={{ opacity: revealed ? 0 : 1 }}
+      >
+        {/* A finer grid than the desk icons and no extra contrast: an icon wants
+            a hard silhouette, a face wants its midtones, and pushing this one
+            the way an icon is pushed turned the portrait into a stencil. */}
+        <BitmapIcon src={src} grid={Math.round(size / 1.6)} size={size} contrast={1.05} />
+      </span>
       <Image
         src={src}
         alt={alt}

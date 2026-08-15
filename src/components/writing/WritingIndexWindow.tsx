@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import BitmapIcon from '@/components/visual/BitmapIcon'
 
 /**
  * The reader's home screen — a contents page rather than a terminal listing,
@@ -19,19 +20,34 @@ export type IndexPost = {
   subtitle?: string
   href: string
   external?: boolean
+  /** served path of the post's header image */
+  cover?: string
 }
 
 function Row({ post }: { post: IndexPost }) {
   const inner = (
     <>
-      <span className="font-mono text-[11px] text-[#a89e8d] tabular-nums">{post.date}</span>
-      <span className="block text-[1.05rem] leading-snug text-[#1f1b16] group-hover:underline">
-        {post.title}
-        {post.external && <span className="pl-1.5 text-[0.7em] text-[#a89e8d]">↗</span>}
+      {/* Every post already ships a header image and the index showed none of
+          them. One bit on paper reads as a newspaper cut, and it gives 25
+          near-identical rows something to tell them apart. */}
+      {post.cover && <BitmapIcon
+        src={post.cover}
+        grid={30}
+        size={44}
+        ink={[36, 31, 25]}
+        contrast={1.7}
+        className="mt-[3px] shrink-0 border border-[#ddd6c8]"
+      />}
+      <span className="block space-y-0.5">
+        <span className="block font-mono text-[11px] text-[#a89e8d] tabular-nums">{post.date}</span>
+        <span className="block text-[1.05rem] leading-snug text-[#1f1b16] group-hover:underline">
+          {post.title}
+          {post.external && <span className="pl-1.5 text-[0.7em] text-[#a89e8d]">↗</span>}
+        </span>
+        {post.subtitle && (
+          <span className="block text-[0.9rem] leading-snug text-[#5d564c]">{post.subtitle}</span>
+        )}
       </span>
-      {post.subtitle && (
-        <span className="block text-[0.9rem] leading-snug text-[#5d564c]">{post.subtitle}</span>
-      )}
     </>
   )
 
@@ -39,7 +55,7 @@ function Row({ post }: { post: IndexPost }) {
   // the middle, with its date at the foot of one column and its title at the
   // head of the next
   const className =
-    'group block space-y-0.5 break-inside-avoid border-b border-[#e5ded0] py-3 last:border-0'
+    'group flex items-start gap-3.5 break-inside-avoid border-b border-[#e5ded0] py-3 last:border-0'
 
   return post.external ? (
     <a href={post.href} target="_blank" rel="noopener noreferrer" className={className}>

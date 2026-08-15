@@ -1,6 +1,5 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import DesktopIcons from './DesktopIcons'
@@ -11,15 +10,8 @@ import WindowChrome from './WindowChrome'
 import { useViewMode } from './ViewModeProvider'
 import AgentView from '@/components/agent/AgentView'
 import TerminalSession from '@/components/terminal/TerminalSession'
-import { presetForRoute, shapeForRoute } from '@/lib/dither'
 import { justBooted } from '@/lib/boot-store'
 import type { PageMeta } from '@/lib/sessions'
-
-// WebGL must not run during SSR
-const PaperBackground = dynamic(
-  () => import('@/components/visual/PaperBackground'),
-  { ssr: false },
-)
 
 interface Props {
   page: PageMeta
@@ -28,7 +20,7 @@ interface Props {
 export default function PageLayout({ page }: Props) {
   const router = useRouter()
   const pathname = usePathname()
-  const { mode, shapeOverride } = useViewMode()
+  const { mode } = useViewMode()
 
   const isAgent = mode === 'agent'
   // plays once, right after the CRT handover
@@ -47,13 +39,10 @@ export default function PageLayout({ page }: Props) {
             'h-[100dvh] overflow-hidden'
       }`}
     >
-      {!isAgent && (
-        <PaperBackground
-          shape={shapeOverride ?? shapeForRoute(pathname)}
-          preset={presetForRoute(pathname)}
-        />
-      )}
-
+      {/* The desk is a flat grey. A photograph behind the window was competing
+          with the writing in front of it, and the dither now lives where it
+          actually looks good: post covers and desk icons, at bitmap size.
+          The shader background survives on /design, where you tune it. */}
       {!isAgent && <DesktopIcons />}
 
       {isAgent ? (
@@ -65,7 +54,9 @@ export default function PageLayout({ page }: Props) {
         // The photo behind is wallpaper; this is a window sitting on it.
         // pointer-events-none so the desktop underneath stays clickable — this
         // wrapper spans the viewport but only the window itself is solid.
-        <div className="pointer-events-none relative z-10 flex h-full w-full justify-center overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
+        // centred on the desk: now that the window is only as tall as its
+        // content, anchoring it to the top left a growing empty margin below it
+        <div className="pointer-events-none relative z-10 flex h-full w-full items-center justify-center overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
           <WindowChrome title={`${page.session.prompt}  —  terminal`}>
             <TerminalTabs />
             <TerminalSession

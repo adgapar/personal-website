@@ -74,8 +74,8 @@ export default function DocumentWindow({
                 // read as buttons at rest rather than only under the pointer
                 className={`border px-2 py-0.5 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
                   copied
-                    ? 'border-[var(--success)] bg-[rgba(110,231,183,0.14)] text-[var(--success)]'
-                    : 'border-[rgba(125,211,252,0.4)] bg-[rgba(125,211,252,0.08)] text-[rgba(125,211,252,0.9)] hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--bg)]'
+                    ? 'border-[var(--success)] text-[var(--success)]'
+                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--surface)]'
                 }`}
               >
                 {copied ? '✓ copied' : '⧉ copy .md'}
@@ -89,8 +89,8 @@ export default function DocumentWindow({
                 // of its two states you are in without reading the label
                 className={`border px-2 py-0.5 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
                   showSource
-                    ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]'
-                    : 'border-[rgba(125,211,252,0.4)] bg-[rgba(125,211,252,0.08)] text-[rgba(125,211,252,0.9)] hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--bg)]'
+                    ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--surface)]'
+                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--surface)]'
                 }`}
               >
                 {showSource ? '¶ rendered' : '.md'}

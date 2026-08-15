@@ -1,20 +1,13 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { presetForRoute } from '@/lib/dither'
 import { TITLE_BAR, WINDOW_FRAME } from '@/lib/window-style'
 
-const PaperBackground = dynamic(
-  () => import('@/components/visual/PaperBackground'),
-  { ssr: false },
-)
-
 /**
- * The reader: one window on the wallpaper, with the list of pieces in its own
- * pane on the left and whatever is open on the right.
+ * The reader: one window on the desk, with the list of pieces in its own pane on
+ * the left and whatever is open on the right.
  *
  * One window, not two side by side — a sidebar and the thing it selects are one
  * app, and two frames would claim they are separate programs that happen to be
@@ -93,7 +86,6 @@ export default function ReaderShell({
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[var(--bg)]">
-      <PaperBackground shape="sphere" preset={presetForRoute('/reader')} />
 
       <div className="relative z-10 flex h-full justify-center px-2 py-2 sm:px-6 sm:py-8">
         {/* the window */}
@@ -116,15 +108,15 @@ export default function ReaderShell({
             >
               reader
             </Link>
-            <span className="text-[10px] tracking-widest text-[var(--dim)]">
+            <span className="text-[10px] tracking-widest text-[var(--chrome)]">
               {total} pieces
             </span>
             <Link
               href="/writing"
               aria-label="Close"
               title="back to the terminal"
-              // same red as the terminal's close, for the same reason
-              className="ml-auto shrink-0 border border-[rgba(252,165,165,0.35)] px-1.5 text-[9px] leading-4 text-[rgba(252,165,165,0.65)] transition-colors duration-200 hover:border-[var(--error)] hover:text-[var(--error)]"
+              // same mark as the terminal's close, for the same reason
+              className="ml-auto shrink-0 px-1 text-[11px] leading-4 text-[var(--chrome)] transition-colors duration-200 hover:text-[var(--error)]"
             >
               ✕
             </Link>
@@ -148,12 +140,11 @@ export default function ReaderShell({
                       role="tab"
                       aria-selected={on}
                       onClick={() => setTab(key)}
-                      className={`-mb-px flex items-baseline gap-1.5 border border-b-0 px-2.5 py-1 text-[10px] tracking-widest transition-colors duration-150 ${
+                      className={`-mb-px flex items-baseline gap-1.5 border-b-2 px-2 py-1.5 text-[10px] tracking-widest transition-colors duration-150 ${
                         on
-                          ? 'border-[var(--border)] text-[var(--warm)]'
-                          : 'border-transparent text-[var(--dim)] hover:text-[var(--fg)]'
+                          ? 'border-[var(--fg)] text-[var(--fg)]'
+                          : 'border-transparent text-[var(--chrome)] hover:text-[var(--fg)]'
                       }`}
-                      style={on ? { background: 'rgba(255,255,255,0.03)' } : undefined}
                     >
                       {key}
                       <span className={on ? 'text-[var(--dim)]' : undefined}>

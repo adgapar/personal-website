@@ -25,8 +25,11 @@ export default function TerminalTabs() {
     <div
       // no scroll container: the row is as tall and wide as the tabs need, and
       // wraps rather than scrolling if a window ever gets narrow enough
-      className="flex flex-wrap items-end gap-px border-b border-[var(--border)] px-2 pt-1.5"
-      style={{ background: 'rgba(20,18,16,0.6)' }}
+      //
+      // The idle tabs sit at 3.3:1 against the paper. You can read them when you
+      // look for them, and they stop existing while you are reading — which is
+      // the whole argument for the redesign.
+      className="flex flex-wrap items-end gap-1 border-b border-[var(--border)] bg-[var(--surface)] px-4 sm:px-6"
     >
       {sessions.map(({ name, href }) => {
         const active = pathname === href
@@ -35,17 +38,11 @@ export default function TerminalTabs() {
             key={href}
             href={href}
             aria-current={active ? 'page' : undefined}
-            className={`-mb-px shrink-0 border border-b-0 px-3 py-1 text-[10px] tracking-widest transition-colors duration-150 ${
+            className={`-mb-px shrink-0 border-b-2 px-2 py-2 text-[11px] tracking-wider transition-colors duration-150 ${
               active
-                ? 'border-[var(--border)] text-[var(--accent)]'
-                : 'border-transparent text-[var(--muted)] hover:text-[var(--fg)]'
+                ? 'border-[var(--fg)] text-[var(--fg)]'
+                : 'border-transparent text-[var(--chrome)] hover:text-[var(--fg)]'
             }`}
-            style={
-              active
-                ? // the active tab merges into the body below it
-                  { background: 'rgba(12,11,10,0.93)', borderBottomColor: 'transparent' }
-                : undefined
-            }
           >
             {name}
           </Link>

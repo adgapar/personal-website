@@ -6,25 +6,28 @@ import type { CSSProperties } from 'react'
  *
  * It lived in three components and had already drifted — moving a window should
  * never change how it is drawn.
+ *
+ * Daylight: a white sheet on a grey desk. Depth comes from one soft shadow, not
+ * from a bevel and not from letting the desk show through — the body is opaque,
+ * so the text always sits on paper.
  */
 
 export const WINDOW_FRAME: CSSProperties = {
-  // bevel: light above, dark below, like a raised surface
-  border: '1px solid var(--border)',
-  borderTopColor: '#3a3733',
-  borderLeftColor: '#332f2b',
-  borderBottomColor: '#141210',
-  borderRightColor: '#141210',
-  boxShadow: '0 24px 70px -12px rgba(0,0,0,0.85), 0 2px 8px rgba(0,0,0,0.5)',
-  background: 'rgba(12,11,10,0.93)',
+  border: '1px solid var(--hair)',
+  borderRadius: '7px',
+  boxShadow:
+    '0 1px 1px rgba(24,22,18,0.04), 0 10px 26px -8px rgba(24,22,18,0.16)',
+  background: 'var(--surface)',
+  overflow: 'hidden',
 }
 
 export const WINDOW_FRAME_LIFTED: CSSProperties = {
   ...WINDOW_FRAME,
-  boxShadow: '0 40px 90px -10px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)',
+  boxShadow:
+    '0 2px 3px rgba(24,22,18,0.05), 0 22px 44px -10px rgba(24,22,18,0.22)',
 }
 
+/** No gradient and no colour: the title bar is the quietest thing on screen. */
 export const TITLE_BAR: CSSProperties = {
-  background:
-    'linear-gradient(to bottom, rgba(45,41,37,0.95), rgba(26,24,21,0.95))',
+  background: 'var(--surface)',
 }

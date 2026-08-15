@@ -8,7 +8,7 @@ export default function Icon() {
     (
       <div
         style={{
-          background: '#0c0b0a',
+          background: '#ffffff',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -17,7 +17,7 @@ export default function Icon() {
           fontFamily: 'monospace',
           fontSize: 18,
           fontWeight: 700,
-          color: '#7dd3fc',
+          color: '#0a6ba8',
         }}
       >
         {'>\u005f'}

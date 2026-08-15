@@ -108,21 +108,23 @@ export default function WindowChrome({ title, children }: Props) {
         // stays reachable, and the window takes them back for itself
         fullscreen
           ? 'pointer-events-auto fixed inset-0 z-40 flex flex-col'
-          : `pointer-events-auto relative flex w-full max-w-4xl flex-col self-start ${
+          : `pointer-events-auto relative flex w-full max-w-3xl flex-col ${
               dragging ? '' : 'transition-[max-width,transform] duration-300'
             }`
       }
       style={{
-        // the terminal body reads this for its scroll height
-        ['--term-max-h' as string]: fullscreen ? 'calc(100vh - 6.75rem)' : '68vh',
+        // the terminal body reads this as a ceiling, not a fixed height — a
+        // window with four lines in it should be four lines tall
+        ['--term-max-h' as string]: fullscreen ? 'calc(100vh - 6.75rem)' : '70vh',
         ...(dragging ? WINDOW_FRAME_LIFTED : WINDOW_FRAME),
         transform: fullscreen ? undefined : `translate(${offset.x}px, ${offset.y}px)`,
         ...(fullscreen
           ? {
               // nothing to be raised above when it fills the screen
               borderColor: 'transparent',
+              borderRadius: 0,
               boxShadow: 'none',
-              background: 'rgba(12,11,10,0.97)',
+              background: 'var(--surface)',
             }
           : {}),
       }}
@@ -134,29 +136,26 @@ export default function WindowChrome({ title, children }: Props) {
         onPointerCancel={endDrag}
         onDoubleClick={() => setOffset({ x: 0, y: 0 })}
         title={fullscreen ? undefined : 'drag to move · double-click to recentre'}
-        className={`flex touch-none items-center gap-2 border-b border-[var(--border)] px-3 py-1.5 select-none ${
+        className={`relative flex touch-none items-center gap-3 border-b border-[var(--border)] px-6 py-2 select-none sm:px-8 ${
           fullscreen ? '' : dragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         style={TITLE_BAR}
       >
-        <span className="text-[10px] tracking-widest text-[var(--muted)]">
-          {title}
+        {/* The title is centred and the controls sit right, so the bar has no
+            left-hand furniture to fight the content's left edge. */}
+        <span className="pointer-events-none absolute inset-x-0 text-center text-[10px] tracking-widest text-[var(--chrome)]">
+          {nagging ? 'nice try — this one stays open' : title}
         </span>
 
-        {nagging && (
-          <span className="text-[10px] tracking-widest text-[var(--warm)]">
-            nice try — this one stays open
-          </span>
-        )}
-
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-3">
+          {/* No boxes. Three faint marks that come forward only when reached for. */}
           <button
             type="button"
             onClick={() => setMinimized(!minimized)}
             aria-label={minimized ? 'Restore' : 'Minimize'}
-            className="h-4 w-5 border border-[var(--border)] text-[9px] leading-none text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            className="text-[11px] leading-none text-[var(--chrome)] transition-colors duration-200 hover:text-[var(--fg)]"
           >
-            {minimized ? '▢' : '─'}
+            {minimized ? '▫' : '–'}
           </button>
           <button
             type="button"
@@ -164,7 +163,7 @@ export default function WindowChrome({ title, children }: Props) {
               setWindowState({ maximized: !maximized, offset: { x: 0, y: 0 } })
             }
             aria-label={maximized ? 'Restore size' : 'Maximize'}
-            className="h-4 w-5 border border-[var(--border)] text-[9px] leading-none text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            className="text-[11px] leading-none text-[var(--chrome)] transition-colors duration-200 hover:text-[var(--fg)]"
           >
             □
           </button>
@@ -175,10 +174,9 @@ export default function WindowChrome({ title, children }: Props) {
               setTimeout(() => setNagging(false), 2200)
             }}
             aria-label="Close"
-            // the only button that carries colour at rest: close is the one
-            // action with a consequence, and red is what people scan for. Held
-            // back to a tint so the title bar stays quiet until you reach for it
-            className="h-4 w-5 border border-[rgba(252,165,165,0.35)] text-[9px] leading-none text-[rgba(252,165,165,0.65)] transition-colors duration-200 hover:border-[var(--error)] hover:text-[var(--error)]"
+            // close is the one action with a consequence, so it is the one mark
+            // that turns red — but only once you reach for it
+            className="text-[11px] leading-none text-[var(--chrome)] transition-colors duration-200 hover:text-[var(--error)]"
           >
             ✕
           </button>

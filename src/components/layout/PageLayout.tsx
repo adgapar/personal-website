@@ -28,7 +28,7 @@ export default function PageLayout({ page }: Props) {
 
   return (
     <div
-      className={`relative bg-[var(--bg)] text-[var(--fg)] font-mono text-base flex flex-col items-center ${
+      className={`desk relative flex flex-col items-center font-mono text-base text-[var(--fg)] ${
         warmingUp ? 'screen-on ' : ''
       }${
         isAgent

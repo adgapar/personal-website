@@ -12,20 +12,68 @@
      on white, and Terminal.app ships Basic, not Pro. */
   color-scheme: light;
 
-  --bg:      #eceae5;  /* the desk */
-  --surface: #ffffff;  /* the window */
-  --fg:      #1b1b1f;  /* ink — body text, 17:1 on white */
+  /* The desk is a surface, not a brighter shade of the paper. At #eceae5 against
+     a pure white window there was 1.20:1 between them, so the whole screen read
+     as one white field and the window stopped being an object. 1.36:1 is still
+     quiet and the sheet now sits on something. */
+  --bg:      #dedad0;  /* the desk */
+  --surface: #fdfcf9;  /* the window — warm, like the reader's paper */
+  --fg:      #1a1a17;  /* ink — body text, 17:1 */
   --accent:  #0a6ba8;
-  --muted:   #6e6c66;  /* secondary text */
-  --dim:     #a19f99;  /* the faintest readable — placeholders, row numbers */
-  --chrome:  #b4b2ac;  /* title bar, idle tabs, status bar — 3.3:1, on purpose */
+  --muted:   #6b675f;  /* secondary content — 5.5:1 */
+  --chrome:  #8d8981;  /* furniture: title, idle tabs, status — 3.9:1 */
+  --dim:     #a8a399;  /* the faintest mark — placeholders, row numbers */
   --warm:    #8a5b00;
   --success: #1f7a4d;
   --error:   #a13b2e;
   --info:    #5b6b7a;
-  --border:  #e6e3dd;  /* hairline inside a window */
-  --hair:    #d9d6ce;  /* the window's own edge */
+  --border:  #e9e5da;  /* hairline inside a window */
+  --hair:    #c8c2b4;  /* the window's own edge, against the desk */
+
+  /* Window controls. The one place on the site where colour is conventional,
+     and the one place it is load-bearing: three grey glyphs at 3.3:1 were
+     invisible and unaimable. Held back from the Apple originals so they sit in
+     this palette rather than borrowing another one. */
+  --ctl-close: #dd6154;
+  --ctl-min:   #dcaa4a;
+  --ctl-max:   #57a273;
 }
+
+/* The desk catches a little light where the window sits. Tonal variation, not
+   detail — the flat field was the other half of why this read as blank. */
+.desk {
+  background:
+    radial-gradient(115% 75% at 50% 18%, rgba(255, 253, 247, 0.75) 0%, rgba(255, 253, 247, 0) 62%),
+    var(--bg);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* the scrollback's own scrollbar, thin and out of the way */
+.term-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hair) transparent;
+}
+
+.term-scroll::-webkit-scrollbar { width: 10px; }
+.term-scroll::-webkit-scrollbar-track { background: transparent; }
+
+.term-scroll::-webkit-scrollbar-thumb {
+  background: var(--hair);
+  border: 3px solid var(--surface);
+  border-radius: 5px;
+}
+
+.term-scroll::-webkit-scrollbar-thumb:hover { background: var(--chrome); }
 
 body {
   background: var(--bg);

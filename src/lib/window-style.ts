@@ -14,17 +14,28 @@ import type { CSSProperties } from 'react'
 
 export const WINDOW_FRAME: CSSProperties = {
   border: '1px solid var(--hair)',
-  borderRadius: '7px',
-  boxShadow:
-    '0 1px 1px rgba(24,22,18,0.04), 0 10px 26px -8px rgba(24,22,18,0.16)',
+  borderRadius: '10px',
+  // Four stops, not one. A single soft shadow under a hairline is what made the
+  // sheet look printed on the desk rather than resting on it: the contact
+  // shadow does the sitting, the wide one does the lifting.
+  boxShadow: [
+    '0 1px 1px rgba(38,32,20,0.05)',
+    '0 2px 4px rgba(38,32,20,0.05)',
+    '0 8px 16px -6px rgba(38,32,20,0.10)',
+    '0 28px 48px -16px rgba(38,32,20,0.16)',
+  ].join(', '),
   background: 'var(--surface)',
   overflow: 'hidden',
 }
 
 export const WINDOW_FRAME_LIFTED: CSSProperties = {
   ...WINDOW_FRAME,
-  boxShadow:
-    '0 2px 3px rgba(24,22,18,0.05), 0 22px 44px -10px rgba(24,22,18,0.22)',
+  boxShadow: [
+    '0 2px 2px rgba(38,32,20,0.06)',
+    '0 6px 10px rgba(38,32,20,0.06)',
+    '0 18px 32px -8px rgba(38,32,20,0.14)',
+    '0 48px 72px -20px rgba(38,32,20,0.22)',
+  ].join(', '),
 }
 
 /** No gradient and no colour: the title bar is the quietest thing on screen. */

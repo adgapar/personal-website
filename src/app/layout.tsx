@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { Geist_Mono, IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
 import BootSequence from "@/components/boot/BootSequence";
 import ViewModeProvider from "@/components/layout/ViewModeProvider";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
+  variable: "--font-jetbrains",
   subsets: ["latin"],
+});
+
+// candidates, for comparing on the real page
+const geistMono = Geist_Mono({ variable: "--font-geist", subsets: ["latin"] });
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -41,7 +49,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${jetbrainsMono.variable} antialiased`}>
+      <body
+        className={`${jetbrainsMono.variable} ${geistMono.variable} ${plexMono.variable} antialiased`}
+        style={{ ["--font-mono" as string]: "var(--font-jetbrains)" }}
+      >
         <ViewModeProvider>
           <BootSequence />
           {children}

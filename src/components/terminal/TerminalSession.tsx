@@ -426,7 +426,7 @@ export default function TerminalSession({
       ref={scrollRef}
       // a fixed height, not a ceiling: output accumulates inside it and the
       // scrollbar arrives when it is needed
-      className="flex h-[var(--term-max-h,68vh)] shrink-0 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
+      className="term-scroll flex h-[var(--term-max-h,68vh)] shrink-0 cursor-text flex-col overflow-y-auto overscroll-contain font-mono text-[15px] text-[var(--fg)]"
       onClick={focusInput}
     >
       {/* the same left edge as the title bar, the tabs and the status bar */}
@@ -440,7 +440,7 @@ export default function TerminalSession({
         {entries.map((entry, i) => (
           <div key={i} className="space-y-2">
             <div className="flex items-baseline gap-3">
-              <span className="text-[var(--accent)] text-[10px] tracking-widest select-none shrink-0">
+              <span className="shrink-0 font-medium text-[var(--accent)] select-none">
                 {prompt}
               </span>
               <span className="text-[var(--fg)]">{entry.input}</span>
@@ -458,7 +458,7 @@ export default function TerminalSession({
         {/* the live prompt, always last */}
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <span className="text-[var(--accent)] text-[10px] tracking-widest select-none shrink-0">
+            <span className="shrink-0 font-medium text-[var(--accent)] select-none">
               {prompt}
             </span>
             {instant ? (

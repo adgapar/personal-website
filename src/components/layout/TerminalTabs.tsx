@@ -38,10 +38,10 @@ export default function TerminalTabs() {
             key={href}
             href={href}
             aria-current={active ? 'page' : undefined}
-            className={`-mb-px shrink-0 border-b-2 px-2 py-2 text-[11px] tracking-wider transition-colors duration-150 ${
+            className={`-mb-px shrink-0 border-b-2 px-2.5 py-2 text-[12px] tracking-wide transition-colors duration-150 ${
               active
-                ? 'border-[var(--fg)] text-[var(--fg)]'
-                : 'border-transparent text-[var(--chrome)] hover:text-[var(--fg)]'
+                ? 'border-[var(--accent)] font-medium text-[var(--fg)]'
+                : 'border-transparent text-[var(--chrome)] hover:border-[var(--hair)] hover:text-[var(--fg)]'
             }`}
           >
             {name}

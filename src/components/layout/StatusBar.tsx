@@ -10,7 +10,7 @@ export default function StatusBar({ hint }: { hint?: string }) {
   const { mode, setMode } = useViewMode()
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--border)] bg-[var(--surface)] px-6 py-2 text-[10px] tracking-widest select-none sm:px-8">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--border)] bg-[var(--surface)] px-6 py-2 text-[11px] tracking-wide select-none sm:px-8">
       {hint && <span className="text-[var(--chrome)]">{hint}</span>}
 
       <div className="ml-auto flex items-center gap-3" role="group" aria-label="Reading mode">

@@ -147,43 +147,54 @@ export default function WindowChrome({ title, children }: Props) {
       >
         {/* The title is centred and the controls sit right, so the bar has no
             left-hand furniture to fight the content's left edge. */}
-        <span className="pointer-events-none absolute inset-x-0 text-center text-[10px] tracking-widest text-[var(--chrome)]">
+        <span className="pointer-events-none absolute inset-x-0 text-center text-[11px] tracking-wide text-[var(--chrome)]">
           {nagging ? 'nice try — this one stays open' : title}
         </span>
 
-        <div className="ml-auto flex items-center gap-3">
-          {/* No boxes. Three faint marks that come forward only when reached for. */}
-          <button
-            type="button"
-            onClick={() => setMinimized(!minimized)}
-            aria-label={minimized ? 'Restore' : 'Minimize'}
-            className="text-[11px] leading-none text-[var(--chrome)] transition-colors duration-200 hover:text-[var(--fg)]"
-          >
-            {minimized ? '▫' : '–'}
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              setWindowState({ maximized: !maximized, offset: { x: 0, y: 0 } })
-            }
-            aria-label={maximized ? 'Restore size' : 'Maximize'}
-            className="text-[11px] leading-none text-[var(--chrome)] transition-colors duration-200 hover:text-[var(--fg)]"
-          >
-            □
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setNagging(true)
-              setTimeout(() => setNagging(false), 2200)
-            }}
-            aria-label="Close"
-            // close is the one action with a consequence, so it is the one mark
-            // that turns red — but only once you reach for it
-            className="text-[11px] leading-none text-[var(--chrome)] transition-colors duration-200 hover:text-[var(--error)]"
-          >
-            ✕
-          </button>
+        {/* Three dots, the one conventional place colour belongs. Grey glyphs at
+            3.3:1 were invisible and had no hit area — you could not see them and
+            you could not aim at them. The glyph appears inside on hover, so the
+            bar is still quiet at rest. */}
+        <div className="group/ctl ml-auto flex items-center gap-2">
+          {[
+            {
+              key: 'min',
+              tint: 'var(--ctl-min)',
+              label: minimized ? 'Restore' : 'Minimize',
+              glyph: minimized ? '+' : '–',
+              onClick: () => setMinimized(!minimized),
+            },
+            {
+              key: 'max',
+              tint: 'var(--ctl-max)',
+              label: maximized ? 'Restore size' : 'Maximize',
+              glyph: maximized ? '⤢' : '□',
+              onClick: () =>
+                setWindowState({ maximized: !maximized, offset: { x: 0, y: 0 } }),
+            },
+            {
+              key: 'close',
+              tint: 'var(--ctl-close)',
+              label: 'Close',
+              glyph: '✕',
+              onClick: () => {
+                setNagging(true)
+                setTimeout(() => setNagging(false), 2200)
+              },
+            },
+          ].map((ctl) => (
+            <button
+              key={ctl.key}
+              type="button"
+              onClick={ctl.onClick}
+              aria-label={ctl.label}
+              title={ctl.label}
+              style={{ background: ctl.tint }}
+              className="flex h-[11px] w-[11px] items-center justify-center rounded-full text-[8px] leading-none text-transparent transition-[filter,color] duration-150 hover:brightness-95 group-hover/ctl:text-[rgba(38,32,20,0.55)]"
+            >
+              {ctl.glyph}
+            </button>
+          ))}
         </div>
       </div>
 

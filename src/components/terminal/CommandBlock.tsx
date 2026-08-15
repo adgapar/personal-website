@@ -9,6 +9,11 @@ import TypedText from './TypedText'
  * The output is withheld until the command has finished typing — a shell prints
  * a result *after* the command, and showing both at once made the session look
  * like it was replaying a transcript rather than running.
+ *
+ * Withheld, but not unmounted. The output holds its space while it waits, so a
+ * block is its final height from the moment it appears. Unmounting it meant each
+ * block grew from one line to its full size as it typed, and the window grew
+ * with it.
  */
 export default function CommandBlock({
   cmd,
@@ -62,7 +67,12 @@ export default function CommandBlock({
         )}
       </div>
 
-      {typed && children}
+      <div
+        style={typed ? undefined : { visibility: 'hidden' }}
+        aria-hidden={typed ? undefined : true}
+      >
+        {children}
+      </div>
     </>
   )
 }

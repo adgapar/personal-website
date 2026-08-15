@@ -262,6 +262,174 @@ export default function TerminalSession({
     [inputValue, historyIndex, commandHistory, commands, blocks, onNavigate, echo, matches, cycle, base]
   )
 
+  /**
+   * One session block. Lifted out of the render so the same markup can be
+   * drawn twice: once for real, and once as invisible ballast that holds the
+   * height of what has not been typed yet.
+   *
+   * The ballast always draws `instant`. A live CommandBlock withholds its output
+   * until the command has finished typing, so ballast that animated would
+   * reserve the height of a `$ line` and nothing else — and the window would
+   * still grow, just later.
+   */
+  const renderBlock = (block: SessionBlock, settled = false) => (
+    <CommandBlock cmd={block.cmd} instant={settled || instant}>
+      {block.action ? (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); runCommand(block.action!.run) }}
+            className="border border-[var(--accent)] px-2.5 py-1 text-xs tracking-widest text-[var(--accent)] transition-colors duration-200 hover:bg-[var(--accent)] hover:text-[var(--bg)]"
+          >
+            {block.action.label}
+          </button>
+          {block.action.hint && (
+            <span className="text-xs text-[var(--muted)]">{block.action.hint}</span>
+          )}
+        </div>
+      ) : block.list ? (
+      <div className="space-y-3">
+        {block.list.items.map((item, j) => (
+          <div
+            key={j}
+            onClick={item.run ? (e) => { e.stopPropagation(); runCommand(item.run!) } : undefined}
+            className={item.run ? 'group -mx-2 rounded-sm px-2 py-0.5 hover:bg-black/[0.035]' : undefined}
+          >
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="text-[var(--dim)] w-4 shrink-0 select-none">{j + 1}</span>
+            {item.meta && (
+              <span className="text-[var(--dim)] text-xs shrink-0 w-24">{item.meta}</span>
+            )}
+            {/* the title is the content of the row, so it is ink — amber
+                is reserved for one job now: arguments in a command */}
+            <span className={item.run ? 'group-hover:text-[var(--accent)]' : undefined}>{item.title}</span>
+            {/* a tag is a word. The box around it was one more shape to
+                count in a list that already has five columns. */}
+            {item.tag && (
+              <span className="shrink-0 text-xs tracking-wide text-[var(--muted)]">
+                {item.tag}
+              </span>
+            )}
+            {item.status && (
+              <span className={`shrink-0 ml-auto ${statusColor('status', item.status)}`}>{item.status}</span>
+            )}
+          </div>
+          {item.summary && (
+            <div className="pl-7 text-xs text-[var(--muted)]">{item.summary}</div>
+          )}
+          </div>
+        ))}
+        {block.list.hint && (
+          <div className="text-[var(--muted)] text-xs pt-1">{block.list.hint}</div>
+        )}
+      </div>
+    ) : block.table ? (
+      <div className="space-y-1 overflow-x-auto">
+        <div className="flex gap-6 text-[var(--muted)] text-xs tracking-widest uppercase pb-1 border-b border-[var(--border)]">
+          <span className="w-4 shrink-0">#</span>
+          {block.table.headers.map((h, j) => (
+            <span key={j} className={colClass(j, block.table!.headers.length, block.table!.colWidths)}>{h}</span>
+          ))}
+        </div>
+        {block.table.rows.map((row, j) => {
+          const rowContent = (
+            <>
+              <span className="w-4 shrink-0 text-[var(--dim)] select-none">{j + 1}</span>
+              {row.cols.map((col, k) => (
+                <span
+                  key={k}
+                  className={`${colClass(k, row.cols.length, block.table!.colWidths)} ${k === 0 ? '' : statusColor(block.table!.headers[k] ?? '', col)}`}
+                >
+                  {col}
+                </span>
+              ))}
+            </>
+          )
+          const rowClass =
+            'flex gap-6 items-baseline hover:text-[var(--accent)] transition-colors duration-200 group'
+          return row.href && isInternal(row.href) ? (
+            <Link key={j} href={row.href} className={rowClass}>
+              {rowContent}
+            </Link>
+          ) : row.href ? (
+            <a key={j} href={row.href} {...externalLinkProps(row.href)} className={rowClass}>
+              {rowContent}
+            </a>
+          ) : (
+            <div key={j} className="flex gap-6 items-baseline">{rowContent}</div>
+          )
+        })}
+        {block.table.hint && (
+          <div className="text-[var(--muted)] text-xs pt-1">{block.table.hint}</div>
+        )}
+      </div>
+    ) : block.log ? (
+      <div>
+        {block.log.entries.map((entry, j) => (
+          <div key={j}>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-[var(--dim)] text-xs shrink-0 whitespace-nowrap w-[5.5rem]">{entry.date}</span>
+              {entry.tag && (
+                <span className="shrink-0 text-xs tracking-wide text-[var(--muted)]">{entry.tag}</span>
+              )}
+              <span className="text-[var(--muted)]">{entry.content}</span>
+              {entry.href &&
+                (isInternal(entry.href) ? (
+                  <Link
+                    href={entry.href}
+                    className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-xs tracking-wide shrink-0"
+                  >
+                    (read)
+                  </Link>
+                ) : (
+                  <a
+                    href={entry.href}
+                    {...externalLinkProps(entry.href)}
+                    className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-xs tracking-wide shrink-0"
+                  >
+                    (link ↗)
+                  </a>
+                ))}
+            </div>
+            {j < block.log!.entries.length - 1 && (
+              <div className="border-t border-[var(--border)] my-2 opacity-40" />
+            )}
+          </div>
+        ))}
+      </div>
+    ) : block.linkRow ? (
+        <div className="flex flex-wrap gap-x-5 gap-y-1">
+          {block.lines.map((line, j) =>
+            line.href ? (
+              <a
+                key={j}
+                href={line.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--muted)] hover:text-[var(--accent)] transition-colors duration-200 tracking-wide"
+              >
+                {line.content}
+              </a>
+            ) : (
+              <span key={j} className="text-[var(--muted)] tracking-wide">
+                {line.content}
+              </span>
+            )
+          )}
+        </div>
+      ) : (
+        <div className={block.avatar ? 'flex gap-5 items-start' : undefined}>
+          {block.avatar && <DitheredAvatar src={block.avatar} />}
+          <div className="space-y-1.5">
+            {block.lines.map((line, j) => (
+              <TerminalLine key={j} line={line} />
+            ))}
+          </div>
+        </div>
+      )}
+    </CommandBlock>
+  )
+
   return (
     <div
       ref={scrollRef}
@@ -271,165 +439,9 @@ export default function TerminalSession({
     >
       {/* the same left edge as the title bar, the tabs and the status bar */}
       <div className="w-full space-y-8 px-6 pt-7 pb-9 sm:px-8">
-        {/* Static session blocks */}
+        {/* what has been typed so far */}
         {blocks.slice(0, visibleCount).map((block, i) => (
-          <div key={i}>
-            <CommandBlock cmd={block.cmd} instant={instant}>
-            {block.action ? (
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); runCommand(block.action!.run) }}
-                  className="border border-[var(--accent)] px-2.5 py-1 text-xs tracking-widest text-[var(--accent)] transition-colors duration-200 hover:bg-[var(--accent)] hover:text-[var(--bg)]"
-                >
-                  {block.action.label}
-                </button>
-                {block.action.hint && (
-                  <span className="text-xs text-[var(--muted)]">{block.action.hint}</span>
-                )}
-              </div>
-            ) : block.list ? (
-            <div className="space-y-3">
-              {block.list.items.map((item, j) => (
-                <div
-                  key={j}
-                  onClick={item.run ? (e) => { e.stopPropagation(); runCommand(item.run!) } : undefined}
-                  className={item.run ? 'group -mx-2 rounded-sm px-2 py-0.5 hover:bg-black/[0.035]' : undefined}
-                >
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="text-[var(--dim)] w-4 shrink-0 select-none">{j + 1}</span>
-                  {item.meta && (
-                    <span className="text-[var(--dim)] text-xs shrink-0 w-24">{item.meta}</span>
-                  )}
-                  {/* the title is the content of the row, so it is ink — amber
-                      is reserved for one job now: arguments in a command */}
-                  <span className={item.run ? 'group-hover:text-[var(--accent)]' : undefined}>{item.title}</span>
-                  {/* a tag is a word. The box around it was one more shape to
-                      count in a list that already has five columns. */}
-                  {item.tag && (
-                    <span className="shrink-0 text-xs tracking-wide text-[var(--muted)]">
-                      {item.tag}
-                    </span>
-                  )}
-                  {item.status && (
-                    <span className={`shrink-0 ml-auto ${statusColor('status', item.status)}`}>{item.status}</span>
-                  )}
-                </div>
-                {item.summary && (
-                  <div className="pl-7 text-xs text-[var(--muted)]">{item.summary}</div>
-                )}
-                </div>
-              ))}
-              {block.list.hint && (
-                <div className="text-[var(--muted)] text-xs pt-1">{block.list.hint}</div>
-              )}
-            </div>
-          ) : block.table ? (
-            <div className="space-y-1 overflow-x-auto">
-              <div className="flex gap-6 text-[var(--muted)] text-xs tracking-widest uppercase pb-1 border-b border-[var(--border)]">
-                <span className="w-4 shrink-0">#</span>
-                {block.table.headers.map((h, j) => (
-                  <span key={j} className={colClass(j, block.table!.headers.length, block.table!.colWidths)}>{h}</span>
-                ))}
-              </div>
-              {block.table.rows.map((row, j) => {
-                const rowContent = (
-                  <>
-                    <span className="w-4 shrink-0 text-[var(--dim)] select-none">{j + 1}</span>
-                    {row.cols.map((col, k) => (
-                      <span
-                        key={k}
-                        className={`${colClass(k, row.cols.length, block.table!.colWidths)} ${k === 0 ? '' : statusColor(block.table!.headers[k] ?? '', col)}`}
-                      >
-                        {col}
-                      </span>
-                    ))}
-                  </>
-                )
-                const rowClass =
-                  'flex gap-6 items-baseline hover:text-[var(--accent)] transition-colors duration-200 group'
-                return row.href && isInternal(row.href) ? (
-                  <Link key={j} href={row.href} className={rowClass}>
-                    {rowContent}
-                  </Link>
-                ) : row.href ? (
-                  <a key={j} href={row.href} {...externalLinkProps(row.href)} className={rowClass}>
-                    {rowContent}
-                  </a>
-                ) : (
-                  <div key={j} className="flex gap-6 items-baseline">{rowContent}</div>
-                )
-              })}
-              {block.table.hint && (
-                <div className="text-[var(--muted)] text-xs pt-1">{block.table.hint}</div>
-              )}
-            </div>
-          ) : block.log ? (
-            <div>
-              {block.log.entries.map((entry, j) => (
-                <div key={j}>
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="text-[var(--dim)] text-xs shrink-0 whitespace-nowrap w-[5.5rem]">{entry.date}</span>
-                    {entry.tag && (
-                      <span className="shrink-0 text-xs tracking-wide text-[var(--muted)]">{entry.tag}</span>
-                    )}
-                    <span className="text-[var(--muted)]">{entry.content}</span>
-                    {entry.href &&
-                      (isInternal(entry.href) ? (
-                        <Link
-                          href={entry.href}
-                          className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-xs tracking-wide shrink-0"
-                        >
-                          (read)
-                        </Link>
-                      ) : (
-                        <a
-                          href={entry.href}
-                          {...externalLinkProps(entry.href)}
-                          className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-xs tracking-wide shrink-0"
-                        >
-                          (link ↗)
-                        </a>
-                      ))}
-                  </div>
-                  {j < block.log!.entries.length - 1 && (
-                    <div className="border-t border-[var(--border)] my-2 opacity-40" />
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : block.linkRow ? (
-              <div className="flex flex-wrap gap-x-5 gap-y-1">
-                {block.lines.map((line, j) =>
-                  line.href ? (
-                    <a
-                      key={j}
-                      href={line.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--muted)] hover:text-[var(--accent)] transition-colors duration-200 tracking-wide"
-                    >
-                      {line.content}
-                    </a>
-                  ) : (
-                    <span key={j} className="text-[var(--muted)] tracking-wide">
-                      {line.content}
-                    </span>
-                  )
-                )}
-              </div>
-            ) : (
-              <div className={block.avatar ? 'flex gap-5 items-start' : undefined}>
-                {block.avatar && <DitheredAvatar src={block.avatar} />}
-                <div className="space-y-1.5">
-                  {block.lines.map((line, j) => (
-                    <TerminalLine key={j} line={line} />
-                  ))}
-                </div>
-              </div>
-            )}
-            </CommandBlock>
-          </div>
+          <div key={i}>{renderBlock(block)}</div>
         ))}
 
         {/* scrollback: each command above the output it produced */}
@@ -532,6 +544,20 @@ export default function TerminalSession({
             </div>
           )}
         </div>
+
+        {/* The blocks that have not arrived yet, drawn but invisible.
+            Without this the window grew a step at a time while the session
+            typed itself out. Holding the full height from the first frame
+            keeps the pane still: the prompt walks down through space that is
+            already there, and the scrollbar appears once rather than four
+            times. */}
+        {visibleCount < blocks.length && (
+          <div aria-hidden className="space-y-8" style={{ visibility: 'hidden' }}>
+            {blocks.slice(visibleCount).map((block, i) => (
+              <div key={i}>{renderBlock(block, true)}</div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

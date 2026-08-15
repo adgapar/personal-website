@@ -1,7 +1,7 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
-import BitmapIcon from '@/components/visual/BitmapIcon'
 
 /**
  * The reader's home screen — a contents page rather than a terminal listing,
@@ -28,16 +28,18 @@ function Row({ post }: { post: IndexPost }) {
   const inner = (
     <>
       {/* Every post already ships a header image and the index showed none of
-          them. One bit on paper reads as a newspaper cut, and it gives 25
-          near-identical rows something to tell them apart. */}
-      {post.cover && <BitmapIcon
-        src={post.cover}
-        grid={30}
-        size={44}
-        ink={[36, 31, 25]}
-        contrast={1.7}
-        className="mt-[3px] shrink-0 border border-[#ddd6c8]"
-      />}
+          them. Shown as it is, small: these covers are pixel art already, and
+          dithering them at 44px only fought their own grid — the dark ones came
+          out as black squares and the rest as noise. */}
+      {post.cover && (
+        <Image
+          src={post.cover}
+          alt=""
+          width={44}
+          height={44}
+          className="mt-[3px] h-11 w-11 shrink-0 border border-[#ddd6c8] object-cover"
+        />
+      )}
       <span className="block space-y-0.5">
         <span className="block font-mono text-[11px] text-[#a89e8d] tabular-nums">{post.date}</span>
         <span className="block text-[1.05rem] leading-snug text-[#1f1b16] group-hover:underline">

@@ -3,20 +3,21 @@
 import { useEffect, useRef, useState } from 'react'
 
 /**
- * A picture of yours, reduced to one bit, in a paper edge.
+ * A photograph, reduced to one bit of ink on paper.
  *
- * This is the whole icon system. There is no drawn artwork anywhere on the desk:
- * a glyph invented for `reader` looked like a page-with-a-folded-corner from any
- * icon set on the internet, said nothing about this site, and gave no way to draw
- * a second icon that was any better. A bitmap of the thing itself is specific by
- * construction, and the next icon is made the same way.
+ * Used for the portrait, where the point is the transformation: a print of a
+ * person that resolves into the person when you touch it. The grid is coarser
+ * than the box it is drawn in, so it reads as halftone rather than as noise.
  *
- * The grid is deliberately coarser than the box it is shown in — a 30×30 bitmap
- * scaled to 48px is how a Mac icon actually looked. Dithering at 1:1 turns the
- * subject into grey mush at this size.
+ * Not used for the post covers or the desk icon, and the difference is worth
+ * writing down. Those are illustrations that already have a pixel grid of their
+ * own, and at 44px a dither grid lands on top of it: the dark ones flattened
+ * into black squares, the rest turned to mud. A photograph has continuous tone
+ * to give up. Artwork does not. Show artwork as it is.
  *
- * Canvas rather than the shader library: it is 40 lines, it needs no WebGL
- * context per icon, and it renders identically on a machine with no GPU.
+ * Canvas rather than the shader library, which offers this same family of image
+ * filters: it is 40 lines, it needs no WebGL context per instance, and it
+ * renders identically on a machine with no GPU.
  */
 
 /** ordered dither — a fixed 4×4 threshold matrix, the classic Bayer kernel */

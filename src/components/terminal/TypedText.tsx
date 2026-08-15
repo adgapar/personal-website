@@ -54,5 +54,16 @@ export default function TypedText({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text])
 
-  return <span className={className}>{text.slice(0, count)}</span>
+  // The full string is laid out from the first frame and only the typed part is
+  // painted. Rendering the substring alone made a line that wraps take fewer
+  // lines while it was still being typed, so the session shrank by a line and
+  // then grew back — a wobble in the pane on every page that has one.
+  return (
+    <span className={`relative inline-block ${className ?? ''}`}>
+      <span className="invisible" aria-hidden>
+        {text}
+      </span>
+      <span className="absolute inset-0">{text.slice(0, count)}</span>
+    </span>
+  )
 }

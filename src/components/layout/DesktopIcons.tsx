@@ -1,8 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import BitmapIcon from '@/components/visual/BitmapIcon'
 import { posts } from '@/data/posts'
 
 /**
@@ -12,8 +12,10 @@ import { posts } from '@/data/posts'
  * Icons for the five tabs would be a second navigation for the same five pages,
  * so the desk holds no pages — only the reader, and whatever apps come after it.
  *
- * Every icon is a 1-bit bitmap of a real picture in a paper edge, never a drawn
- * glyph. See BitmapIcon for why.
+ * Every icon is a real picture in a paper edge, never a drawn glyph: a page with
+ * a folded corner could belong to any website, and there is no way to draw a
+ * second one that is any better. The picture is shown as it is — reducing these
+ * covers to one bit at 44px turned the dark ones into black squares.
  *
  * Kept at z-[5] so a maximized or dragged window passes over it rather than
  * under, and nothing is hidden behind this: the writing tab has a button and
@@ -43,7 +45,13 @@ export default function DesktopIcons() {
         className="group pointer-events-auto flex w-[86px] flex-col items-center gap-2 rounded-sm p-1 text-center focus-visible:outline-none"
       >
         <span className="border border-[var(--fg)] bg-[var(--surface)] p-[3px] leading-none shadow-[2px_2px_0_rgba(27,27,31,0.16)] transition-transform duration-200 group-hover:-translate-y-0.5">
-          <BitmapIcon src={newest?.cover ?? '/profile.jpg'} grid={30} size={44} />
+          <Image
+            src={newest?.cover ?? '/profile.jpg'}
+            alt=""
+            width={44}
+            height={44}
+            className="block h-11 w-11 object-cover"
+          />
         </span>
         <span className="font-mono text-[10px] tracking-widest text-[var(--muted)] transition-colors duration-200 group-hover:text-[var(--fg)] group-focus-visible:text-[var(--fg)]">
           reader

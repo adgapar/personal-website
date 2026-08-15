@@ -113,9 +113,13 @@ export default function WindowChrome({ title, children }: Props) {
             }`
       }
       style={{
-        // the terminal body reads this as a ceiling, not a fixed height — a
-        // window with four lines in it should be four lines tall
-        ['--term-max-h' as string]: fullscreen ? 'calc(100vh - 6.75rem)' : '70vh',
+        // One height for every tab. The tabs are inside this window, so the
+        // window is the thing that does not move when you switch between them —
+        // a frame that resized per tab made the furniture the moving part.
+        // Short pages simply have room left over.
+        ['--term-max-h' as string]: fullscreen
+          ? 'calc(100vh - 6.75rem)'
+          : 'min(68vh, calc(100dvh - 13rem))',
         ...(dragging ? WINDOW_FRAME_LIFTED : WINDOW_FRAME),
         transform: fullscreen ? undefined : `translate(${offset.x}px, ${offset.y}px)`,
         ...(fullscreen

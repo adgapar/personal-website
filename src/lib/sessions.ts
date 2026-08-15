@@ -208,7 +208,7 @@ export const playSession: SessionBlock[] = [
   {
     mdSkip: true,
     lines: [
-      { content: '→ new shell  ·  nothing loaded', style: 'success' },
+      { content: '→ new shell  ·  nothing loaded', style: 'dim' },
       { content: "→ every command works here. 'help' lists the obvious ones.", style: 'muted' },
       { content: "→ the rest you find by typing what a terminal would understand.", style: 'muted' },
     ],

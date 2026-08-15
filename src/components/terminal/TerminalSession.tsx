@@ -262,18 +262,9 @@ export default function TerminalSession({
     [inputValue, historyIndex, commandHistory, commands, blocks, onNavigate, echo, matches, cycle, base]
   )
 
-  /**
-   * One session block. Lifted out of the render so the same markup can be
-   * drawn twice: once for real, and once as invisible ballast that holds the
-   * height of what has not been typed yet.
-   *
-   * The ballast always draws `instant`. A live CommandBlock withholds its output
-   * until the command has finished typing, so ballast that animated would
-   * reserve the height of a `$ line` and nothing else — and the window would
-   * still grow, just later.
-   */
-  const renderBlock = (block: SessionBlock, settled = false) => (
-    <CommandBlock cmd={block.cmd} instant={settled || instant}>
+  /** One session block, lifted out of the render to keep the tree readable. */
+  const renderBlock = (block: SessionBlock) => (
+    <CommandBlock cmd={block.cmd} instant={instant}>
       {block.action ? (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <button
@@ -433,8 +424,9 @@ export default function TerminalSession({
   return (
     <div
       ref={scrollRef}
-      // a ceiling, not a height: four lines of output should be four lines tall
-      className="flex max-h-[var(--term-max-h,70vh)] shrink-0 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
+      // a fixed height, not a ceiling: output accumulates inside it and the
+      // scrollbar arrives when it is needed
+      className="flex h-[var(--term-max-h,68vh)] shrink-0 flex-col overflow-y-auto overscroll-contain text-[var(--fg)] font-mono text-sm cursor-text"
       onClick={focusInput}
     >
       {/* the same left edge as the title bar, the tabs and the status bar */}
@@ -544,20 +536,6 @@ export default function TerminalSession({
             </div>
           )}
         </div>
-
-        {/* The blocks that have not arrived yet, drawn but invisible.
-            Without this the window grew a step at a time while the session
-            typed itself out. Holding the full height from the first frame
-            keeps the pane still: the prompt walks down through space that is
-            already there, and the scrollbar appears once rather than four
-            times. */}
-        {visibleCount < blocks.length && (
-          <div aria-hidden className="space-y-8" style={{ visibility: 'hidden' }}>
-            {blocks.slice(visibleCount).map((block, i) => (
-              <div key={i}>{renderBlock(block, true)}</div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )

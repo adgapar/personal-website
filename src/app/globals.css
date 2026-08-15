@@ -4,6 +4,14 @@
    the weight of the writing — the whole point of the palette is that you stop
    seeing everything that is not the content. */
 :root {
+  /* Light on purpose, and only light. Declared rather than left unset: without
+     it a browser on a dark machine styles the parts it owns — the terminal's
+     input, the scrollbars, the caret — for a dark page that does not exist here.
+     Terminals were dark because a VT100 was phosphor on an unlit tube. Once they
+     became windows on a desktop the defaults went the other way: xterm is black
+     on white, and Terminal.app ships Basic, not Pro. */
+  color-scheme: light;
+
   --bg:      #eceae5;  /* the desk */
   --surface: #ffffff;  /* the window */
   --fg:      #1b1b1f;  /* ink — body text, 17:1 on white */

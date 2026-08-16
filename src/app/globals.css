@@ -96,6 +96,30 @@
 .term .term-scroll { scrollbar-color: var(--hair) transparent; }
 .term .term-scroll::-webkit-scrollbar-thumb { border-color: var(--surface); }
 
+/**
+ * The reader's sidebar is glass; its page is not.
+ *
+ * This is the one place translucency belongs, and it is the opposite of what the
+ * old build did — there a photograph showed through the *text*, which is why
+ * nothing looked solid. Here the desk shows through the *navigation*, while the
+ * page you are reading stays opaque paper. Chrome can be a surface you see past.
+ * Content cannot.
+ *
+ * The window's own background is transparent on this route so there is something
+ * real to see through; the title bar and the page each paint their own.
+ */
+.glass {
+  background: rgba(253, 252, 249, 0.52);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
+
+/* no backdrop-filter (older Firefox, some Linux): fall back to near-opaque
+   rather than to unreadable text on a bare desk */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass { background: rgba(253, 252, 249, 0.94); }
+}
+
 /* The desk catches a little light where the window sits. Tonal variation, not
    detail — the flat field was the other half of why this read as blank. */
 .desk {
@@ -174,7 +198,9 @@ body {
 /* a page of paper, for reading prose */
 .paper {
   background:
-    linear-gradient(rgba(255,253,248,0.97), rgba(248,244,236,0.97));
+    /* opaque, now that the window frame behind it carries no fill of its own —
+       the sidebar is the glass, the page is never see-through */
+    linear-gradient(#fffdf8, #f8f4ec);
   color: #2a2520;
 }
 

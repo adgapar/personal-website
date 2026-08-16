@@ -85,7 +85,7 @@ export default function ReaderShell({
   }, [pathname, tab])
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-[var(--bg)]">
+    <div className="desk h-[100dvh] overflow-hidden">
 
       <div className="relative z-10 flex h-full justify-center px-2 py-2 sm:px-6 sm:py-8">
         {/* the window */}
@@ -95,7 +95,9 @@ export default function ReaderShell({
           className={`flex h-full w-full flex-col overflow-hidden transition-[max-width] duration-300 ${
             reading ? 'max-w-6xl' : 'max-w-4xl'
           }`}
-          style={WINDOW_FRAME}
+          // no background on the frame itself: the sidebar is glass, and glass
+          // over an opaque parent blurs the parent and shows nothing
+          style={{ ...WINDOW_FRAME, background: 'transparent' }}
         >
           {/* one title bar, for the whole app */}
           <div
@@ -125,7 +127,7 @@ export default function ReaderShell({
           {/* the body: list on the left, what is open on the right */}
           <div className="flex min-h-0 flex-1">
             {reading && (
-            <nav className="hidden w-[15rem] shrink-0 flex-col border-r border-[var(--border)] lg:flex xl:w-[17rem]">
+            <nav className="glass hidden w-[15rem] shrink-0 flex-col border-r border-[var(--border)] lg:flex xl:w-[17rem]">
               {/* one source at a time — the other tab shows what it holds */}
               <div
                 className="flex shrink-0 gap-px border-b border-[var(--border)] px-2 pt-2 font-mono"
@@ -173,7 +175,9 @@ export default function ReaderShell({
                           : 'text-[var(--muted)] hover:bg-white/[0.03] hover:text-[var(--fg)]'
                       }`}
                     >
-                      <span className="block text-[10px] text-[var(--dim)]">{post.date}</span>
+                      {/* --dim and --chrome are tuned for paper; the glass is a dimmer
+                          ground, so the same tokens fall to 2-3:1 on it */}
+                      <span className="block text-[10px] text-[var(--muted)]">{post.date}</span>
                       {post.title}
                     </Link>
                   )

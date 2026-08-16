@@ -62,6 +62,10 @@ export default function WindowChrome({ title, tabs, children }: Props) {
   const onPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
       if (fullscreen) return
+      // Below sm the window is pinned to the viewport, so a drag has nothing to
+      // move. Asked of the medium rather than the input: a touchscreen laptop
+      // still has a desk, and a mouse on a phone-width window still does not.
+      if (!window.matchMedia('(min-width: 640px)').matches) return
       // let the buttons be buttons and the tabs be tabs
       if ((e.target as HTMLElement).closest('button, a')) return
       origin.current = {
@@ -113,10 +117,15 @@ export default function WindowChrome({ title, tabs, children }: Props) {
       className={
         // pointer-events-auto: the wrapper disables them so the desktop behind
         // stays reachable, and the window takes them back for itself
+        //
+        // Below sm every window is maximized, whatever the store says. A phone
+        // runs one app at a time and there is nothing to arrange it against; the
+        // floating-window layout spent a third of the viewport on desk and
+        // chrome to show a 452px porthole onto 1700px of text.
         fullscreen
-          ? 'term term-glass pointer-events-auto fixed inset-0 z-40 flex flex-col'
-          : `term term-glass pointer-events-auto relative flex w-full max-w-3xl flex-col ${
-              dragging ? '' : 'transition-[max-width,transform] duration-300'
+          ? 'term term-glass window-shell window-filled pointer-events-auto fixed inset-0 z-40 flex flex-col'
+          : `term term-glass window-shell pointer-events-auto fixed inset-0 z-40 flex flex-col sm:relative sm:inset-auto sm:z-auto sm:w-full sm:max-w-3xl ${
+              dragging ? '' : 'sm:transition-[max-width,transform] duration-300'
             }`
       }
       style={{
@@ -124,11 +133,24 @@ export default function WindowChrome({ title, tabs, children }: Props) {
         // window is the thing that does not move when you switch between them —
         // a frame that resized per tab made the furniture the moving part.
         // Short pages simply have room left over.
-        ['--term-max-h' as string]: fullscreen
-          ? 'calc(100vh - 6.75rem)'
-          : 'min(68vh, calc(100dvh - 13rem))',
+        //
+        // Unset when the window fills the screen — the scrollback takes the
+        // space left over from the bars instead, which is the only figure that
+        // stays right as the keyboard opens and closes.
+        ...(fullscreen
+          ? {}
+          : { ['--term-max-h' as string]: 'min(68vh, calc(100dvh - 13rem))' }),
         ...(dragging ? WINDOW_FRAME_LIFTED : WINDOW_FRAME),
-        transform: fullscreen ? undefined : `translate(${offset.x}px, ${offset.y}px)`,
+        // Handed to CSS as two numbers rather than applied as a transform here,
+        // so the narrow-screen rule can drop it: below sm the window is pinned to
+        // the viewport, and a drag offset left over from a wider layout would
+        // push it off the edge with no way to get it back.
+        ...(fullscreen
+          ? {}
+          : {
+              ['--win-tx' as string]: `${offset.x}px`,
+              ['--win-ty' as string]: `${offset.y}px`,
+            }),
         ...(fullscreen
           ? {
               // nothing to be raised above when it fills the screen
@@ -147,8 +169,10 @@ export default function WindowChrome({ title, tabs, children }: Props) {
         onPointerCancel={endDrag}
         onDoubleClick={() => setOffset({ x: 0, y: 0 })}
         title={fullscreen ? undefined : 'drag to move · double-click to recentre'}
-        className={`relative flex touch-none items-stretch gap-3 px-3 select-none sm:px-4 ${
-          fullscreen ? '' : dragging ? 'cursor-grabbing' : 'cursor-grab'
+        // touch-none only from sm up: below it the bar is not a drag handle, and
+        // swallowing touch there just makes the top of the window feel dead
+        className={`relative flex items-stretch select-none sm:touch-none sm:gap-3 sm:px-4 ${
+          fullscreen ? '' : dragging ? 'sm:cursor-grabbing' : 'sm:cursor-grab'
         }`}
         style={TITLE_BAR}
       >
@@ -159,7 +183,7 @@ export default function WindowChrome({ title, tabs, children }: Props) {
         {tabs}
 
         {nagging && (
-          <span className="flex items-center text-[11px] tracking-wide text-[var(--warm)]">
+          <span className="hidden items-center text-[11px] tracking-wide text-[var(--warm)] sm:flex">
             nice try — this one stays open
           </span>
         )}
@@ -167,8 +191,14 @@ export default function WindowChrome({ title, tabs, children }: Props) {
         {/* Three dots, the one conventional place colour belongs. Grey glyphs at
             3.3:1 were invisible and had no hit area — you could not see them and
             you could not aim at them. The glyph appears inside on hover, so the
-            bar is still quiet at rest. */}
-        <div className="group/ctl ml-auto flex items-center gap-2 self-center">
+            bar is still quiet at rest.
+
+            Gone below sm, and not as a space saving: all three name operations a
+            phone does not have. There is nothing to minimize a window away from,
+            maximize is the only state it is ever in, and close would put you on
+            an empty desk. Three 11px dots that lie about what they do are worth
+            less than the 90px of tab strip they were sitting on. */}
+        <div className="group/ctl ml-auto hidden items-center gap-2 self-center pr-1 sm:flex">
           {[
             {
               key: 'min',
@@ -217,12 +247,15 @@ export default function WindowChrome({ title, tabs, children }: Props) {
       <div
         // `hidden` as a class, not the attribute: Tailwind's `flex` is an author
         // rule and would win over the attribute's display:none
+        // min-h-0 flex-1 below sm for the same reason as fullscreen: the window
+        // is the viewport there, so the scrollback should take whatever the tab
+        // row and the status bar leave — measured, not guessed at with a vh sum
         className={
           minimized
             ? 'hidden'
             : fullscreen
               ? 'flex min-h-0 flex-1 flex-col'
-              : 'flex flex-col'
+              : 'flex min-h-0 flex-1 flex-col sm:flex-none'
         }
         aria-hidden={minimized || undefined}
       >

@@ -25,7 +25,7 @@ export default function AgentView({ page }: { page: PageMeta }) {
   const bytes = new Blob([markdown]).size
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-10 py-6">
+    <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-10">
       <div className="mb-3 space-y-2 text-[11px] tracking-widest">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <span className="text-[var(--dim)]">

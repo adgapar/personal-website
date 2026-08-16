@@ -24,21 +24,30 @@ import { Water } from '@paper-design/shaders-react'
  */
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
+/* the breakpoint at which a window stops covering the whole desk — Tailwind's sm */
+const HAS_DESK = '(min-width: 640px)'
 
-function usePrefersReducedMotion() {
+function useMatchMedia(query: string, fallback: boolean) {
   return useSyncExternalStore(
     (onChange) => {
-      const mq = window.matchMedia(REDUCED_MOTION)
+      const mq = window.matchMedia(query)
       mq.addEventListener('change', onChange)
       return () => mq.removeEventListener('change', onChange)
     },
-    () => window.matchMedia(REDUCED_MOTION).matches,
-    () => false,
+    () => window.matchMedia(query).matches,
+    () => fallback,
   )
 }
 
 export default function DeskSurface() {
-  const still = usePrefersReducedMotion()
+  const still = useMatchMedia(REDUCED_MOTION, false)
+  // Below sm the window is the screen, so every pixel of this is behind an
+  // opaque surface. A full-viewport WebGL shader animating at 60fps where
+  // nothing of it is visible is the worst trade on the site: all of the battery,
+  // none of the effect.
+  const visible = useMatchMedia(HAS_DESK, true)
+
+  if (!visible) return null
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">

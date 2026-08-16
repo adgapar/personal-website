@@ -51,7 +51,7 @@ export default function SiteNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex flex-wrap items-center gap-x-6 gap-y-1 px-10 py-4">
+    <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4 sm:gap-x-6 sm:px-10">
       <span className="text-[11px] tracking-widest text-[var(--muted)] select-none">
         ~/adilet
       </span>

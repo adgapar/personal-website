@@ -41,6 +41,10 @@
   /* how a window is drawn on the desk — overridden for the dark one */
   --frame-fill: var(--surface);
   --frame-edge: var(--hair);
+  /* variables rather than literals, because on a phone there is no desk for a
+     window to have corners or an edge against — see the narrow-screen block */
+  --frame-radius: 10px;
+  --frame-border: 1px;
   --frame-shadow:
     0 1px 1px rgba(38, 32, 20, 0.07),
     0 3px 6px rgba(38, 32, 20, 0.08),
@@ -118,9 +122,91 @@
     0 80px 112px -28px rgba(28, 22, 12, 0.42);
 }
 
+/* Where a dragged window sits. Two numbers in, one transform out — so the
+   narrow-screen rule below can drop the whole thing without fighting an inline
+   style. */
+.window-shell {
+  transform: translate(var(--win-tx, 0px), var(--win-ty, 0px));
+}
+
+/**
+ * On a phone, a window is the screen.
+ *
+ * Everything the frame says — the rounded corners, the hairline, the four-stop
+ * shadow — is a claim that this rectangle is floating above a surface. On a
+ * 390px viewport there is no surface left to float above: the window covers it.
+ * So the frame was drawing an edge around nothing, and charging 32px of the only
+ * scarce dimension for the privilege. A phone runs one app full-screen; this is
+ * the same window, maximized, which is the state it should have been in here all
+ * along.
+ *
+ * Placed after the blocks it overrides so the cascade picks it up at equal
+ * specificity.
+ */
+@media (max-width: 639px) {
+  :root,
+  .term,
+  .term-glass {
+    --frame-radius: 0px;
+    --frame-border: 0px;
+    --frame-edge: transparent;
+    --frame-shadow: none;
+    --frame-shadow-lifted: none;
+  }
+
+  /* and with the desk covered, the glass has nothing behind it to be
+     transparent against — it is just a blur pass that costs a phone GPU
+     every frame for an effect nobody can see */
+  .term-glass {
+    --frame-fill: #1d1c19;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* nowhere to drag it to, and nowhere to drag it back from */
+  .window-shell { transform: none; }
+
+  /* The window now reaches into the notch and the home-bar strip, because
+     viewport-fit=cover is what makes it feel like the screen rather than a page
+     inset from it. It pays the insets back here, in the frame's own colour, so
+     the tab row starts below the camera and nothing lands under the gesture
+     bar. Zero on every device that has no such areas. */
+  .window-shell {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/**
+ * How tall the scrollback is, which is really the question of what the window is.
+ *
+ * A window that fills the screen — maximized, or any window on a phone — takes
+ * whatever the tab row and the status bar leave, measured by the flexbox rather
+ * than guessed at with a vh sum. That is the only figure that stays right when
+ * the on-screen keyboard opens and the viewport shortens under it.
+ *
+ * A window sitting on the desk is the other case: it has a height of its own, the
+ * same one on every tab, so switching sessions does not resize the furniture.
+ */
+.term-scroll { flex: 1 1 0%; min-height: 0; }
+
+@media (min-width: 640px) {
+  .window-shell:not(.window-filled) .term-scroll {
+    flex: none;
+    height: var(--term-max-h);
+  }
+}
+
 /* the terminal's scrollbar rides on its own ground */
 .term .term-scroll { scrollbar-color: var(--hair) transparent; }
 .term .term-scroll::-webkit-scrollbar-thumb { border-color: var(--surface); }
+
+/* A row that scrolls sideways under a thumb, with no bar drawn for it. The tab
+   strip is the one place this is right: it is short, and the cut-off tab at the
+   edge is the affordance. */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 
 /**
  * The reader's sidebar is glass; its page is not.

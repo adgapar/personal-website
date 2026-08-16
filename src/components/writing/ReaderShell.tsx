@@ -94,12 +94,17 @@ export default function ReaderShell({
     <div className="desk relative h-[100dvh] overflow-hidden">
       <DeskSurface />
 
-      <div className="relative z-10 flex h-full justify-center px-2 py-2 sm:px-6 sm:py-8">
+      {/* no inset below sm: the frame has no corners, edge or shadow there, so
+          8px of desk around a flat rectangle only says the window missed */}
+      <div className="relative z-10 flex h-full justify-center sm:px-6 sm:py-8">
         {/* the window */}
         <div
           // the window is as wide as the view needs: a contents page alone is a
           // page, and only the two-pane reading view earns the extra 15rem
-          className={`flex h-full w-full flex-col overflow-hidden transition-[max-width] duration-300 ${
+          // window-shell for the safe-area insets it carries below sm — this
+          // window reaches the screen edges there too, so its title bar has the
+          // same notch to keep clear of
+          className={`window-shell flex h-full w-full flex-col overflow-hidden transition-[max-width] duration-300 ${
             reading ? 'max-w-6xl' : 'max-w-4xl'
           }`}
           // no background on the frame itself: the sidebar is glass, and glass

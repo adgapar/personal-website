@@ -63,7 +63,9 @@ export default function PageLayout({ page }: Props) {
         // wrapper spans the viewport but only the window itself is solid.
         // centred on the desk: now that the window is only as tall as its
         // content, anchoring it to the top left a growing empty margin below it
-        <div className="pointer-events-none relative z-10 flex h-full w-full items-center justify-center overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
+        // no padding below sm: there is no desk to inset the window from, and
+        // the 32px it was spending is the scarcest dimension on a phone
+        <div className="pointer-events-none relative z-10 flex h-full w-full items-center justify-center overflow-hidden sm:px-8 sm:py-10">
           <WindowChrome
             title={`${page.session.prompt}  —  terminal`}
             tabs={<TerminalTabs />}

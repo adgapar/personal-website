@@ -18,15 +18,38 @@ import type { PageCommand, SessionBlock } from '@/lib/sessions'
 
 const NAV_COMMANDS = ['about', 'cv', 'writing', 'contact', 'play']
 
-const COL_WIDTHS = ['w-44 shrink-0', 'w-44 shrink-0', 'w-24 shrink-0', 'w-20 shrink-0']
+// Columns only from sm up. A 176px column is a third of a phone's width, and
+// three of them made a table that scrolled sideways inside a scrollback that
+// scrolled down inside a page that did not scroll at all. Below sm the row
+// stacks instead — see the table branch of renderBlock.
+const COL_WIDTHS = [
+  'sm:w-44 sm:shrink-0',
+  'sm:w-44 sm:shrink-0',
+  'sm:w-24 sm:shrink-0',
+  'sm:w-20 sm:shrink-0',
+]
 function colClass(index: number, total: number, widths?: string[]) {
   const scale = widths ?? COL_WIDTHS
-  return index < total - 1 ? (scale[index] ?? 'w-24 shrink-0') : ''
+  return index < total - 1 ? (scale[index] ?? 'sm:w-24 sm:shrink-0') : ''
 }
 
 /** in-app routes get client-side navigation; everything else opens away */
 function isInternal(href: string) {
   return href.startsWith('/')
+}
+
+/**
+ * The prompt, shortened for a narrow window: `adilet@cv:~$` becomes `cv:~$`.
+ *
+ * Fourteen characters of prompt is a third of a phone's line, spent every line
+ * on a name that does not change and a host that was never in question. What is
+ * left is the part that does change — which session you are in — which is the
+ * only reason a real prompt carries any of this. Same convention as a shell
+ * that has been told its own $PS1 is too long.
+ */
+function shortenPrompt(prompt: string) {
+  const at = prompt.indexOf('@')
+  return at === -1 ? prompt : prompt.slice(at + 1)
 }
 
 function externalLinkProps(href: string) {
@@ -89,6 +112,8 @@ export default function TerminalSession({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  /** true only while the reveal is taking focus by itself — see the effect below */
+  const autoFocusing = useRef(false)
 
   // some blocks exist for the markdown and agent views only — a full post index
   // is worth indexing but would bury the session it sits in
@@ -119,7 +144,16 @@ export default function TerminalSession({
       )
     })
     timers.push(
-      setTimeout(() => { if (!cancelled) inputRef.current?.focus({ preventScroll: true }) }, 200 + blocks.length * 420 + 120)
+      setTimeout(() => {
+        if (cancelled) return
+        // Flagged so the input's own onFocus can tell this apart from a reader
+        // tapping the prompt. That handler scrolls to the bottom to stay clear
+        // of the on-screen keyboard, which is right for a tap and wrong here —
+        // it would open every page at the end of its own session.
+        autoFocusing.current = true
+        inputRef.current?.focus({ preventScroll: true })
+        autoFocusing.current = false
+      }, 200 + blocks.length * 420 + 120)
     )
     return () => {
       cancelled = true
@@ -262,6 +296,14 @@ export default function TerminalSession({
     [inputValue, historyIndex, commandHistory, commands, blocks, onNavigate, echo, matches, cycle, base]
   )
 
+  /** the `$` at the head of a line, long on the desk and short on a phone */
+  const Prompt = () => (
+    <span className="shrink-0 font-medium text-[var(--accent)] select-none">
+      <span className="sm:hidden">{shortenPrompt(prompt)}</span>
+      <span className="hidden sm:inline">{prompt}</span>
+    </span>
+  )
+
   /** One session block, lifted out of the render to keep the tree readable. */
   const renderBlock = (block: SessionBlock) => (
     <CommandBlock cmd={block.cmd} instant={instant}>
@@ -286,24 +328,47 @@ export default function TerminalSession({
             onClick={item.run ? (e) => { e.stopPropagation(); runCommand(item.run!) } : undefined}
             className={item.run ? 'group -mx-2 rounded-sm px-2 py-0.5 hover:bg-black/[0.035]' : undefined}
           >
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          {/* Five things on one line needs about 60 characters and a phone has
+              forty. Wrapping them was worse than either layout: `ml-auto` sent
+              the status word to a line of its own, right-aligned, attached to
+              nothing.
+
+              So the row has two shapes. On a phone the title is the line, and
+              the date, the org and the state fall under it as one quiet strip.
+              From sm up `contents` dissolves that strip and all five become
+              columns of the same row again, exactly as before. */}
+          <div className="flex items-baseline gap-x-3">
             <span className="text-[var(--dim)] w-4 shrink-0 select-none">{j + 1}</span>
-            {item.meta && (
-              <span className="text-[var(--dim)] text-xs shrink-0 w-24">{item.meta}</span>
-            )}
-            {/* the title is the content of the row, so it is ink — amber
-                is reserved for one job now: arguments in a command */}
-            <span className={item.run ? 'group-hover:text-[var(--accent)]' : undefined}>{item.title}</span>
-            {/* a tag is a word. The box around it was one more shape to
-                count in a list that already has five columns. */}
-            {item.tag && (
-              <span className="shrink-0 text-xs tracking-wide text-[var(--muted)]">
-                {item.tag}
+            <div className="min-w-0 flex-1 sm:flex sm:flex-wrap sm:items-baseline sm:gap-x-3">
+              {/* the title is the content of the row, so it is ink — amber
+                  is reserved for one job now: arguments in a command */}
+              <span
+                className={`block sm:order-2 ${item.run ? 'group-hover:text-[var(--accent)]' : ''}`}
+              >
+                {item.title}
               </span>
-            )}
-            {item.status && (
-              <span className={`shrink-0 ml-auto ${statusColor('status', item.status)}`}>{item.status}</span>
-            )}
+              <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-xs sm:contents">
+                {item.meta && (
+                  <span className="text-[var(--dim)] sm:order-1 sm:w-24 sm:shrink-0">
+                    {item.meta}
+                  </span>
+                )}
+                {/* a tag is a word. The box around it was one more shape to
+                    count in a list that already has five columns. */}
+                {item.tag && (
+                  <span className="tracking-wide text-[var(--muted)] sm:order-3 sm:shrink-0">
+                    {item.tag}
+                  </span>
+                )}
+                {item.status && (
+                  <span
+                    className={`sm:order-4 sm:ml-auto sm:shrink-0 sm:text-[length:inherit] ${statusColor('status', item.status)}`}
+                  >
+                    {item.status}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           {item.summary && (
             <div className="pl-7 text-xs text-[var(--muted)]">{item.summary}</div>
@@ -315,29 +380,44 @@ export default function TerminalSession({
         )}
       </div>
     ) : block.table ? (
-      <div className="space-y-1 overflow-x-auto">
-        <div className="flex gap-6 text-[var(--muted)] text-xs tracking-widest uppercase pb-1 border-b border-[var(--border)]">
+      <div className="space-y-1">
+        {/* Column headings over stacked rows would be labelling columns that are
+            not there. Gone below sm, where the first cell is the row's name and
+            the rest read as its detail. */}
+        <div className="hidden gap-6 text-[var(--muted)] text-xs tracking-widest uppercase pb-1 border-b border-[var(--border)] sm:flex">
           <span className="w-4 shrink-0">#</span>
           {block.table.headers.map((h, j) => (
             <span key={j} className={colClass(j, block.table!.headers.length, block.table!.colWidths)}>{h}</span>
           ))}
         </div>
         {block.table.rows.map((row, j) => {
+          const [first, ...rest] = row.cols
+          // same two-shape trick as the list: stacked on a phone, and `contents`
+          // puts every cell back on one row from sm up
           const rowContent = (
             <>
               <span className="w-4 shrink-0 text-[var(--dim)] select-none">{j + 1}</span>
-              {row.cols.map((col, k) => (
-                <span
-                  key={k}
-                  className={`${colClass(k, row.cols.length, block.table!.colWidths)} ${k === 0 ? '' : statusColor(block.table!.headers[k] ?? '', col)}`}
-                >
-                  {col}
+              <div className="min-w-0 flex-1 sm:contents">
+                <span className={colClass(0, row.cols.length, block.table!.colWidths)}>
+                  {first}
                 </span>
-              ))}
+                {rest.length > 0 && (
+                  <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-xs text-[var(--muted)] sm:contents">
+                    {rest.map((col, k) => (
+                      <span
+                        key={k}
+                        className={`${colClass(k + 1, row.cols.length, block.table!.colWidths)} sm:text-[length:inherit] ${statusColor(block.table!.headers[k + 1] ?? '', col)}`}
+                      >
+                        {col}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </>
           )
           const rowClass =
-            'flex gap-6 items-baseline hover:text-[var(--accent)] transition-colors duration-200 group'
+            'flex gap-3 items-baseline hover:text-[var(--accent)] transition-colors duration-200 group sm:gap-6'
           return row.href && isInternal(row.href) ? (
             <Link key={j} href={row.href} className={rowClass}>
               {rowContent}
@@ -347,7 +427,7 @@ export default function TerminalSession({
               {rowContent}
             </a>
           ) : (
-            <div key={j} className="flex gap-6 items-baseline">{rowContent}</div>
+            <div key={j} className="flex gap-3 items-baseline sm:gap-6">{rowContent}</div>
           )
         })}
         {block.table.hint && (
@@ -409,7 +489,14 @@ export default function TerminalSession({
           )}
         </div>
       ) : (
-        <div className={block.avatar ? 'flex gap-5 items-start' : undefined}>
+        // A 144px portrait beside the labels leaves 146px for the text on a
+        // phone, which is narrower than "Founding AI Engineer". It goes above
+        // them instead, and the labels get the full width.
+        <div
+          className={
+            block.avatar ? 'flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5' : undefined
+          }
+        >
           {block.avatar && <DitheredAvatar src={block.avatar} />}
           <div className="space-y-1.5">
             {block.lines.map((line, j) => (
@@ -424,13 +511,18 @@ export default function TerminalSession({
   return (
     <div
       ref={scrollRef}
-      // a fixed height, not a ceiling: output accumulates inside it and the
-      // scrollbar arrives when it is needed
-      className="term-scroll flex h-[var(--term-max-h,68vh)] shrink-0 cursor-text flex-col overflow-y-auto overscroll-contain font-mono text-[15px] text-[var(--fg)]"
+      // How tall this is belongs to the window, not to the session — see
+      // .term-scroll in globals.css. It fills a window that fills the screen, and
+      // takes a fixed height inside one sitting on the desk.
+      //
+      // 13px below sm. At 15px a 358px window fits 35 monospace characters, so
+      // "type 'help' for available commands" broke across two lines; 13px fits 45
+      // and the session reads as lines again rather than as paragraphs.
+      className="term-scroll flex cursor-text flex-col overflow-y-auto overscroll-contain font-mono text-[13px] text-[var(--fg)] sm:text-[15px]"
       onClick={focusInput}
     >
       {/* the same left edge as the tab row and the status bar */}
-      <div className="w-full space-y-8 px-6 pt-7 pb-9 sm:px-8">
+      <div className="w-full space-y-6 px-4 pt-5 pb-8 sm:space-y-8 sm:px-8 sm:pt-7 sm:pb-9">
         {/* what has been typed so far */}
         {blocks.slice(0, visibleCount).map((block, i) => (
           <div key={i}>{renderBlock(block)}</div>
@@ -440,9 +532,7 @@ export default function TerminalSession({
         {entries.map((entry, i) => (
           <div key={i} className="space-y-2">
             <div className="flex items-baseline gap-3">
-              <span className="shrink-0 font-medium text-[var(--accent)] select-none">
-                {prompt}
-              </span>
+              <Prompt />
               <span className="text-[var(--fg)]">{entry.input}</span>
             </div>
             {entry.lines.length > 0 && (
@@ -458,15 +548,18 @@ export default function TerminalSession({
         {/* the live prompt, always last */}
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <span className="shrink-0 font-medium text-[var(--accent)] select-none">
-              {prompt}
-            </span>
+            <Prompt />
             {instant ? (
               // an unfocused window has no live prompt to type into, and must
               // not sit in the tab order
               <span className="cursor inline-block h-3 w-1.5 bg-[var(--dim)]" aria-hidden />
             ) : (
-              <span className="relative flex-1">
+              // 16px on a phone, and not for legibility: Safari zooms the page
+              // in whenever you focus an input smaller than that, and this page
+              // does not scroll, so it zooms you into a corner you cannot get
+              // back out of. The ghost sits in here too, so both keep the same
+              // metrics and the completion still lines up under the caret.
+              <span className="relative flex-1 text-base sm:text-[15px]">
                 {/* the completion, drawn under the caret in the same metrics —
                     the typed part is invisible so the ghost lines up exactly */}
                 {(ghost || (base !== null && matches.length > 1)) && (
@@ -492,6 +585,13 @@ export default function TerminalSession({
                     setBase(null)
                   }}
                   onKeyDown={handleKeyDown}
+                  // the keyboard shortens the window under it; put the prompt
+                  // back at the bottom of what is left
+                  onFocus={() => {
+                    if (autoFocusing.current) return
+                    const el = scrollRef.current
+                    if (el) setTimeout(() => { el.scrollTop = el.scrollHeight }, 300)
+                  }}
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="off"

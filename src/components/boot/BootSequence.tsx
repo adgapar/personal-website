@@ -108,10 +108,16 @@ export default function BootSequence() {
 
   return (
     <div
-      className={`fixed inset-0 z-50 overflow-hidden px-6 py-8 font-mono text-xs sm:px-10 sm:py-12 ${
+      className={`fixed inset-0 z-50 overflow-y-auto px-5 py-8 font-mono text-xs sm:px-10 sm:py-12 ${
         closing ? 'crt-collapse' : ''
       }`}
-      style={{ background: BOOT.ground, color: BOOT.ink }}
+      style={{
+        background: BOOT.ground,
+        color: BOOT.ink,
+        // clear of the notch and the home bar, like every other full-screen surface
+        paddingTop: 'max(2rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(2rem, env(safe-area-inset-bottom))',
+      }}
       role="status"
       aria-live="polite"
       aria-label="Starting up"
@@ -146,11 +152,17 @@ export default function BootSequence() {
             <button
               type="button"
               onClick={beginHandover}
-              className="group flex items-center gap-3 border border-[#26251f] px-4 py-2 text-[11px] tracking-widest text-[#7b7973] transition-colors hover:border-[#7dd3fc] hover:text-[#7dd3fc]"
+              className="group flex w-full items-center gap-3 border border-[#26251f] px-4 py-3 text-[11px] tracking-widest text-[#7b7973] transition-colors hover:border-[#7dd3fc] hover:text-[#7dd3fc] sm:w-auto sm:py-2"
             >
               <span className="cursor text-[#7dd3fc]">▊</span>
-              press any key to continue
-              <span className="transition-transform duration-200 group-hover:translate-x-1">
+              {/* A BIOS says "press any key" because a BIOS is talking to
+                  something with keys. On a phone that is an instruction you
+                  cannot follow, on the one screen that is blocking the site —
+                  the whole surface has always been tappable, it just never said
+                  so. Same sentence, told to whoever is reading it. */}
+              <span className="sm:hidden">tap to continue</span>
+              <span className="hidden sm:inline">press any key to continue</span>
+              <span className="ml-auto transition-transform duration-200 group-hover:translate-x-1 sm:ml-0">
                 →
               </span>
             </button>
@@ -159,15 +171,24 @@ export default function BootSequence() {
       </div>
 
       {!waiting && (
-        <div className="absolute right-6 bottom-6 flex gap-4 text-[10px] tracking-widest text-[#7b7973] sm:right-10 sm:bottom-8">
+        <div
+          className="absolute right-4 bottom-4 flex gap-2 text-[10px] tracking-widest text-[#7b7973] sm:right-10 sm:bottom-8 sm:gap-4"
+          style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          {/* px-2 py-2 rather than bare text: 10px of glyph is not something a
+              thumb can aim at, and skip is the control most worth hitting */}
           <button
             type="button"
             onClick={() => setPaused((p) => !p)}
-            className="hover:text-[#e8e6e1]"
+            className="px-2 py-2 hover:text-[#e8e6e1] sm:p-0"
           >
             {paused ? '▶ resume' : '⏸ pause'}
           </button>
-          <button type="button" onClick={finishBoot} className="hover:text-[#e8e6e1]">
+          <button
+            type="button"
+            onClick={finishBoot}
+            className="px-2 py-2 hover:text-[#e8e6e1] sm:p-0"
+          >
             skip ✕
           </button>
         </div>

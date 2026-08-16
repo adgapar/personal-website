@@ -108,14 +108,32 @@
  * The window's own background is transparent on this route so there is something
  * real to see through; the title bar and the page each paint their own.
  */
+/**
+ * One material, three grounds.
+ *
+ * The sidebar and the reader's bars were drifting apart — different alpha,
+ * different blur radius, different saturation — for no reason anyone could see.
+ * They are the same glass now, and the only thing that still differs is what
+ * each one has behind it, which is the honest difference:
+ *
+ *   .glass-paper  the reader's bars   → the article: text and pictures, moving
+ *   .glass-term   the terminal's bars → the scrollback: text, moving
+ *   .glass        the reader's sidebar → the desk: a gradient, still
+ *
+ * That is why the top bar reads as glass and the sidebar reads as a tint. Glass
+ * announces itself through change, and nothing behind the sidebar ever changes.
+ * No CSS value fixes that; only giving it a moving backdrop would.
+ */
+.glass,
+.glass-paper,
+.glass-term {
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+}
+
 .glass {
   position: relative;
-  /* Smoked grey rather than a white veil. The blur is small enough to keep the
-     shape of what it sees — 26px destroyed everything behind it; 14px lets the
-     desk's washes through as a gradient. */
-  background: rgba(112, 108, 98, 0.17);
-  -webkit-backdrop-filter: blur(14px) saturate(1.7) brightness(1.06);
-  backdrop-filter: blur(14px) saturate(1.7) brightness(1.06);
+  background: rgba(112, 108, 98, 0.24);
   /* it floats over the page, so it casts on it — the cue that says "panel above"
      rather than "region beside" */
   box-shadow: 5px 0 18px -4px rgba(40, 34, 22, 0.16);
@@ -163,12 +181,36 @@
      against. Grey gives the glass a value of its own, and the prose underneath
      shows as darker shapes rather than as almost-nothing. */
   background: rgba(112, 108, 98, 0.24);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  backdrop-filter: blur(16px) saturate(1.4);
 }
 
 @supports not (backdrop-filter: blur(1px)) {
   .glass-paper { background: rgba(224, 221, 214, 0.97); }
+}
+
+/**
+ * The terminal's own glass — the same rule as the reader's, on the other ground.
+ *
+ * Chrome can be seen through; content cannot. So the tab row and the status bar
+ * float over the scrollback and your commands slide under them, exactly as the
+ * prose slides under the reader's bars. The title bar stays solid, because it
+ * has the desk behind it rather than content, and there is nothing there worth
+ * showing.
+ *
+ * Lifted rather than darkened: a dark tint on a dark body is the same colour, so
+ * the bar would vanish. This sits 1.31:1 above the body — a visible plane, with
+ * the light text underneath ghosting through it.
+ */
+.glass-term {
+  /* Lifted rather than smoked: a dark tint on a dark body is the same colour and
+     the bar would disappear. This sits 1.31:1 above it. */
+  background: rgba(70, 66, 57, 0.55);
+
+  /* --chrome is tuned for the solid body and falls to 2.9:1 up here */
+  --chrome: #948f84;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-term { background: rgba(52, 49, 43, 0.97); }
 }
 
 /* no backdrop-filter (older Firefox, some Linux): fall back to near-opaque

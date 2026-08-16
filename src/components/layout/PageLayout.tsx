@@ -64,16 +64,26 @@ export default function PageLayout({ page }: Props) {
         // content, anchoring it to the top left a growing empty margin below it
         <div className="pointer-events-none relative z-10 flex h-full w-full items-center justify-center overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
           <WindowChrome title={`${page.session.prompt}  —  terminal`}>
-            <TerminalTabs />
-            <TerminalSession
-              key={pathname}
-              blocks={page.session.blocks}
-              commands={page.session.commands}
-              prompt={page.session.prompt}
-              placeholder={page.session.placeholder}
-              onNavigate={(href) => router.push(href)}
-            />
-            <StatusBar hint={page.session.placeholder} />
+            {/* The tab row and the status bar float over the scrollback rather
+                than sitting above and below it, so the session passes under
+                them and blurs — the same construction as the reader's bars.
+                TerminalSession pads itself to clear them. */}
+            <div className="relative flex min-h-0 flex-col">
+              <div className="absolute inset-x-0 top-0 z-20">
+                <TerminalTabs />
+              </div>
+              <TerminalSession
+                key={pathname}
+                blocks={page.session.blocks}
+                commands={page.session.commands}
+                prompt={page.session.prompt}
+                placeholder={page.session.placeholder}
+                onNavigate={(href) => router.push(href)}
+              />
+              <div className="absolute inset-x-0 bottom-0 z-20">
+                <StatusBar hint={page.session.placeholder} />
+              </div>
+            </div>
           </WindowChrome>
         </div>
       )}

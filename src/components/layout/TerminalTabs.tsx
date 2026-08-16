@@ -29,7 +29,7 @@ export default function TerminalTabs() {
       // The idle tabs sit at 3.3:1 against the paper. You can read them when you
       // look for them, and they stop existing while you are reading — which is
       // the whole argument for the redesign.
-      className="flex flex-wrap items-end gap-1 border-b border-[var(--border)] bg-[var(--surface)] px-4 sm:px-6"
+      className="glass-term flex flex-wrap items-end gap-1 border-b border-[var(--border)] px-4 sm:px-6"
     >
       {sessions.map(({ name, href }) => {
         const active = pathname === href

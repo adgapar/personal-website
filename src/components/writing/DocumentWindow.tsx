@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { TITLE_BAR } from '@/lib/window-style'
 
 /**
  * A post, in the reader's right-hand pane — a page of paper rather than
@@ -56,12 +55,12 @@ export default function DocumentWindow({
   }
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+    // relative, because the two bars float over the page rather than sitting
+    // beside it — the prose passes underneath them and blurs, which is the whole
+    // point of making them glass
+    <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden">
           {/* the document's own toolbar — under the app's title bar */}
-          <div
-            className="flex shrink-0 items-center gap-2 border-b border-[var(--border)] px-3 py-1.5 font-mono select-none"
-            style={TITLE_BAR}
-          >
+          <div className="glass-paper absolute inset-x-0 top-0 z-20 flex h-9 items-center gap-2 border-b border-[var(--border)] px-3 font-mono select-none">
             <span className="min-w-0 flex-1 truncate text-[10px] tracking-widest text-[var(--muted)]">
               {title}.md — {showSource ? 'source' : 'reader'}
             </span>
@@ -99,7 +98,8 @@ export default function DocumentWindow({
           </div>
 
       {/* the page — scrolls inside the pane, like any reader */}
-      <article className="paper min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-14 sm:py-14">
+      {/* the page — scrolls under both bars, so its padding clears them */}
+      <article className="paper min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-[4.25rem] pb-[4.5rem] sm:px-14 sm:pt-[5.5rem] sm:pb-[5rem]">
             <header className="mb-10">
               <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] tracking-widest text-[#8a8178]">
                 <span>{date}</span>
@@ -160,10 +160,7 @@ export default function DocumentWindow({
 
       {/* navigation is chrome, not part of the document — and at the foot of
           the pane it stays reachable without scrolling to the end */}
-      <div
-        className="flex shrink-0 items-center gap-3 border-t border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-widest"
-        style={TITLE_BAR}
-      >
+      <div className="glass-paper absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-3 border-t border-[var(--border)] px-3 font-mono text-[10px] tracking-widest">
         <div className="min-w-0 flex-1">
           {prev && (
             <Link

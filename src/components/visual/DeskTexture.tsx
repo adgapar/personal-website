@@ -24,7 +24,13 @@ export default function DeskTexture() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <StaticMeshGradient
-        colors={['#e7e3d9', '#d5d0c3', '#e9e6dd', '#cfc9ba']}
+        // Hue, not contrast. Proved with a test: force the desk red and the
+        // sidebar goes red, so the glass was always transparent — it just had
+        // four shades of the same beige to show, which looks like one beige.
+        // Sand, clay, stone and a cool blue-grey: close in value so the desk
+        // stays quiet, far enough apart in hue that glass over them reads as
+        // glass.
+        colors={['#e8e2d4', '#dcd2c2', '#d2d6d4', '#c9d1d8']}
         positions={2}
         waveX={0.85}
         waveXShift={0.45}

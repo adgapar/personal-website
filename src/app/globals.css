@@ -113,7 +113,7 @@
   /* Thin enough to be see-through, and a blur small enough to keep the shape of
      what it is seeing. 26px destroyed everything behind it; 14px lets the desk's
      washes through as a gradient. */
-  background: rgba(252, 251, 247, 0.34);
+  background: rgba(252, 251, 247, 0.26);
   -webkit-backdrop-filter: blur(14px) saturate(1.7) brightness(1.06);
   backdrop-filter: blur(14px) saturate(1.7) brightness(1.06);
   /* it floats over the page, so it casts on it — the cue that says "panel above"
@@ -137,6 +137,27 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
+/**
+ * Glass over the page rather than over the desk — the reader's toolbar and its
+ * footer, with the prose scrolling underneath them.
+ *
+ * This is the version of the effect that actually reads, and the reason is that
+ * there is something worth seeing behind it: your own text, blurred, moving as
+ * you scroll. A sidebar has no content passing beneath it, only a backdrop, so
+ * it can only ever be as interesting as the backdrop is.
+ *
+ * Tinted from the paper, not the desk, because that is what it sits on.
+ */
+.glass-paper {
+  background: rgba(255, 253, 246, 0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-paper { background: rgba(255, 253, 246, 0.97); }
+}
+
 /* no backdrop-filter (older Firefox, some Linux): fall back to near-opaque
    rather than to unreadable text on a bare desk */
 @supports not (backdrop-filter: blur(1px)) {
@@ -147,8 +168,8 @@
    Soft and wide on purpose: this is the shape of variation blur can keep. */
 .desk {
   background:
-    radial-gradient(75% 60% at 24% 6%, rgba(255, 252, 244, 0.8) 0%, rgba(255, 252, 244, 0) 70%),
-    radial-gradient(70% 65% at 86% 34%, rgba(206, 199, 184, 0.7) 0%, rgba(206, 199, 184, 0) 72%),
+    radial-gradient(75% 60% at 24% 6%, rgba(255, 251, 240, 0.85) 0%, rgba(255, 251, 240, 0) 70%),
+    radial-gradient(70% 65% at 86% 34%, rgba(197, 206, 214, 0.7) 0%, rgba(197, 206, 214, 0) 72%),
     var(--bg);
 }
 

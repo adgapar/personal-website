@@ -1,6 +1,5 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import DesktopIcons from './DesktopIcons'
@@ -13,11 +12,6 @@ import AgentView from '@/components/agent/AgentView'
 import TerminalSession from '@/components/terminal/TerminalSession'
 import { justBooted } from '@/lib/boot-store'
 import type { PageMeta } from '@/lib/sessions'
-
-// WebGL must not run during SSR; the flat --bg underneath is the fallback
-const DeskTexture = dynamic(() => import('@/components/visual/DeskTexture'), {
-  ssr: false,
-})
 
 interface Props {
   page: PageMeta
@@ -45,10 +39,6 @@ export default function PageLayout({ page }: Props) {
             'h-[100dvh] overflow-hidden'
       }`}
     >
-      {/* One desk under both apps: stock, not a photograph. A picture behind the
-          window competed with the writing in front of it and won; paper fibre
-          gives the surface tone without ever asking to be looked at. */}
-      {!isAgent && <DeskTexture />}
       {!isAgent && <DesktopIcons />}
 
       {isAgent ? (

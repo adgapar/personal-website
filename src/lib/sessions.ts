@@ -66,9 +66,10 @@ function sectionHeader(page: string): SessionBlock {
   return {
     mdSkip: true,
     lines: [
-      // the machine clearing its throat — chrome, so it stays quiet
-      { content: `→ loading ${page}...  done`, style: 'dim' },
-      { content: "→ type 'help' for available commands", style: 'dim' },
+      // the machine clearing its throat — quiet, but a line you can actually
+      // read: at --dim these were 1.6:1 against the glass and simply gone
+      { content: `→ loading ${page}...  done`, style: 'muted' },
+      { content: "→ type 'help' for available commands", style: 'muted' },
     ],
   }
 }
@@ -79,8 +80,8 @@ export const homeSession: SessionBlock[] = [
   {
     mdSkip: true,
     lines: [
-      { content: '→ starting session...  done', style: 'dim' },
-      { content: "→ type 'help' for available commands", style: 'dim' },
+      { content: '→ starting session...  done', style: 'muted' },
+      { content: "→ type 'help' for available commands", style: 'muted' },
     ],
   },
   {
@@ -208,7 +209,7 @@ export const playSession: SessionBlock[] = [
   {
     mdSkip: true,
     lines: [
-      { content: '→ new shell  ·  nothing loaded', style: 'dim' },
+      { content: '→ new shell  ·  nothing loaded', style: 'muted' },
       { content: "→ every command works here. 'help' lists the obvious ones.", style: 'muted' },
       { content: "→ the rest you find by typing what a terminal would understand.", style: 'muted' },
     ],

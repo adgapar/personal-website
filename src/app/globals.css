@@ -65,26 +65,34 @@
  * resolves to these too.
  */
 .term {
-  --surface: #1d1c19;  /* 12.2:1 against the desk — the figure, unmistakably */
-  --fg:      #ece9e2;  /* 14.1:1 */
-  --muted:   #a8a49b;  /* 6.9:1 */
-  --chrome:  #7a766d;  /* 3.8:1 — the same rank as it had on paper */
-  --dim:     #5c584f;
-  --accent:  #5cb6e8;  /* 7.6:1 — below the content, as on the light window */
-  --warm:    #cf9f52;
-  --success: #5fb98a;
-  --error:   #de8474;
-  --info:    #93a3b3;
-  --border:  #302e29;
-  --hair:    #3a372f;
+  /* Every one of these was tuned against a solid #1d1c19 and then the window
+     became glass, which lifts the ground to about #3c3b37 over the brightest
+     part of the desk. Nobody re-ranked them, so --dim landed at 1.6:1 — that is
+     why "loading cv... done" was a rumour rather than a line. Measured against
+     the worst case, not the convenient one. */
+  --surface: #1d1c19;  /* still the solid, for text sitting on the accent */
+  --fg:      #f0ede6;  /* 9.6:1 */
+  --muted:   #c2beb4;  /* 6.0:1 */
+  --chrome:  #a09b90;  /* 4.1:1 — furniture, readable when looked at */
+  --dim:     #8b8579;  /* 3.1:1 — the faintest that is still a line of text */
+  --accent:  #74c6f2;  /* 5.9:1 */
+  --warm:    #dcae63;  /* 5.5:1 */
+  --success: #74c79b;
+  --error:   #e89b8c;
+  --info:    #a3b2c1;
+  --border:  rgba(255, 255, 255, 0.10);
+  --hair:    rgba(255, 255, 255, 0.14);
 
   /* The whole window is glass, not just its bars — this is what terminal
-     transparency has always been. 0.88 is the floor: below it the desk lifts the
-     ground far enough to cost real contrast, and body text has to stay above
-     10:1. Measured across the desk's whole tonal range. */
-  --frame-fill: rgba(26, 25, 22, 0.88);
-  -webkit-backdrop-filter: blur(26px) saturate(1.25);
-  backdrop-filter: blur(26px) saturate(1.25);
+     transparency has always been.
+     Both numbers were wrong before. 26px of blur spreads a 1px rule across 52px
+     and costs it ~26x of its amplitude, so the desk's lines never reached the
+     glass at all: it was provably transparent and looked solid. 8px keeps an
+     edge, and edges are what the eye reads. 0.82 lets a fifth of the desk
+     through instead of an eighth, and body text still holds at 8.6:1. */
+  --frame-fill: rgba(26, 25, 22, 0.84);
+  -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  backdrop-filter: blur(6px) saturate(1.2);
 
   /* A dark sheet on a light desk casts a deeper, warmer shadow than a white one,
      and needs no hairline — the value difference is the edge. */
@@ -211,12 +219,25 @@
   .glass { background: rgba(206, 202, 194, 0.95); }
 }
 
-/* Under the mesh (see DeskTexture), and the whole desk when there is no WebGL.
-   Soft and wide on purpose: this is the shape of variation blur can keep. */
+/**
+ * The desk: ruled, flat, and drawn in CSS.
+ *
+ * A mesh gradient was here and it looked like a smear. It was also solving the
+ * wrong problem — glass needs *structure* behind it, not tone. Lines you can
+ * count beat colour you cannot name, and a ruled surface is what a desk is.
+ *
+ * No shader, so nothing to fall back from and nothing to wait for.
+ */
 .desk {
   background:
-    radial-gradient(75% 60% at 24% 6%, rgba(255, 251, 240, 0.85) 0%, rgba(255, 251, 240, 0) 70%),
-    radial-gradient(70% 65% at 86% 34%, rgba(197, 206, 214, 0.7) 0%, rgba(197, 206, 214, 0) 72%),
+    /* the major rule, every four */
+    repeating-linear-gradient(0deg, rgba(58, 50, 38, 0.22) 0 5px, transparent 5px 288px),
+    repeating-linear-gradient(90deg, rgba(58, 50, 38, 0.22) 0 5px, transparent 5px 288px),
+    /* the minor */
+    repeating-linear-gradient(0deg, rgba(58, 50, 38, 0.08) 0 1.5px, transparent 1.5px 72px),
+    repeating-linear-gradient(90deg, rgba(58, 50, 38, 0.08) 0 1.5px, transparent 1.5px 72px),
+    /* the light it catches where the windows sit */
+    radial-gradient(80% 62% at 50% 8%, rgba(255, 252, 244, 0.9) 0%, rgba(255, 252, 244, 0) 68%),
     var(--bg);
 }
 

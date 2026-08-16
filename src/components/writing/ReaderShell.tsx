@@ -152,7 +152,7 @@ export default function ReaderShell({
                       className={`-mb-px flex items-baseline gap-1.5 border-b-2 px-2 py-1.5 text-[10px] tracking-widest transition-colors duration-150 ${
                         on
                           ? 'border-[var(--fg)] text-[var(--fg)]'
-                          : 'border-transparent text-[var(--chrome)] hover:text-[var(--fg)]'
+                          : 'border-transparent text-[var(--muted)] hover:text-[var(--fg)]'
                       }`}
                     >
                       {key}
@@ -176,15 +176,23 @@ export default function ReaderShell({
                       href={post.href}
                       ref={active ? activeRef : undefined}
                       aria-current={active ? 'page' : undefined}
-                      className={`block rounded-sm px-2 py-1.5 text-xs leading-snug transition-colors ${
+                      // Titles are ink, not muted: this is the list you steer
+                      // the app with, and every row was secondary to nothing.
+                      // Selected is a filled row rather than a tinted one — a
+                      // 5%-white wash on light glass was invisible.
+                      className={`block rounded-md px-2.5 py-1.5 text-xs leading-snug transition-colors ${
                         active
-                          ? 'bg-white/[0.05] text-[var(--accent)]'
-                          : 'text-[var(--muted)] hover:bg-white/[0.03] hover:text-[var(--fg)]'
+                          ? 'bg-[var(--accent)] text-white shadow-[0_1px_2px_rgba(20,16,8,0.2)]'
+                          : 'text-[var(--fg)] hover:bg-black/[0.06]'
                       }`}
                     >
-                      {/* --dim and --chrome are tuned for paper; the glass is a dimmer
-                          ground, so the same tokens fall to 2-3:1 on it */}
-                      <span className="block text-[10px] text-[var(--muted)]">{post.date}</span>
+                      <span
+                        className={`block text-[10px] ${
+                          active ? 'text-white/75' : 'text-[var(--muted)]'
+                        }`}
+                      >
+                        {post.date}
+                      </span>
                       {post.title}
                     </Link>
                   )

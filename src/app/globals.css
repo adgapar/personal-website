@@ -39,6 +39,7 @@
   --ctl-max:   #57a273;
 
   /* how a window is drawn on the desk — overridden for the dark one */
+  --frame-fill: var(--surface);
   --frame-edge: var(--hair);
   --frame-shadow:
     0 1px 1px rgba(38, 32, 20, 0.07),
@@ -76,6 +77,14 @@
   --info:    #93a3b3;
   --border:  #302e29;
   --hair:    #3a372f;
+
+  /* The whole window is glass, not just its bars — this is what terminal
+     transparency has always been. 0.88 is the floor: below it the desk lifts the
+     ground far enough to cost real contrast, and body text has to stay above
+     10:1. Measured across the desk's whole tonal range. */
+  --frame-fill: rgba(26, 25, 22, 0.88);
+  -webkit-backdrop-filter: blur(26px) saturate(1.25);
+  backdrop-filter: blur(26px) saturate(1.25);
 
   /* A dark sheet on a light desk casts a deeper, warmer shadow than a white one,
      and needs no hairline — the value difference is the edge. */
@@ -117,7 +126,6 @@
  * each one has behind it, which is the honest difference:
  *
  *   .glass-paper  the reader's bars   → the article: text and pictures, moving
- *   .glass-term   the terminal's bars → the scrollback: text, moving
  *   .glass        the reader's sidebar → the desk: a gradient, still
  *
  * That is why the top bar reads as glass and the sidebar reads as a tint. Glass
@@ -125,8 +133,7 @@
  * No CSS value fixes that; only giving it a moving backdrop would.
  */
 .glass,
-.glass-paper,
-.glass-term {
+.glass-paper {
   -webkit-backdrop-filter: blur(16px) saturate(1.5);
   backdrop-filter: blur(16px) saturate(1.5);
 }
@@ -188,29 +195,14 @@
 }
 
 /**
- * The terminal's own glass — the same rule as the reader's, on the other ground.
- *
- * Chrome can be seen through; content cannot. So the tab row and the status bar
- * float over the scrollback and your commands slide under them, exactly as the
- * prose slides under the reader's bars. The title bar stays solid, because it
- * has the desk behind it rather than content, and there is nothing there worth
- * showing.
- *
- * Lifted rather than darkened: a dark tint on a dark body is the same colour, so
- * the bar would vanish. This sits 1.31:1 above the body — a visible plane, with
- * the light text underneath ghosting through it.
+ * Recessed, not glass. The whole terminal window is glass now, so a bar with its
+ * own backdrop-filter would be blurring an already-composited surface. These
+ * just sit back from it: the same sheet, in shadow.
  */
-.glass-term {
-  /* Lifted rather than smoked: a dark tint on a dark body is the same colour and
-     the bar would disappear. This sits 1.31:1 above it. */
-  background: rgba(70, 66, 57, 0.55);
-
-  /* --chrome is tuned for the solid body and falls to 2.9:1 up here */
-  --chrome: #948f84;
-}
-
-@supports not (backdrop-filter: blur(1px)) {
-  .glass-term { background: rgba(52, 49, 43, 0.97); }
+.term-recess {
+  /* Set back from the glass, not a second sheet of it: the idle tabs and the
+     status bar are the same window in shadow. */
+  background: rgba(0, 0, 0, 0.26);
 }
 
 /* no backdrop-filter (older Firefox, some Linux): fall back to near-opaque

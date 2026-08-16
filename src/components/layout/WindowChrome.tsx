@@ -32,12 +32,14 @@ import {
 
 interface Props {
   title: string
+  /** the session tabs — they live in the top row, not in a strip below it */
+  tabs?: React.ReactNode
   children: React.ReactNode
 }
 
 type Offset = { x: number; y: number }
 
-export default function WindowChrome({ title, children }: Props) {
+export default function WindowChrome({ title, tabs, children }: Props) {
   const { minimized, maximized, offset } = useSyncExternalStore(
     subscribe,
     getSnapshot,
@@ -60,8 +62,8 @@ export default function WindowChrome({ title, children }: Props) {
   const onPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
       if (fullscreen) return
-      // let the window buttons be buttons
-      if ((e.target as HTMLElement).closest('button')) return
+      // let the buttons be buttons and the tabs be tabs
+      if ((e.target as HTMLElement).closest('button, a')) return
       origin.current = {
         pointer: { x: e.clientX, y: e.clientY },
         offset,
@@ -104,6 +106,10 @@ export default function WindowChrome({ title, children }: Props) {
   return (
     <div
       ref={frame}
+      // the window still has a name; the tabs just say it better than a strip
+      // repeating it above them would
+      role="group"
+      aria-label={title}
       className={
         // pointer-events-auto: the wrapper disables them so the desktop behind
         // stays reachable, and the window takes them back for itself
@@ -141,22 +147,28 @@ export default function WindowChrome({ title, children }: Props) {
         onPointerCancel={endDrag}
         onDoubleClick={() => setOffset({ x: 0, y: 0 })}
         title={fullscreen ? undefined : 'drag to move · double-click to recentre'}
-        className={`relative flex touch-none items-center gap-3 border-b border-[var(--border)] px-6 py-2 select-none sm:px-8 ${
+        className={`relative flex touch-none items-stretch gap-3 px-3 select-none sm:px-4 ${
           fullscreen ? '' : dragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         style={TITLE_BAR}
       >
-        {/* The title is centred and the controls sit right, so the bar has no
-            left-hand furniture to fight the content's left edge. */}
-        <span className="pointer-events-none absolute inset-x-0 text-center text-[11px] tracking-wide text-[var(--chrome)]">
-          {nagging ? 'nice try — this one stays open' : title}
-        </span>
+        {/* The tabs are the top of the window, the way a terminal emulator does
+            it — no title strip above them saying the same thing twice. The one
+            that is open has no ground of its own, so it is the body's surface
+            carried up into the row: a folder tab rather than a button. */}
+        {tabs}
+
+        {nagging && (
+          <span className="flex items-center text-[11px] tracking-wide text-[var(--warm)]">
+            nice try — this one stays open
+          </span>
+        )}
 
         {/* Three dots, the one conventional place colour belongs. Grey glyphs at
             3.3:1 were invisible and had no hit area — you could not see them and
             you could not aim at them. The glyph appears inside on hover, so the
             bar is still quiet at rest. */}
-        <div className="group/ctl ml-auto flex items-center gap-2">
+        <div className="group/ctl ml-auto flex items-center gap-2 self-center">
           {[
             {
               key: 'min',

@@ -429,9 +429,8 @@ export default function TerminalSession({
       className="term-scroll flex h-[var(--term-max-h,68vh)] shrink-0 cursor-text flex-col overflow-y-auto overscroll-contain font-mono text-[15px] text-[var(--fg)]"
       onClick={focusInput}
     >
-      {/* The same left edge as the title bar, the tabs and the status bar. The
-          vertical padding also clears those two, which now float over this. */}
-      <div className="w-full space-y-8 px-6 pt-[4.25rem] pb-[4.5rem] sm:px-8">
+      {/* the same left edge as the tab row and the status bar */}
+      <div className="w-full space-y-8 px-6 pt-7 pb-9 sm:px-8">
         {/* what has been typed so far */}
         {blocks.slice(0, visibleCount).map((block, i) => (
           <div key={i}>{renderBlock(block)}</div>

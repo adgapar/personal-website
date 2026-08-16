@@ -20,7 +20,7 @@ export const WINDOW_FRAME: CSSProperties = {
   border: '1px solid var(--frame-edge)',
   borderRadius: '10px',
   boxShadow: 'var(--frame-shadow)',
-  background: 'var(--surface)',
+  background: 'var(--frame-fill)',
   overflow: 'hidden',
 }
 
@@ -31,5 +31,5 @@ export const WINDOW_FRAME_LIFTED: CSSProperties = {
 
 /** No gradient and no colour: the title bar is the quietest thing on screen. */
 export const TITLE_BAR: CSSProperties = {
-  background: 'var(--surface)',
+  background: 'var(--frame-fill)',
 }

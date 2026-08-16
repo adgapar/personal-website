@@ -71,10 +71,14 @@ export default function DocumentWindow({
                 title="copy this post as markdown"
                 // these are the two things you can do to a document, so they
                 // read as buttons at rest rather than only under the pointer
-                className={`border px-2 py-0.5 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
+                // Pills, and filled rather than outlined. A hairline box with
+                // square corners is the one shape left over from the old build,
+                // and it reads as a dialog button from another decade. Filled on
+                // hover in the same accent as a selected row in the list.
+                className={`rounded-full px-2.5 py-1 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
                   copied
-                    ? 'border-[var(--success)] text-[var(--success)]'
-                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--surface)]'
+                    ? 'bg-[var(--success)] text-white'
+                    : 'bg-black/[0.06] text-[var(--muted)] hover:bg-[var(--accent)] hover:text-white'
                 }`}
               >
                 {copied ? '✓ copied' : '⧉ copy .md'}
@@ -86,10 +90,10 @@ export default function DocumentWindow({
                 title={showSource ? 'back to the rendered post' : 'show the markdown source'}
                 // pressed is filled, not outlined — a toggle should say which
                 // of its two states you are in without reading the label
-                className={`border px-2 py-0.5 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
+                className={`rounded-full px-2.5 py-1 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
                   showSource
-                    ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--surface)]'
-                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--surface)]'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-black/[0.06] text-[var(--muted)] hover:bg-[var(--accent)] hover:text-white'
                 }`}
               >
                 {showSource ? '¶ rendered' : '.md'}

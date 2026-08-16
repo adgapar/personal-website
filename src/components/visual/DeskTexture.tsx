@@ -49,6 +49,26 @@ export default function DeskTexture() {
         maxPixelCount={1_400_000}
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
       />
+      {/* A ruled grid, wide enough to survive being blurred.
+          The mesh alone gave the glass tone but no structure, so there was
+          nothing to measure movement against: drag a window or scroll a pane
+          and nothing behind it appeared to move. Lines fix that — and the
+          spacing is the whole trick. The terminal blurs its backdrop by 26px,
+          so anything finer than that averages away to nothing. At 72px they
+          survive as soft bands; the heavier line every fourth one gives the eye
+          something larger to track. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: [
+            'repeating-linear-gradient(0deg, rgba(74,66,52,0.09) 0 1px, transparent 1px 72px)',
+            'repeating-linear-gradient(90deg, rgba(74,66,52,0.09) 0 1px, transparent 1px 72px)',
+            'repeating-linear-gradient(0deg, rgba(74,66,52,0.07) 0 1px, transparent 1px 288px)',
+            'repeating-linear-gradient(90deg, rgba(74,66,52,0.07) 0 1px, transparent 1px 288px)',
+          ].join(', '),
+        }}
+      />
+
       {/* the light the desk catches where the window sits */}
       <div
         className="absolute inset-0"

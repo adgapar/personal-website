@@ -68,8 +68,11 @@ function statusColor(header: string, value: string): string {
 
 function buildHelp(commands: PageCommand[]): TLine[] {
   const D: TLine = { content: '', style: 'default' }
+  // help is the documented way in, so every name it prints runs itself. It was
+  // a sentence of names joined with dots — fine to read, and on a phone a list
+  // of words you then had to spell back at it one letter at a time.
   const lines: TLine[] = [
-    { label: 'navigate', content: NAV_COMMANDS.join('  ·  '), style: 'default' },
+    { label: 'navigate', content: '', chips: NAV_COMMANDS },
   ]
   if (commands.length > 0) {
     lines.push(D)
@@ -79,13 +82,14 @@ function buildHelp(commands: PageCommand[]): TLine[] {
     )
   }
   lines.push(D)
-  lines.push({ label: 'always', content: 'help  ·  clear', style: 'muted' })
+  lines.push({ label: 'always', content: '', chips: ['help', 'clear'] })
   lines.push(D)
   lines.push({
     label: 'and',
     content: "it's a terminal — try what you'd type in one. some of it answers back.",
     style: 'muted',
   })
+  lines.push({ label: 'or', content: '', chips: ['fortune'] })
   return lines
 }
 
@@ -123,12 +127,18 @@ export default function TerminalSession({
   /** what has been run in this session — echoed command plus its output */
   const [entries, setEntries] = useState<{ input: string; lines: TLine[] }[]>([])
   const [commandHistory, setCommandHistory] = useState<string[]>([])
-  const [historyIndex, setHistoryIndex] = useState(-1)
+  // A ref, not state: how far back through history you are never appears on
+  // screen — only the input value it produces does — so making it state was
+  // re-rendering the whole session to remember a number nothing reads.
+  const historyIndex = useRef(-1)
   // Tab cycles against what was typed, not against what it just inserted —
   // otherwise accepting `git blame` leaves nothing that still starts with it.
   const [cycle, setCycle] = useState(0)
   const [base, setBase] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(instant ? blocks.length : 0)
+  // drives the on-screen key strip, which should arrive and leave with the
+  // keyboard rather than sit there taking 40px from a session nobody is typing at
+  const [focused, setFocused] = useState(false)
 
   useEffect(() => {
     if (instant) return
@@ -190,8 +200,12 @@ export default function TerminalSession({
 
   const matches = useMemo(() => {
     const typed = (base ?? inputValue).toLowerCase()
-    // two characters minimum, so one letter does not dump the whole set
-    if (typed.trim().length < 2) return []
+    // One character, not two. The threshold was there so a single letter would
+    // not dump the whole set, but it also meant the completion — the one thing
+    // that makes a 91-command vocabulary reachable without knowing it — stayed
+    // switched off until you had already guessed most of a word. One letter is
+    // between four and a dozen candidates, which is a list, not a dump.
+    if (typed.trim().length < 1) return []
     return completions.filter((c) => c.startsWith(typed))
   }, [base, inputValue, completions])
 
@@ -221,36 +235,56 @@ export default function TerminalSession({
     [onNavigate, echo],
   )
 
+  // Tab, ↑ and ↓ lifted out of the key handler, because a phone keyboard has
+  // none of the three and the on-screen key strip below drives the same code.
+  /** first Tab pins what was typed, each one after moves to the next match */
+  const cycleCompletion = useCallback(() => {
+    if (matches.length === 0) return
+    const next = base === null ? 0 : (cycle + 1) % matches.length
+    if (base === null) setBase(inputValue)
+    setCycle(next)
+    setInputValue(matches[next])
+  }, [matches, base, cycle, inputValue])
+
+  const historyBack = useCallback(() => {
+    const next = Math.min(historyIndex.current + 1, commandHistory.length - 1)
+    historyIndex.current = next
+    setInputValue(commandHistory[next] ?? '')
+  }, [commandHistory])
+
+  const historyForward = useCallback(() => {
+    const next = Math.max(historyIndex.current - 1, -1)
+    historyIndex.current = next
+    setInputValue(next === -1 ? '' : (commandHistory[next] ?? ''))
+  }, [commandHistory])
+
+  /** a character the phone keyboard hides behind a layer switch */
+  const insert = useCallback((ch: string) => {
+    setInputValue((v) => v + ch)
+    setBase(null)
+    setCycle(0)
+  }, [])
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Tab') {
         e.preventDefault()
-        if (matches.length === 0) return
-
-        // first Tab pins what was typed, each one after moves to the next match
-        const next = base === null ? 0 : (cycle + 1) % matches.length
-        if (base === null) setBase(inputValue)
-        setCycle(next)
-        setInputValue(matches[next])
+        cycleCompletion()
         return
       }
 
       if (e.key === 'ArrowUp') {
         e.preventDefault()
-        const newIdx = Math.min(historyIndex + 1, commandHistory.length - 1)
-        setHistoryIndex(newIdx)
-        setInputValue(commandHistory[newIdx] ?? '')
+        historyBack()
       } else if (e.key === 'ArrowDown') {
         e.preventDefault()
-        const newIdx = Math.max(historyIndex - 1, -1)
-        setHistoryIndex(newIdx)
-        setInputValue(newIdx === -1 ? '' : commandHistory[newIdx] ?? '')
+        historyForward()
       } else if (e.key === 'Enter') {
         const input = inputValue.trim()
         if (!input) return
 
         setCommandHistory((prev) => [input, ...prev].slice(0, 100))
-        setHistoryIndex(-1)
+        historyIndex.current = -1
         setInputValue('')
         setBase(null)
         setCycle(0)
@@ -293,7 +327,7 @@ export default function TerminalSession({
         }
       }
     },
-    [inputValue, historyIndex, commandHistory, commands, blocks, onNavigate, echo, matches, cycle, base]
+    [inputValue, commands, blocks, onNavigate, echo, cycleCompletion, historyBack, historyForward]
   )
 
   /** the `$` at the head of a line, long on the desk and short on a phone */
@@ -312,7 +346,8 @@ export default function TerminalSession({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); runCommand(block.action!.run) }}
-            className="border border-[var(--accent)] px-2.5 py-1 text-xs tracking-widest text-[var(--accent)] transition-colors duration-200 hover:bg-[var(--accent)] hover:text-[var(--bg)]"
+            // a real tap target on a phone; the desk keeps the tighter box
+            className="border border-[var(--accent)] px-3 py-2 text-xs tracking-widest text-[var(--accent)] transition-colors duration-200 hover:bg-[var(--accent)] hover:text-[var(--bg)] sm:px-2.5 sm:py-1"
           >
             {block.action.label}
           </button>
@@ -500,7 +535,7 @@ export default function TerminalSession({
           {block.avatar && <DitheredAvatar src={block.avatar} />}
           <div className="space-y-1.5">
             {block.lines.map((line, j) => (
-              <TerminalLine key={j} line={line} />
+              <TerminalLine key={j} line={line} onRun={runCommand} />
             ))}
           </div>
         </div>
@@ -508,7 +543,31 @@ export default function TerminalSession({
     </CommandBlock>
   )
 
+  /**
+   * The keys a phone keyboard does not have.
+   *
+   * Every mobile terminal ships one of these — Termux, iSH, Working Copy — and
+   * they all ship the same reason: a shell is driven by keys that no touch
+   * keyboard has, and without them the shell is a text field. Tab is the whole
+   * argument. There are 91 commands here and completion is the only way to
+   * reach a vocabulary you do not already know, and until now it was bound to a
+   * key that does not exist on the device where you need it most.
+   *
+   * ↑ and ↓ are history, which is how you fix a typo in a command rather than
+   * retyping it. `-` and `/` are on the symbol layer of every phone keyboard,
+   * and they appear in half the commands worth finding — `rm -rf /`, `kill -9`,
+   * `ls -l`. One tap instead of a layer switch and back.
+   */
+  const KEYS: { label: string; title: string; press: () => void; wide?: boolean }[] = [
+    { label: 'tab', title: 'complete', press: cycleCompletion, wide: true },
+    { label: '↑', title: 'previous command', press: historyBack },
+    { label: '↓', title: 'next command', press: historyForward },
+    { label: '-', title: 'dash', press: () => insert('-') },
+    { label: '/', title: 'slash', press: () => insert('/') },
+  ]
+
   return (
+    <>
     <div
       ref={scrollRef}
       // How tall this is belongs to the window, not to the session — see
@@ -538,7 +597,7 @@ export default function TerminalSession({
             {entry.lines.length > 0 && (
               <div className="space-y-1.5">
                 {entry.lines.map((line, j) => (
-                  <TerminalLine key={j} line={line} />
+                  <TerminalLine key={j} line={line} onRun={runCommand} />
                 ))}
               </div>
             )}
@@ -578,7 +637,7 @@ export default function TerminalSession({
                   value={inputValue}
                   onChange={(e) => {
                     setInputValue(e.target.value)
-                    setHistoryIndex(-1)
+                    historyIndex.current = -1
                     setCycle(0)
                     // typing abandons whatever Tab was cycling through,
                     // otherwise the menu keeps answering the previous prefix
@@ -588,14 +647,19 @@ export default function TerminalSession({
                   // the keyboard shortens the window under it; put the prompt
                   // back at the bottom of what is left
                   onFocus={() => {
+                    setFocused(true)
                     if (autoFocusing.current) return
                     const el = scrollRef.current
                     if (el) setTimeout(() => { el.scrollTop = el.scrollHeight }, 300)
                   }}
+                  onBlur={() => setFocused(false)}
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="off"
                   spellCheck={false}
+                  // the return key should say what it does — this is a command
+                  // line, not a form you are filling in
+                  enterKeyHint="go"
                   placeholder={placeholder}
                   aria-label="terminal input"
                   className="relative w-full bg-transparent outline-none font-[inherit] text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
@@ -604,10 +668,13 @@ export default function TerminalSession({
             )}
           </div>
 
-          {/* the candidates, visible rather than hidden behind a keystroke */}
+          {/* The candidates, visible rather than hidden behind a keystroke.
+              Capped at ten now that one letter is enough to ask: `c` matches
+              fourteen, and a menu that is four lines taller than the session is
+              not a menu. Tab still cycles the whole set. */}
           {matches.length > 1 && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-1 text-[11px]">
-              {matches.map((name, i) => {
+              {matches.slice(0, 10).map((name, i) => {
                 const active = base !== null && i === cycle % matches.length
                 return (
                   <button
@@ -630,7 +697,13 @@ export default function TerminalSession({
                   </button>
                 )
               })}
-              <span className="text-[10px] tracking-widest text-[var(--dim)]">
+              {matches.length > 10 && (
+                <span className="text-[var(--dim)]">+{matches.length - 10}</span>
+              )}
+              {/* Desk only. On a phone the key strip below has a key with `tab`
+                  written on it, so the same word floating at the end of the
+                  candidates just reads as a candidate called "tab to cycle". */}
+              <span className="hidden text-[10px] tracking-widest text-[var(--dim)] sm:inline">
                 tab to cycle
               </span>
             </div>
@@ -638,5 +711,45 @@ export default function TerminalSession({
         </div>
       </div>
     </div>
+
+    {/* Sits between the scrollback and the status bar, so it lands directly on
+        top of the keyboard — the accessory-bar position. Phone only: a desk has
+        these keys already. */}
+    {!instant && (
+      <div
+        aria-label="terminal keys"
+        className={`term-recess shrink-0 items-stretch gap-px border-t border-[var(--border)] px-1 sm:hidden ${
+          focused ? 'flex' : 'hidden'
+        }`}
+      >
+        {KEYS.map((key) => (
+          <button
+            key={key.label}
+            type="button"
+            title={key.title}
+            aria-label={key.title}
+            // The bar must not take focus, or the first tap closes the keyboard
+            // and the second one reopens it — which is the failure mode that
+            // makes most of these bars useless. mousedown rather than
+            // pointerdown: preventing the default on pointerdown also cancels
+            // the click that follows it.
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.stopPropagation()
+              key.press()
+            }}
+            // a ground of their own, so they read as keys rather than as five
+            // glyphs adrift on a bar — the gap-px above lets the recess through
+            // between them, which is the only separation a key needs
+            className={`bg-white/[0.05] py-2.5 text-[13px] text-[var(--muted)] transition-colors duration-150 active:bg-white/[0.11] active:text-[var(--accent)] ${
+              key.wide ? 'flex-[1.4]' : 'flex-1'
+            }`}
+          >
+            {key.label}
+          </button>
+        ))}
+      </div>
+    )}
+    </>
   )
 }

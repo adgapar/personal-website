@@ -3,6 +3,8 @@ import type { TerminalLine as TerminalLineType } from '@/lib/commands/types'
 
 interface Props {
   line: TerminalLineType
+  /** run a command the reader tapped — see `chips` on TerminalLine */
+  onRun?: (input: string) => void
 }
 
 const styleMap: Record<string, string> = {
@@ -17,7 +19,41 @@ const styleMap: Record<string, string> = {
   divider: 'text-[var(--border)]',
 }
 
-export default function TerminalLine({ line }: Props) {
+export default function TerminalLine({ line, onRun }: Props) {
+  // A row of commands you can run by tapping. Words, not buttons: the site
+  // already decided that a box around a word is one more shape to count, and
+  // seventy-two boxed eggs would be a control panel. They are accent-coloured
+  // because that is what the `$` is, and padded past their own size so a thumb
+  // has something to hit without the row growing.
+  if (line.chips?.length) {
+    return (
+      <div className="flex flex-col gap-x-5 sm:flex-row sm:items-baseline">
+        {line.label !== undefined && (
+          <span className="shrink-0 text-[10px] tracking-widest text-[var(--muted)] uppercase sm:w-20">
+            {line.label}
+          </span>
+        )}
+        {/* negative margins cancel the buttons' own hit padding, so the first
+            chip sits on the same left edge as prose on the line above */}
+        <div className="-mx-1.5 -my-1 flex flex-wrap items-baseline gap-x-1 gap-y-0">
+          {line.chips.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRun?.(name)
+              }}
+              className="px-1.5 py-1 text-[var(--accent)] transition-colors duration-150 hover:text-[var(--fg)]"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   if (line.image) {
     return (
       <DitheredPlate

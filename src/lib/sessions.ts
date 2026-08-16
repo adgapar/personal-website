@@ -214,6 +214,20 @@ export const playSession: SessionBlock[] = [
       { content: "→ the rest you find by typing what a terminal would understand.", style: 'muted' },
     ],
   },
+  // A door for anyone not holding a keyboard. This page is deliberately empty —
+  // the prompt is the invitation — but an empty prompt only invites you if
+  // typing at it is cheap, and on a phone it is the most expensive thing on the
+  // page. One tap plays the same game: something you did not ask for, and no
+  // hint about how many more there are.
+  {
+    mdSkip: true,
+    lines: [],
+    action: {
+      label: 'feeling lucky',
+      run: 'fortune',
+      hint: 'or type something — a tool you use every day',
+    },
+  },
 ]
 
 // ─── Contact ─────────────────────────────────────────────────────────────────
@@ -278,7 +292,10 @@ export const playPage: PageSession = {
   blocks: playSession,
   prompt: 'adilet@play:~$',
   commands: [],
-  placeholder: 'type anything — try a tool you use every day',
+  // short, because the block above now carries the long version as a hint and
+  // a placeholder that runs off the end of a phone's input is a worse invitation
+  // than no placeholder at all
+  placeholder: 'type anything',
 }
 
 export const contactPage: PageSession = {

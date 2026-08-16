@@ -16,7 +16,11 @@ registerCommand({
   type: 'output',
   handler: () => ({
     type: 'output',
-    lines: [{ content: 'git: specify a subcommand — commit · push · pull · blame · status · log', style: 'muted' }],
+    lines: [
+      { content: 'git: specify a subcommand', style: 'muted' },
+      // the reply teaches its own vocabulary, and each word is the next tap
+      { content: '', chips: ['git commit', 'git push', 'git pull', 'git blame', 'git status', 'git log'] },
+    ],
   }),
 })
 
@@ -800,6 +804,59 @@ registerCommand({
   handler: () => egg('copied. now there are two of whatever that was.'),
 })
 
+// ─── one at random, for whoever cannot be bothered to guess ──────────────────
+
+/**
+ * `fortune`, which is a real thing a shell has had since 1979 and which does
+ * exactly this: prints something you did not ask for.
+ *
+ * It exists for the phone. The whole premise of the play tab is "type a tool you
+ * use every day and it answers back", which is a guessing game whose input
+ * device is a keyboard — fine on a desk, and on glass it is a spelling test with
+ * a joke as the prize. This is the same game with the typing taken out. It does
+ * not print the list, so the surprise survives: you never learn how many there
+ * are, only that there was another one.
+ *
+ * Anything with a side effect stays out of the pool. A random command that
+ * switches the whole page to agent mode, repaints the desk, or ends the session
+ * is not a fortune, it is a trap.
+ */
+const NOT_A_FORTUNE = new Set([
+  'fortune',  // no
+  'eggs',     // the index, which is the one thing this must not hand over
+  'clear',    // empties the scrollback that just told you what happened
+  'agent',    // switches the whole page out from under you
+  'dither',   // repaints the desk
+  'exit',
+  'logout',
+  'history',  // prints your own session back at you — hollow at random
+  'man',      // wants an argument
+  'git',      // a stub that asks for a subcommand
+])
+
+registerCommand({
+  name: 'fortune',
+  aliases: ['lucky'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => {
+    const pool = listCommands().filter(
+      (c) => c.hidden && c.type === 'output' && !NOT_A_FORTUNE.has(c.name),
+    )
+    const pick = pool[Math.floor(Math.random() * pool.length)]
+    if (!pick) return egg('nothing happens.')
+
+    const rolled = pick.handler([], pick.name)
+    return {
+      type: 'output',
+      // echoed as a command, because that is what it is — the reader should see
+      // which one came up and be able to type it themselves next time
+      lines: [{ content: pick.name, style: 'command' }, ...(rolled.lines ?? [])],
+    }
+  },
+})
+
 // ─── the index, for the person who wrote them ────────────────────────────────
 
 /**
@@ -829,23 +886,23 @@ registerCommand({
 
     const hidden = listCommands()
       .filter((c) => c.hidden && c.name !== 'eggs')
-      .map((c) => (c.aliases?.length ? `${c.name} (${c.aliases.join(', ')})` : c.name))
+      .map((c) => c.name)
       .sort()
 
-    // six to a row, so a long list stays readable
-    const rows: string[] = []
-    for (let i = 0; i < hidden.length; i += 3) {
-      rows.push('  ' + hidden.slice(i, i + 3).map((n) => n.padEnd(26)).join('').trimEnd())
-    }
-
+    // Was three to a row, each padEnd(26) — a 78-character block laid out for a
+    // window that is always wide enough. A phone gives it 45, so the reveal at
+    // the end of the riddle arrived as a wrapped mess. As a list it flows to
+    // whatever width it has, and every one of them runs itself, which on a
+    // touchscreen is the difference between a list and an inventory of things
+    // to go and spell.
     return {
       type: 'output',
       lines: [
         { content: `${hidden.length} hidden commands`, style: 'warm' },
         { content: '', style: 'muted' },
-        ...rows.map((content) => ({ content, style: 'muted' as const })),
+        { content: '', chips: hidden },
         { content: '', style: 'muted' },
-        { content: 'two-word ones need both words. aliases in brackets.', style: 'dim' },
+        { content: 'two-word ones need both words.', style: 'dim' },
       ],
     }
   },

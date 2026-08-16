@@ -41,15 +41,15 @@
   /* how a window is drawn on the desk — overridden for the dark one */
   --frame-edge: var(--hair);
   --frame-shadow:
-    0 1px 1px rgba(38, 32, 20, 0.05),
-    0 2px 4px rgba(38, 32, 20, 0.05),
-    0 8px 16px -6px rgba(38, 32, 20, 0.10),
-    0 28px 48px -16px rgba(38, 32, 20, 0.16);
+    0 1px 1px rgba(38, 32, 20, 0.07),
+    0 3px 6px rgba(38, 32, 20, 0.08),
+    0 12px 24px -6px rgba(38, 32, 20, 0.16),
+    0 40px 64px -20px rgba(38, 32, 20, 0.26);
   --frame-shadow-lifted:
-    0 2px 2px rgba(38, 32, 20, 0.06),
-    0 6px 10px rgba(38, 32, 20, 0.06),
-    0 18px 32px -8px rgba(38, 32, 20, 0.14),
-    0 48px 72px -20px rgba(38, 32, 20, 0.22);
+    0 2px 2px rgba(38, 32, 20, 0.09),
+    0 8px 14px rgba(38, 32, 20, 0.10),
+    0 26px 44px -8px rgba(38, 32, 20, 0.22),
+    0 64px 96px -24px rgba(38, 32, 20, 0.32);
 }
 
 /**
@@ -81,15 +81,15 @@
      and needs no hairline — the value difference is the edge. */
   --frame-edge: rgba(20, 16, 10, 0.34);
   --frame-shadow:
-    0 1px 2px rgba(30, 26, 18, 0.10),
-    0 4px 10px rgba(30, 26, 18, 0.10),
-    0 14px 28px -8px rgba(30, 26, 18, 0.22),
-    0 40px 64px -20px rgba(30, 26, 18, 0.26);
+    0 1px 2px rgba(28, 22, 12, 0.16),
+    0 6px 14px rgba(28, 22, 12, 0.16),
+    0 20px 38px -8px rgba(28, 22, 12, 0.30),
+    0 56px 84px -24px rgba(28, 22, 12, 0.36);
   --frame-shadow-lifted:
-    0 2px 4px rgba(30, 26, 18, 0.12),
-    0 8px 18px rgba(30, 26, 18, 0.12),
-    0 24px 44px -10px rgba(30, 26, 18, 0.26),
-    0 60px 88px -24px rgba(30, 26, 18, 0.32);
+    0 2px 4px rgba(28, 22, 12, 0.18),
+    0 12px 26px rgba(28, 22, 12, 0.18),
+    0 34px 58px -10px rgba(28, 22, 12, 0.34),
+    0 80px 112px -28px rgba(28, 22, 12, 0.42);
 }
 
 /* the terminal's scrollbar rides on its own ground */
@@ -110,9 +110,15 @@
  */
 .glass {
   position: relative;
-  background: rgba(253, 252, 249, 0.42);
-  -webkit-backdrop-filter: blur(26px) saturate(1.5) brightness(1.04);
-  backdrop-filter: blur(26px) saturate(1.5) brightness(1.04);
+  /* Thin enough to be see-through, and a blur small enough to keep the shape of
+     what it is seeing. 26px destroyed everything behind it; 14px lets the desk's
+     washes through as a gradient. */
+  background: rgba(252, 251, 247, 0.34);
+  -webkit-backdrop-filter: blur(14px) saturate(1.7) brightness(1.06);
+  backdrop-filter: blur(14px) saturate(1.7) brightness(1.06);
+  /* it floats over the page, so it casts on it — the cue that says "panel above"
+     rather than "region beside" */
+  box-shadow: 5px 0 18px -4px rgba(40, 34, 22, 0.16);
 }
 
 /* Light catching the edge. A flat tint has no edges; glass does, and this is
@@ -134,14 +140,15 @@
 /* no backdrop-filter (older Firefox, some Linux): fall back to near-opaque
    rather than to unreadable text on a bare desk */
 @supports not (backdrop-filter: blur(1px)) {
-  .glass { background: rgba(253, 252, 249, 0.93); }
+  .glass { background: rgba(252, 251, 247, 0.93); }
 }
 
-/* The desk catches a little light where the window sits. Tonal variation, not
-   detail — the flat field was the other half of why this read as blank. */
+/* Under the mesh (see DeskTexture), and the whole desk when there is no WebGL.
+   Soft and wide on purpose: this is the shape of variation blur can keep. */
 .desk {
   background:
-    radial-gradient(115% 75% at 50% 18%, rgba(255, 253, 247, 0.75) 0%, rgba(255, 253, 247, 0) 62%),
+    radial-gradient(75% 60% at 24% 6%, rgba(255, 252, 244, 0.8) 0%, rgba(255, 252, 244, 0) 70%),
+    radial-gradient(70% 65% at 86% 34%, rgba(206, 199, 184, 0.7) 0%, rgba(206, 199, 184, 0) 72%),
     var(--bg);
 }
 

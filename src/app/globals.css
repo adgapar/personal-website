@@ -83,6 +83,15 @@
   --border:  rgba(255, 255, 255, 0.10);
   --hair:    rgba(255, 255, 255, 0.14);
 
+}
+
+/**
+ * The glass, kept apart from the palette above. `term` is now just "this subtree
+ * is the machine" and can be put on a whole page — the agent view uses it that
+ * way. Only a window that actually floats over the desk should carry a
+ * backdrop-filter, which also creates a containing block for fixed children.
+ */
+.term-glass {
   /* The whole window is glass, not just its bars — this is what terminal
      transparency has always been.
      Both numbers were wrong before. 26px of blur spreads a 1px rule across 52px

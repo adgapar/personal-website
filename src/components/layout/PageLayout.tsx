@@ -34,9 +34,13 @@ export default function PageLayout({ page }: Props) {
 
   return (
     <div
-      className={`desk relative flex flex-col items-center font-mono text-base text-[var(--fg)] ${
-        warmingUp ? 'screen-on ' : ''
-      }${
+      // Agent mode is the machine's view of the page, so it belongs to the
+      // machine's world: the `term` palette on a solid dark ground, with no desk
+      // under it. It was inheriting the desk — a lit surface built for windows
+      // to sit on, with nothing sitting on it.
+      className={`relative flex flex-col items-center font-mono text-base ${
+        isAgent ? 'term bg-[var(--surface)] text-[var(--fg)]' : 'desk text-[var(--fg)]'
+      } ${warmingUp ? 'screen-on ' : ''}${
         isAgent
           ? // a document scrolls
             'min-h-screen'

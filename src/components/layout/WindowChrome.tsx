@@ -114,8 +114,8 @@ export default function WindowChrome({ title, tabs, children }: Props) {
         // pointer-events-auto: the wrapper disables them so the desktop behind
         // stays reachable, and the window takes them back for itself
         fullscreen
-          ? 'term pointer-events-auto fixed inset-0 z-40 flex flex-col'
-          : `term pointer-events-auto relative flex w-full max-w-3xl flex-col ${
+          ? 'term term-glass pointer-events-auto fixed inset-0 z-40 flex flex-col'
+          : `term term-glass pointer-events-auto relative flex w-full max-w-3xl flex-col ${
               dragging ? '' : 'transition-[max-width,transform] duration-300'
             }`
       }

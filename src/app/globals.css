@@ -78,7 +78,9 @@
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  /* Geist Mono, with the system mono behind it — the fallback should be the
+     face the machine already has, not a second download that never arrives. */
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   line-height: 1.7;
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;

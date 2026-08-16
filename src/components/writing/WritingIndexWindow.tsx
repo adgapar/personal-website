@@ -3,6 +3,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+/** the voice the posts are set in — the index should speak it too */
+const SERIF = 'Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif'
+
 /**
  * The reader's home screen — a contents page rather than a terminal listing,
  * shown in the same right-hand pane a post would open in.
@@ -42,12 +45,20 @@ function Row({ post }: { post: IndexPost }) {
       )}
       <span className="block space-y-0.5">
         <span className="block font-mono text-[11px] text-[#a89e8d] tabular-nums">{post.date}</span>
-        <span className="block text-[1.05rem] leading-snug text-[#1f1b16] group-hover:underline">
+        <span
+          className="block text-[1.12rem] leading-snug text-[#1f1b16] group-hover:underline"
+          style={{ fontFamily: SERIF }}
+        >
           {post.title}
           {post.external && <span className="pl-1.5 text-[0.7em] text-[#a89e8d]">↗</span>}
         </span>
         {post.subtitle && (
-          <span className="block text-[0.9rem] leading-snug text-[#5d564c]">{post.subtitle}</span>
+          <span
+            className="block text-[0.95rem] leading-snug text-[#5d564c] italic"
+            style={{ fontFamily: SERIF }}
+          >
+            {post.subtitle}
+          </span>
         )}
       </span>
     </>
@@ -84,17 +95,28 @@ export default function WritingIndexWindow({
             measure — a title stretched over 1000px is not a contents page */}
         <div className="mx-auto w-full max-w-2xl lg:max-w-none">
         <header className="mb-10">
-          <h1 className="text-[1.75rem] leading-tight font-semibold text-[#1f1b16]">
+          <h1
+            className="text-[2rem] leading-tight font-semibold text-[#1f1b16]"
+            style={{ fontFamily: SERIF }}
+          >
             Writing
           </h1>
-          <p className="mt-2 text-[1rem] text-[#5d564c] italic">
+          <p
+            className="mt-2 text-[1.05rem] text-[#5d564c] italic"
+            style={{ fontFamily: SERIF }}
+          >
             Essays here, and a newsletter on AI reliability over on Substack.
           </p>
         </header>
 
         <section className="mb-14">
           <div className="mb-3 flex items-baseline gap-3 border-b-2 border-[#1f1b16] pb-1.5">
-            <h2 className="text-[1.15rem] font-semibold text-[#1f1b16]">Blog</h2>
+            <h2
+              className="text-[1.25rem] font-semibold text-[#1f1b16]"
+              style={{ fontFamily: SERIF }}
+            >
+              Blog
+            </h2>
             <span className="font-mono text-[10px] tracking-widest text-[#8a8178]">
               {blog.length} posts · here
             </span>
@@ -110,7 +132,10 @@ export default function WritingIndexWindow({
 
         <section>
           <div className="mb-3 flex items-baseline gap-3 border-b-2 border-[#1f1b16] pb-1.5">
-            <h2 className="text-[1.15rem] font-semibold text-[#1f1b16]">
+            <h2
+              className="text-[1.25rem] font-semibold text-[#1f1b16]"
+              style={{ fontFamily: SERIF }}
+            >
               The Working Prototype
             </h2>
             <span className="font-mono text-[10px] tracking-widest text-[#8a8178]">

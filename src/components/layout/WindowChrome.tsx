@@ -25,8 +25,9 @@ import {
  * Position and min/max state live in window-state-store, not here — every route
  * renders its own PageLayout, so this component remounts on each tab click.
  *
- * Deliberately not a Win95 pastiche: one bevel, one shadow, a title bar. Enough
- * to say "window" without dragging in grey plastic that would fight the palette.
+ * Carries the `term` class, which is where the dark palette lives. The desk, the
+ * icons and the reader stay in daylight; only what is inside this frame is a
+ * machine. See globals.css.
  */
 
 interface Props {
@@ -107,8 +108,8 @@ export default function WindowChrome({ title, children }: Props) {
         // pointer-events-auto: the wrapper disables them so the desktop behind
         // stays reachable, and the window takes them back for itself
         fullscreen
-          ? 'pointer-events-auto fixed inset-0 z-40 flex flex-col'
-          : `pointer-events-auto relative flex w-full max-w-3xl flex-col ${
+          ? 'term pointer-events-auto fixed inset-0 z-40 flex flex-col'
+          : `term pointer-events-auto relative flex w-full max-w-3xl flex-col ${
               dragging ? '' : 'transition-[max-width,transform] duration-300'
             }`
       }

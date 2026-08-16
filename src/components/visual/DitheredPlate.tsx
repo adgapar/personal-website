@@ -42,7 +42,7 @@ export default function DitheredPlate({
         onFocus={() => setRevealed(true)}
         onBlur={() => setRevealed(false)}
         onClick={() => setRevealed((r) => !r)}
-        className="relative block cursor-pointer overflow-hidden border border-[var(--border)] bg-[var(--surface)]"
+        className="relative block cursor-pointer overflow-hidden border border-[var(--border)] bg-[var(--border)]"
         style={{
           height,
           width: `calc(${height} * ${ratio})`,
@@ -52,9 +52,9 @@ export default function DitheredPlate({
       >
         <ImageDithering
           image={src}
-          colorBack="#ffffff"
-          colorFront="#1b1b1f"
-          colorHighlight="#1b1b1f"
+          colorBack="#1d1c19"
+          colorFront="#ece9e2"
+          colorHighlight="#ece9e2"
           originalColors={false}
           type="8x8"
           size={1.6}

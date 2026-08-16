@@ -37,7 +37,64 @@
   --ctl-close: #dd6154;
   --ctl-min:   #dcaa4a;
   --ctl-max:   #57a273;
+
+  /* how a window is drawn on the desk — overridden for the dark one */
+  --frame-edge: var(--hair);
+  --frame-shadow:
+    0 1px 1px rgba(38, 32, 20, 0.05),
+    0 2px 4px rgba(38, 32, 20, 0.05),
+    0 8px 16px -6px rgba(38, 32, 20, 0.10),
+    0 28px 48px -16px rgba(38, 32, 20, 0.16);
+  --frame-shadow-lifted:
+    0 2px 2px rgba(38, 32, 20, 0.06),
+    0 6px 10px rgba(38, 32, 20, 0.06),
+    0 18px 32px -8px rgba(38, 32, 20, 0.14),
+    0 48px 72px -20px rgba(38, 32, 20, 0.22);
 }
+
+/**
+ * The terminal is dark. Not a theme and not a mode — a decision about what the
+ * object is. A terminal has been a dark rectangle since the tube, and the site
+ * has a second app that is emphatically not one: the reader is paper. Two kinds
+ * of thing on one desk, and you can tell which is which before reading a word.
+ *
+ * Scoped to the window's own subtree rather than the document, so the desk, the
+ * icons, the reader and the agent view all keep the daylight palette. Custom
+ * properties apply to the element that declares them, so the frame itself
+ * resolves to these too.
+ */
+.term {
+  --surface: #1d1c19;  /* 12.2:1 against the desk — the figure, unmistakably */
+  --fg:      #ece9e2;  /* 14.1:1 */
+  --muted:   #a8a49b;  /* 6.9:1 */
+  --chrome:  #7a766d;  /* 3.8:1 — the same rank as it had on paper */
+  --dim:     #5c584f;
+  --accent:  #5cb6e8;  /* 7.6:1 — below the content, as on the light window */
+  --warm:    #cf9f52;
+  --success: #5fb98a;
+  --error:   #de8474;
+  --info:    #93a3b3;
+  --border:  #302e29;
+  --hair:    #3a372f;
+
+  /* A dark sheet on a light desk casts a deeper, warmer shadow than a white one,
+     and needs no hairline — the value difference is the edge. */
+  --frame-edge: rgba(20, 16, 10, 0.34);
+  --frame-shadow:
+    0 1px 2px rgba(30, 26, 18, 0.10),
+    0 4px 10px rgba(30, 26, 18, 0.10),
+    0 14px 28px -8px rgba(30, 26, 18, 0.22),
+    0 40px 64px -20px rgba(30, 26, 18, 0.26);
+  --frame-shadow-lifted:
+    0 2px 4px rgba(30, 26, 18, 0.12),
+    0 8px 18px rgba(30, 26, 18, 0.12),
+    0 24px 44px -10px rgba(30, 26, 18, 0.26),
+    0 60px 88px -24px rgba(30, 26, 18, 0.32);
+}
+
+/* the terminal's scrollbar rides on its own ground */
+.term .term-scroll { scrollbar-color: var(--hair) transparent; }
+.term .term-scroll::-webkit-scrollbar-thumb { border-color: var(--surface); }
 
 /* The desk catches a little light where the window sits. Tonal variation, not
    detail — the flat field was the other half of why this read as blank. */

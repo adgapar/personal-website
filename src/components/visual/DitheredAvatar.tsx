@@ -34,7 +34,7 @@ export default function DitheredAvatar({
       onFocus={() => setRevealed(true)}
       onBlur={() => setRevealed(false)}
       onClick={() => setRevealed((r) => !r)}
-      className="relative shrink-0 cursor-pointer overflow-hidden rounded-sm bg-[var(--surface)]"
+      className="relative shrink-0 cursor-pointer overflow-hidden rounded-sm"
       style={{ width: size, height: size }}
     >
       <span
@@ -44,7 +44,15 @@ export default function DitheredAvatar({
         {/* A finer grid than the desk icons and no extra contrast: an icon wants
             a hard silhouette, a face wants its midtones, and pushing this one
             the way an icon is pushed turned the portrait into a stencil. */}
-        <BitmapIcon src={src} grid={Math.round(size / 1.6)} size={size} contrast={1.05} />
+        <BitmapIcon
+          src={src}
+          grid={Math.round(size / 1.6)}
+          size={size}
+          // paper on a dark window, not ink on a white one — this only ever
+          // renders inside the terminal
+          ink={[236, 233, 226]}
+          contrast={1.05}
+        />
       </span>
       <Image
         src={src}

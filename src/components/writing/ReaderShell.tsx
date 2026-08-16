@@ -1,9 +1,15 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { TITLE_BAR, WINDOW_FRAME } from '@/lib/window-style'
+
+// WebGL must not run during SSR; the flat --bg underneath is the fallback
+const DeskTexture = dynamic(() => import('@/components/visual/DeskTexture'), {
+  ssr: false,
+})
 
 /**
  * The reader: one window on the desk, with the list of pieces in its own pane on
@@ -85,7 +91,8 @@ export default function ReaderShell({
   }, [pathname, tab])
 
   return (
-    <div className="desk h-[100dvh] overflow-hidden">
+    <div className="desk relative h-[100dvh] overflow-hidden">
+      <DeskTexture />
 
       <div className="relative z-10 flex h-full justify-center px-2 py-2 sm:px-6 sm:py-8">
         {/* the window */}

@@ -110,15 +110,24 @@
  */
 .glass {
   position: relative;
-  /* Thin enough to be see-through, and a blur small enough to keep the shape of
-     what it is seeing. 26px destroyed everything behind it; 14px lets the desk's
-     washes through as a gradient. */
-  background: rgba(252, 251, 247, 0.26);
+  /* Smoked grey rather than a white veil. The blur is small enough to keep the
+     shape of what it sees — 26px destroyed everything behind it; 14px lets the
+     desk's washes through as a gradient. */
+  background: rgba(112, 108, 98, 0.17);
   -webkit-backdrop-filter: blur(14px) saturate(1.7) brightness(1.06);
   backdrop-filter: blur(14px) saturate(1.7) brightness(1.06);
   /* it floats over the page, so it casts on it — the cue that says "panel above"
      rather than "region beside" */
   box-shadow: 5px 0 18px -4px rgba(40, 34, 22, 0.16);
+
+  /* The ink ranks, restated for a darker ground. --muted and --chrome are tuned
+     for paper and fall to 3:1 on smoked glass, which is fine for furniture and
+     not fine for a list of links. */
+  --fg: #232019;
+  --muted: #555046;
+  --chrome: #6f6a5f;
+  --dim: #857f73;
+  --accent: #08557f;
 }
 
 /* Light catching the edge. A flat tint has no edges; glass does, and this is
@@ -149,19 +158,23 @@
  * Tinted from the paper, not the desk, because that is what it sits on.
  */
 .glass-paper {
-  background: rgba(255, 253, 246, 0.72);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-  backdrop-filter: blur(16px) saturate(1.5);
+  /* Smoked, not clear. A near-white tint on near-white paper left a 1.05:1 step
+     between the bar and the page, so the transparency had nothing to be read
+     against. Grey gives the glass a value of its own, and the prose underneath
+     shows as darker shapes rather than as almost-nothing. */
+  background: rgba(112, 108, 98, 0.24);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
 }
 
 @supports not (backdrop-filter: blur(1px)) {
-  .glass-paper { background: rgba(255, 253, 246, 0.97); }
+  .glass-paper { background: rgba(224, 221, 214, 0.97); }
 }
 
 /* no backdrop-filter (older Firefox, some Linux): fall back to near-opaque
    rather than to unreadable text on a bare desk */
 @supports not (backdrop-filter: blur(1px)) {
-  .glass { background: rgba(252, 251, 247, 0.93); }
+  .glass { background: rgba(206, 202, 194, 0.95); }
 }
 
 /* Under the mesh (see DeskTexture), and the whole desk when there is no WebGL.

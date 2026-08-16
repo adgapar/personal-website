@@ -1,8 +1,14 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import DesktopIcons from './DesktopIcons'
+
+// WebGL must not run during SSR; the flat .desk underneath is the fallback
+const DeskSurface = dynamic(() => import('@/components/visual/DeskSurface'), {
+  ssr: false,
+})
 import SiteNav from './SiteNav'
 import StatusBar from './StatusBar'
 import TerminalTabs from './TerminalTabs'
@@ -39,6 +45,7 @@ export default function PageLayout({ page }: Props) {
             'h-[100dvh] overflow-hidden'
       }`}
     >
+      {!isAgent && <DeskSurface />}
       {!isAgent && <DesktopIcons />}
 
       {isAgent ? (

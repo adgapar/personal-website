@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import DesktopIcons from './DesktopIcons'
+import Dock from './Dock'
 
 // WebGL must not run during SSR; the flat .desk underneath is the fallback
 const DeskSurface = dynamic(() => import('@/components/visual/DeskSurface'), {
@@ -50,7 +50,7 @@ export default function PageLayout({ page }: Props) {
       }`}
     >
       {!isAgent && <DeskSurface />}
-      {!isAgent && <DesktopIcons />}
+      {!isAgent && <Dock />}
 
       {isAgent ? (
         <div className="relative z-10 max-w-4xl w-full flex flex-col flex-1">
@@ -65,7 +65,12 @@ export default function PageLayout({ page }: Props) {
         // content, anchoring it to the top left a growing empty margin below it
         // no padding below sm: there is no desk to inset the window from, and
         // the 32px it was spending is the scarcest dimension on a phone
-        <div className="pointer-events-none relative z-10 flex h-full w-full items-center justify-center overflow-hidden sm:px-8 sm:py-10">
+        // pb-20 rather than py-10: the dock stands on the bottom edge of the
+        // desk, and the window is centred on what is left over rather than on
+        // the whole desk. The dock is drawn above the window, so this padding is
+        // what keeps it from resting on the prompt — the window can still be
+        // dragged under it, which is the window's own business.
+        <div className="pointer-events-none relative z-10 flex h-full w-full items-center justify-center overflow-hidden sm:px-8 sm:pt-10 sm:pb-20">
           <WindowChrome
             title={`${page.session.prompt}  —  terminal`}
             tabs={<TerminalTabs />}

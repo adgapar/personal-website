@@ -108,7 +108,10 @@ export default function BootSequence() {
 
   return (
     <div
-      className={`fixed inset-0 z-50 overflow-y-auto px-5 py-8 font-mono text-xs sm:px-10 sm:py-12 ${
+      // z-[60], above everything the desktop puts on screen — the window at
+      // z-40 and the dock at z-50. This is the machine before there is a desk,
+      // so nothing the desk owns may show through it or over it.
+      className={`fixed inset-0 z-[60] overflow-y-auto px-5 py-8 font-mono text-xs sm:px-10 sm:py-12 ${
         closing ? 'crt-collapse' : ''
       }`}
       style={{

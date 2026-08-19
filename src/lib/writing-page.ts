@@ -40,7 +40,7 @@ export function getWritingPage(): PageMeta {
     ],
   }
 
-  // the way in — the same thing the desktop icon and the 'reader' command do
+  // the way in — the same thing the dock and the 'reader' command do
   const openReader: SessionBlock = {
     mdSkip: true,
     lines: [],

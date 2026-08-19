@@ -9,7 +9,7 @@ export const metadata = {
 
 /**
  * The reader app's home screen — a contents page, opened from the writing tab,
- * the desktop icon, or the `reader` command. Posts under /blog and /newsletter
+ * the dock, or the `reader` command. Posts under /blog and /newsletter
  * share this shell, so moving between them stays inside the app.
  */
 export default function ReaderPage() {

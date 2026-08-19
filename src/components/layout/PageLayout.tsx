@@ -12,6 +12,7 @@ import { useViewMode } from './ViewModeProvider'
 import AgentView from '@/components/agent/AgentView'
 import TerminalSession from '@/components/terminal/TerminalSession'
 import SnakeApp from '@/components/apps/SnakeApp'
+import PaintApp from '@/components/apps/PaintApp'
 import Sunlight from '@/components/visual/Sunlight'
 import {
   closeApp,
@@ -109,9 +110,10 @@ export default function PageLayout({ page }: Props) {
           reduced motion. */}
       {!isAgent && <Sunlight />}
 
-      {!isAgent && app === 'snake' && (
+      {!isAgent && app && (
         <div className="pointer-events-none fixed inset-0 z-[45] flex items-center justify-center overflow-hidden sm:px-8 sm:pt-10 sm:pb-20">
-          <SnakeApp onClose={closeApp} />
+          {app === 'snake' && <SnakeApp onClose={closeApp} />}
+          {app === 'paint' && <PaintApp onClose={closeApp} />}
         </div>
       )}
     </div>

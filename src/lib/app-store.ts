@@ -11,7 +11,7 @@
  * anybody came here for.
  */
 
-export type DeskApp = 'snake'
+export type DeskApp = 'snake' | 'paint'
 
 let current: DeskApp | null = null
 const listeners = new Set<() => void>()
@@ -29,12 +29,44 @@ export function getServerSnapshot(): DeskApp | null {
   return null
 }
 
-export function openApp(app: DeskApp): void {
-  current = app
+function notify(): void {
   listeners.forEach((listener) => listener())
 }
 
+export function openApp(app: DeskApp): void {
+  current = app
+  notify()
+}
+
+/**
+ * Open one after a beat, so the command that opened it can be read first.
+ *
+ * A command handler runs before its own output is on screen, so opening the
+ * window there covered the joke with the punchline still in flight — you got an
+ * app and never saw why. The terminal already has this instinct: a `navigate`
+ * result waits 400ms before it goes anywhere. This is the same courtesy sized for
+ * a few lines of reading rather than one.
+ *
+ * At most one pending open. Typing `python` and then `claude` before the first
+ * lands should give you paint, not both in sequence — and closing cancels a
+ * window that has not arrived yet, rather than letting it appear after you have
+ * already said no.
+ */
+let pending: ReturnType<typeof setTimeout> | null = null
+
+export function openAppSoon(app: DeskApp, delayMs: number): void {
+  if (pending) clearTimeout(pending)
+  pending = setTimeout(() => {
+    pending = null
+    openApp(app)
+  }, delayMs)
+}
+
 export function closeApp(): void {
+  if (pending) {
+    clearTimeout(pending)
+    pending = null
+  }
   current = null
-  listeners.forEach((listener) => listener())
+  notify()
 }

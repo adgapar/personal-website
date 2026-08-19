@@ -2,7 +2,7 @@ import { listCommands, registerCommand } from './registry'
 import type { TerminalLine } from './types'
 import { publishUiEvent } from '@/lib/ui-bus'
 import { setViewMode } from '@/lib/view-mode-store'
-import { openApp } from '@/lib/app-store'
+import { openAppSoon } from '@/lib/app-store'
 
 function egg(content: string, style: TerminalLine['style'] = 'muted') {
   return { type: 'output' as const, lines: [{ content, style }] }
@@ -401,22 +401,30 @@ registerCommand({
   description: '',
   hidden: true,
   type: 'output',
-  handler: () => ({
-    type: 'output',
-    lines: [
-      { content: 'Claude Monet  ·  Impression, Sunrise  ·  1872', style: 'warm' },
-      {
-        content: '',
-        image: {
-          src: '/art/monet-impression-sunrise.jpg',
-          alt: 'Claude Monet, Impression, Sunrise, 1872',
-          caption: 'hover for the colours',
-          ratio: 900 / 698,
+  // The first thing anybody types here, so it is the one that hands something
+  // over: the plate, the joke, and a brush loaded with the plate's own colours.
+  handler: () => {
+    // longer than snake's: there is a plate to look at before the last line
+    openAppSoon('paint', 2000)
+    return {
+      type: 'output',
+      lines: [
+        { content: 'Claude Monet  ·  Impression, Sunrise  ·  1872', style: 'warm' },
+        {
+          content: '',
+          image: {
+            src: '/art/monet-impression-sunrise.jpg',
+            alt: 'Claude Monet, Impression, Sunrise, 1872',
+            caption: 'hover for the colours',
+            ratio: 900 / 698,
+          },
         },
-      },
-      { content: 'you probably meant the other Claude. it also makes pictures.', style: 'muted' },
-    ],
-  }),
+        { content: 'you probably meant the other Claude. it also makes pictures.', style: 'muted' },
+        { content: 'so can you. sixteen colours, which is all a terminal ever had.', style: 'accent' },
+        { content: 'opening paint...', style: 'dim' },
+      ],
+    }
+  },
 })
 
 registerCommand({
@@ -538,12 +546,13 @@ registerCommand({
   // The one egg that opens something. It had the setup already — the joke was
   // about keeping a snake as a pet — so the reply hands you one.
   handler: () => {
-    openApp('snake')
+    openAppSoon('snake', 1500)
     return {
       type: 'output',
       lines: [
         { content: 'still the one I reach for. the snake, though — why would you keep one as a pet?', style: 'muted' },
-        { content: 'fine. here is one. esc to put it away.', style: 'accent' },
+        { content: 'fine. here is one — esc to put it away.', style: 'accent' },
+        { content: 'opening snake...', style: 'dim' },
       ],
     }
   },
@@ -871,6 +880,7 @@ const NOT_A_FORTUNE = new Set([
   'agent',    // switches the whole page out from under you
   'python',   // opens a whole window over the session
   'uv',       // turns the lights up on the whole desk
+  'claude',   // opens a whole window over the session
   'exit',
   'logout',
   'history',  // prints your own session back at you — hollow at random

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:snake": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/snake.test.mts",
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/snake.test.mts && node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/paint.test.mts",
     "sync-content": "node scripts/sync-content.mjs"
   },
   "dependencies": {

@@ -229,9 +229,17 @@ registerCommand({
   description: '',
   hidden: true,
   type: 'output',
+  // The real one prints `y` on its own line until you stop it, which is the
+  // whole joke — it is the program you pipe into something that keeps asking
+  // for confirmation. Twenty lines and then the interrupt: without the `^C`
+  // the output looks like a bug rather than like a command that had to be
+  // stopped, and the `^C` is the part that says which.
   handler: () => ({
     type: 'output',
-    lines: Array.from({ length: 20 }, () => ({ content: 'y', style: 'muted' as const })),
+    lines: [
+      ...Array.from({ length: 20 }, () => ({ content: 'y', style: 'muted' as const })),
+      { content: '^C', style: 'dim' as const },
+    ],
   }),
 })
 

@@ -62,28 +62,21 @@ export type PageSession = {
   placeholder?: string
 }
 
-function sectionHeader(page: string): SessionBlock {
-  return {
-    mdSkip: true,
-    lines: [
-      // the machine clearing its throat — quiet, but a line you can actually
-      // read: at --dim these were 1.6:1 against the glass and simply gone
-      { content: `→ loading ${page}...  done`, style: 'muted' },
-      { content: "→ type 'help' for available commands", style: 'muted' },
-    ],
-  }
-}
+/**
+ * No session header on any tab, and both halves of it were saying something the
+ * reader had already been told. The machine boots once, at the door, with a
+ * screen of its own — a second "loading writing... done" on every tab click is
+ * not a machine starting up, it is a page pretending to. And "type 'help'" is
+ * already sitting in the prompt's own placeholder, one line below where it was
+ * printed.
+ *
+ * The play tab is the exception, and for the opposite reason: nothing is loaded
+ * there, so the banner is the only thing that says what the shell is. See below.
+ */
 
 // ─── Homepage ────────────────────────────────────────────────────────────────
 
 export const homeSession: SessionBlock[] = [
-  {
-    mdSkip: true,
-    lines: [
-      { content: '→ starting session...  done', style: 'muted' },
-      { content: "→ type 'help' for available commands", style: 'muted' },
-    ],
-  },
   {
     cmd: 'whois adilet',
     mdHeading: 'profile',
@@ -138,7 +131,6 @@ export const aboutSession: SessionBlock[] = homeSession
 // ─── CV ───────────────────────────────────────────────────────────────────────
 
 export const cvSession: SessionBlock[] = [
-  sectionHeader('cv'),
   {
     cmd: 'ls work',
     mdHeading: 'work',
@@ -197,21 +189,32 @@ export const cvSession: SessionBlock[] = [
 
 // ─── Writing (blog + newsletter) ─────────────────────────────────────────────
 
-// Deliberately only the header here: every other block needs the post counts,
-// which come off the filesystem in ./writing-page.
-export const writingSession: SessionBlock[] = [sectionHeader('writing')]
+// Deliberately empty here: every block needs the post counts, which come off
+// the filesystem in ./writing-page.
+export const writingSession: SessionBlock[] = []
 
 // ─── Play ───────────────────────────────────────────────────────────────────
 // Every other tab arrives full, which reads as "look at this". This one is
 // empty on purpose, so the prompt is the invitation.
 
 export const playSession: SessionBlock[] = [
+  // The one tab that starts with something, and the reason is that it starts
+  // with nothing else. Every other tab arrives full of its own content and
+  // needs no introduction; this one is a bare prompt, so the banner is what
+  // says which shell you are standing in and what to do with it — the two
+  // things a CLI prints on launch before it hands you the cursor.
+  //
+  // Drawn from the label rows, not from a box of ─ and │. A box has a width,
+  // and any width that fits the desk breaks at 37 characters on a phone. The
+  // gutter does the same work the box was doing: it says these two lines are
+  // the machine reporting, not the session's content.
   {
     mdSkip: true,
     lines: [
-      { content: '→ new shell  ·  nothing loaded', style: 'muted' },
-      { content: "→ every command works here. 'help' lists the obvious ones.", style: 'muted' },
-      { content: "→ the rest you find by typing what a terminal would understand.", style: 'muted' },
+      { label: 'shell', content: 'play  ·  a bare prompt, nothing loaded', style: 'default' },
+      { label: 'tips',  content: '1. type a tool you use every day — the ones you would swear at', style: 'muted' },
+      { label: '',      content: "2. 'help' lists the obvious commands", style: 'muted' },
+      { label: '',      content: '3. the rest are found, not listed', style: 'muted' },
     ],
   },
   // A door for anyone not holding a keyboard. This page is deliberately empty —
@@ -233,7 +236,6 @@ export const playSession: SessionBlock[] = [
 // ─── Contact ─────────────────────────────────────────────────────────────────
 
 export const contactSession: SessionBlock[] = [
-  sectionHeader('contact'),
   {
     cmd: 'nmap adgapar',
     mdHeading: 'contact',

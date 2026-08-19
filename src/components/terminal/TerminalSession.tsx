@@ -9,7 +9,8 @@ import {
   type KeyboardEvent,
 } from 'react'
 import Link from 'next/link'
-import CommandBlock from './CommandBlock'
+import CommandBlock, { typingDuration } from './CommandBlock'
+import Prompt, { PromptContext } from './Prompt'
 import TerminalLine from './TerminalLine'
 import DitheredAvatar from '@/components/visual/DitheredAvatar'
 import { executeCommand, hasCommand, listCommands } from '@/lib/commands'
@@ -36,20 +37,6 @@ function colClass(index: number, total: number, widths?: string[]) {
 /** in-app routes get client-side navigation; everything else opens away */
 function isInternal(href: string) {
   return href.startsWith('/')
-}
-
-/**
- * The prompt, shortened for a narrow window: `adilet@cv:~$` becomes `cv:~$`.
- *
- * Fourteen characters of prompt is a third of a phone's line, spent every line
- * on a name that does not change and a host that was never in question. What is
- * left is the part that does change — which session you are in — which is the
- * only reason a real prompt carries any of this. Same convention as a shell
- * that has been told its own $PS1 is too long.
- */
-function shortenPrompt(prompt: string) {
-  const at = prompt.indexOf('@')
-  return at === -1 ? prompt : prompt.slice(at + 1)
 }
 
 function externalLinkProps(href: string) {
@@ -136,6 +123,16 @@ export default function TerminalSession({
   const [cycle, setCycle] = useState(0)
   const [base, setBase] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(instant ? blocks.length : 0)
+  /**
+   * True once the last pre-written command has finished typing.
+   *
+   * The live prompt waits for it. A shell prints its prompt when it is ready for
+   * you, and this one was printing it at the top of the reveal and then leaving
+   * it there — a cursor waiting for input below a command that was still being
+   * typed above it, which is two shells, not one. Now the bottom line of the
+   * session is always the line that is happening.
+   */
+  const [revealDone, setRevealDone] = useState(instant)
   // drives the on-screen key strip, which should arrive and leave with the
   // keyboard rather than sit there taking 40px from a session nobody is typing at
   const [focused, setFocused] = useState(false)
@@ -145,6 +142,7 @@ export default function TerminalSession({
 
     // Reset on every mount — handles router cache restoration with stale state
     setVisibleCount(0)
+    setRevealDone(false)
     let cancelled = false
 
     const timers: ReturnType<typeof setTimeout>[] = []
@@ -153,17 +151,15 @@ export default function TerminalSession({
         setTimeout(() => { if (!cancelled) setVisibleCount(i + 1) }, 200 + i * 420)
       )
     })
+    // The last block appears at 200 + (n-1)*420 and then types itself out, so
+    // the session is only finished once that typing is — a figure the block
+    // itself knows how to compute.
+    const last = blocks[blocks.length - 1]
     timers.push(
-      setTimeout(() => {
-        if (cancelled) return
-        // Flagged so the input's own onFocus can tell this apart from a reader
-        // tapping the prompt. That handler scrolls to the bottom to stay clear
-        // of the on-screen keyboard, which is right for a tap and wrong here —
-        // it would open every page at the end of its own session.
-        autoFocusing.current = true
-        inputRef.current?.focus({ preventScroll: true })
-        autoFocusing.current = false
-      }, 200 + blocks.length * 420 + 120)
+      setTimeout(
+        () => { if (!cancelled) setRevealDone(true) },
+        200 + Math.max(blocks.length - 1, 0) * 420 + typingDuration(last?.cmd) + 140,
+      ),
     )
     return () => {
       cancelled = true
@@ -172,6 +168,19 @@ export default function TerminalSession({
   // blocks is a stable module-level constant; animated never changes per page
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // The prompt takes focus when it appears, not before: until then there is no
+  // visible input to take it, and `visibility: hidden` makes it unfocusable.
+  useEffect(() => {
+    if (instant || !revealDone) return
+    // Flagged so the input's own onFocus can tell this apart from a reader
+    // tapping the prompt. That handler scrolls to the bottom to stay clear of
+    // the on-screen keyboard, which is right for a tap and wrong here — it
+    // would open every page at the end of its own session.
+    autoFocusing.current = true
+    inputRef.current?.focus({ preventScroll: true })
+    autoFocusing.current = false
+  }, [instant, revealDone])
 
   // New output should bring the prompt into view. The reveal animation must not:
   // scrolling on every block meant every page opened at the bottom, with the
@@ -328,14 +337,6 @@ export default function TerminalSession({
       }
     },
     [inputValue, commands, blocks, onNavigate, echo, cycleCompletion, historyBack, historyForward]
-  )
-
-  /** the `$` at the head of a line, long on the desk and short on a phone */
-  const Prompt = () => (
-    <span className="shrink-0 font-medium text-[var(--accent)] select-none">
-      <span className="sm:hidden">{shortenPrompt(prompt)}</span>
-      <span className="hidden sm:inline">{prompt}</span>
-    </span>
   )
 
   /** One session block, lifted out of the render to keep the tree readable. */
@@ -567,7 +568,10 @@ export default function TerminalSession({
   ]
 
   return (
-    <>
+    // Every prompt in the tree reads the session's own — the pre-written blocks,
+    // the scrollback, the live line, and a command echoed inside another
+    // command's output.
+    <PromptContext.Provider value={prompt}>
     <div
       ref={scrollRef}
       // How tall this is belongs to the window, not to the session — see
@@ -604,8 +608,11 @@ export default function TerminalSession({
           </div>
         ))}
 
-        {/* the live prompt, always last */}
-        <div className="space-y-2">
+        {/* The live prompt, always last — and hidden until the session it
+            belongs to has finished arriving. `invisible` rather than unmounted,
+            so the line it will stand on is already reserved and nothing below
+            it jumps when it appears. */}
+        <div className={`space-y-2 ${revealDone ? '' : 'invisible'}`}>
           <div className="flex items-center gap-3">
             <Prompt />
             {instant ? (
@@ -750,6 +757,6 @@ export default function TerminalSession({
         ))}
       </div>
     )}
-    </>
+    </PromptContext.Provider>
   )
 }

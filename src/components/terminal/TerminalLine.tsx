@@ -1,3 +1,4 @@
+import Prompt from './Prompt'
 import DitheredPlate from '@/components/visual/DitheredPlate'
 import type { TerminalLine as TerminalLineType } from '@/lib/commands/types'
 
@@ -104,13 +105,15 @@ export default function TerminalLine({ line, onRun }: Props) {
     )
   }
 
-  // Command echo — $ blue · verb white · args amber
+  // Command echo — prompt · verb white · args amber. The prompt is the session's
+  // own, because a command the machine ran for you ran in your shell, not in
+  // some other one that only has a `$`.
   if (line.style === 'command') {
     const [verb, ...rest] = line.content.split(' ')
     const args = rest.join(' ')
     return (
-      <div className="flex items-baseline gap-2 tracking-wide">
-        <span className="text-[var(--accent)] select-none">$</span>
+      <div className="flex items-baseline gap-3 tracking-wide">
+        <Prompt />
         <span className="text-[var(--fg)]">{verb}</span>
         {args && <span className="text-[var(--warm)]">{args}</span>}
       </div>

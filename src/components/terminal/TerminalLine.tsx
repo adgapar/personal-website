@@ -1,5 +1,8 @@
 import Prompt from './Prompt'
 import DitheredPlate from '@/components/visual/DitheredPlate'
+import Weightless from '@/components/visual/Weightless'
+import Oxidising from '@/components/visual/Oxidising'
+import Afloat from '@/components/visual/Afloat'
 import type { TerminalLine as TerminalLineType } from '@/lib/commands/types'
 
 interface Props {
@@ -53,6 +56,17 @@ export default function TerminalLine({ line, onRun }: Props) {
         </div>
       </div>
     )
+  }
+
+  // Motion is rare here on purpose — an egg moves only when movement is what
+  // the word means, so these branches stay a short list.
+  if (line.motion) {
+    const cls = styleMap[line.style ?? 'default'] ?? styleMap.default
+    if (line.motion === 'weightless') return <Weightless content={line.content} className={cls} />
+    if (line.motion === 'oxidising') return <Oxidising content={line.content} className={cls} />
+    // a scene rather than a sentence — it carries its own label, so `content` is
+    // only here to keep the line shape honest
+    if (line.motion === 'afloat') return <Afloat />
   }
 
   if (line.image) {

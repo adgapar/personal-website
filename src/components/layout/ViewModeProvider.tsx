@@ -3,13 +3,9 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useMemo,
-  useState,
   useSyncExternalStore,
 } from 'react'
-import type { DitherShape } from '@/lib/dither'
-import { subscribeToUiEvents } from '@/lib/ui-bus'
 import {
   getServerSnapshot,
   getSnapshot,
@@ -24,8 +20,6 @@ interface ViewModeContextValue {
   mode: ViewMode
   setMode: (mode: ViewMode) => void
   toggleMode: () => void
-  /** set by the `dither` command; null means "use the route default" */
-  shapeOverride: DitherShape | null
 }
 
 const ViewModeContext = createContext<ViewModeContextValue | null>(null)
@@ -42,25 +36,14 @@ export default function ViewModeProvider({
   children: React.ReactNode
 }) {
   const mode = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
-  const [shapeOverride, setShapeOverride] = useState<DitherShape | null>(null)
-
-  // the `dither` command reaches the shader layer through here
-  useEffect(
-    () =>
-      subscribeToUiEvents((event) => {
-        if (event.kind === 'dither') setShapeOverride(event.shape)
-      }),
-    [],
-  )
 
   const value = useMemo(
     () => ({
       mode,
       setMode: setViewMode,
       toggleMode: () => setViewMode(mode === 'human' ? 'agent' : 'human'),
-      shapeOverride,
     }),
-    [mode, shapeOverride],
+    [mode],
   )
 
   return (

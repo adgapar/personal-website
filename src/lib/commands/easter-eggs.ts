@@ -2,7 +2,7 @@ import { listCommands, registerCommand } from './registry'
 import type { TerminalLine } from './types'
 import { publishUiEvent } from '@/lib/ui-bus'
 import { setViewMode } from '@/lib/view-mode-store'
-import { DITHER_SHAPES, type DitherShape } from '@/lib/dither'
+import { openApp } from '@/lib/app-store'
 
 function egg(content: string, style: TerminalLine['style'] = 'muted') {
   return { type: 'output' as const, lines: [{ content, style }] }
@@ -393,45 +393,6 @@ registerCommand({
   }),
 })
 
-registerCommand({
-  name: 'dither',
-  aliases: ['paper', 'ink'],
-  description: '',
-  hidden: true,
-  type: 'output',
-  handler: (args) => {
-    const requested = args[0]?.toLowerCase()
-
-    if (requested === 'off' || requested === 'reset') {
-      publishUiEvent({ kind: 'dither', shape: null })
-      return egg('ink reset to this page’s default.', 'accent')
-    }
-
-    if (requested && !DITHER_SHAPES.includes(requested as DitherShape)) {
-      return {
-        type: 'output',
-        lines: [
-          { content: `dither: unknown pattern '${requested}'`, style: 'error' },
-          { content: `available: ${DITHER_SHAPES.join(' · ')} · reset`, style: 'muted' },
-        ],
-      }
-    }
-
-    // no argument → surprise them with something other than what's showing
-    const shape = (requested as DitherShape | undefined)
-      ?? DITHER_SHAPES[Math.floor(Math.random() * DITHER_SHAPES.length)]
-
-    publishUiEvent({ kind: 'dither', shape })
-    return {
-      type: 'output',
-      lines: [
-        { content: `printing '${shape}' onto the page...`, style: 'accent' },
-        { content: `patterns: ${DITHER_SHAPES.join(' · ')}  ·  'dither reset' to restore`, style: 'muted' },
-      ],
-    }
-  },
-})
-
 // ─── what people type into terminals in 2026 ─────────────────────────────────
 // The picture does the work. One line after it, like every other egg here.
 
@@ -512,6 +473,39 @@ registerCommand({
   handler: () => egg('latin for "runner". it slid along a slide rule before it learned to blink.'),
 })
 
+registerCommand({
+  name: 'grok',
+  description: '',
+  hidden: true,
+  type: 'output',
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'martian for "to drink". you understand a thing by taking it in.', style: 'muted' },
+      // the eggs can point at each other — same joke, one shelf over
+      { label: 'see also', content: '', chips: ['brew'] },
+    ],
+  }),
+})
+
+registerCommand({
+  name: 'agy',
+  aliases: ['antigravity'],
+  description: '',
+  hidden: true,
+  type: 'output',
+  // The only egg whose subject is a force, so it is the only one that gets to
+  // move. One line stays on the ground and one line leaves it — the joke needs
+  // both, because a page where everything floats has no gravity to be anti to.
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'python has shipped `import antigravity` since 2008. it opens a comic.', style: 'muted' },
+      { content: 'the name was already taken. it went up anyway.', style: 'muted', motion: 'weightless' },
+    ],
+  }),
+})
+
 // same joke, one line, no picture needed
 registerCommand({
   name: 'zoom',
@@ -541,7 +535,18 @@ registerCommand({
   description: '',
   hidden: true,
   type: 'output',
-  handler: () => egg('still the one I reach for. the snake, though — why would you keep one as a pet?'),
+  // The one egg that opens something. It had the setup already — the joke was
+  // about keeping a snake as a pet — so the reply hands you one.
+  handler: () => {
+    openApp('snake')
+    return {
+      type: 'output',
+      lines: [
+        { content: 'still the one I reach for. the snake, though — why would you keep one as a pet?', style: 'muted' },
+        { content: 'fine. here is one. esc to put it away.', style: 'accent' },
+      ],
+    }
+  },
 })
 
 registerCommand({
@@ -549,7 +554,16 @@ registerCommand({
   description: '',
   hidden: true,
   type: 'output',
-  handler: () => egg('what happens to iron left out. also to my attempt at learning it.'),
+  // The subject is a duration, so the line takes one: it goes brown where it
+  // stands, unevenly, over about half a minute, and it stays brown. The second
+  // line is the one that has to still be readable, so it does not rust.
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'what happens to iron left out.', style: 'muted', motion: 'oxidising' },
+      { content: 'also to my attempt at learning it.', style: 'muted' },
+    ],
+  }),
 })
 
 registerCommand({
@@ -571,7 +585,15 @@ registerCommand({
   description: '',
   hidden: true,
   type: 'output',
-  handler: () => egg('the shipping container did it first. same box, any ship, any crane.'),
+  // The one egg that gets weather. The joke is that the box floats on anything,
+  // so it is put on some water and left to it.
+  handler: () => ({
+    type: 'output',
+    lines: [
+      { content: 'the shipping container did it first. same box, any ship, any crane.', style: 'muted' },
+      { content: 'a container ship', motion: 'afloat' },
+    ],
+  }),
 })
 
 registerCommand({
@@ -719,7 +741,20 @@ registerCommand({
   description: '',
   hidden: true,
   type: 'output',
-  handler: () => egg("ultraviolet: light past what your eyes handle. also the only package manager I never wait for."),
+  // The one egg that turns the lights up. It cannot show you ultraviolet — that
+  // is the joke — so it shows you the visible half of a bright afternoon and
+  // says so.
+  handler: () => {
+    publishUiEvent({ kind: 'sunlight' })
+    return {
+      type: 'output',
+      lines: [
+        { content: 'ultraviolet: light past what your eyes handle.', style: 'muted' },
+        { content: 'also the only package manager I never wait for.', style: 'muted' },
+        { content: 'that was the visible half. the part it is named after, you missed.', style: 'accent' },
+      ],
+    }
+  },
 })
 
 registerCommand({
@@ -834,7 +869,8 @@ const NOT_A_FORTUNE = new Set([
   'eggs',     // the index, which is the one thing this must not hand over
   'clear',    // empties the scrollback that just told you what happened
   'agent',    // switches the whole page out from under you
-  'dither',   // repaints the desk
+  'python',   // opens a whole window over the session
+  'uv',       // turns the lights up on the whole desk
   'exit',
   'logout',
   'history',  // prints your own session back at you — hollow at random

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Dock from './Dock'
 import DeskSurface from '@/components/visual/DeskSurface'
@@ -11,6 +11,14 @@ import WindowChrome from './WindowChrome'
 import { useViewMode } from './ViewModeProvider'
 import AgentView from '@/components/agent/AgentView'
 import TerminalSession from '@/components/terminal/TerminalSession'
+import SnakeApp from '@/components/apps/SnakeApp'
+import Sunlight from '@/components/visual/Sunlight'
+import {
+  closeApp,
+  getServerSnapshot as getAppServerSnapshot,
+  getSnapshot as getAppSnapshot,
+  subscribe as subscribeToApp,
+} from '@/lib/app-store'
 import { justBooted } from '@/lib/boot-store'
 import type { PageMeta } from '@/lib/sessions'
 
@@ -22,6 +30,10 @@ export default function PageLayout({ page }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const { mode } = useViewMode()
+
+  // which app is open on top of the terminal, if any — a command can open one,
+  // so it lives in a store rather than in state here
+  const app = useSyncExternalStore(subscribeToApp, getAppSnapshot, getAppServerSnapshot)
 
   const isAgent = mode === 'agent'
   // plays once, right after the CRT handover
@@ -84,6 +96,22 @@ export default function PageLayout({ page }: Props) {
             />
             <StatusBar hint={page.session.placeholder} />
           </WindowChrome>
+        </div>
+      )}
+
+      {/* An open app gets its own wrapper rather than sharing the terminal's:
+          that one is a centring flex row, so a second window placed inside it
+          would stand *beside* the terminal instead of over it. Same shape
+          otherwise — spans the desk so the window centres on it, no pointer
+          events of its own so the desk behind stays clickable, and the same
+          bottom inset that keeps the dock off the window's own edge. */}
+      {/* `uv`. Renders nothing until the command fires, and nothing at all under
+          reduced motion. */}
+      {!isAgent && <Sunlight />}
+
+      {!isAgent && app === 'snake' && (
+        <div className="pointer-events-none fixed inset-0 z-[45] flex items-center justify-center overflow-hidden sm:px-8 sm:pt-10 sm:pb-20">
+          <SnakeApp onClose={closeApp} />
         </div>
       )}
     </div>

@@ -451,6 +451,117 @@ body {
 .crt-collapse { animation: crt-collapse 560ms cubic-bezier(0.6, 0, 0.8, 0.2) forwards; }
 .screen-on    { animation: screen-on 620ms ease-out both; }
 
+/* `antigravity` — a glyph crouches, lets go, and does not come back down.
+   Two animations on one element, back to back: `liftoff` runs once and holds,
+   `bob` takes over at exactly the height liftoff left off at, so the handover
+   is invisible and the glyph simply keeps hanging. */
+@keyframes liftoff {
+  0%   { transform: translateY(0)      rotate(0deg); }
+  20%  { transform: translateY(2px)    rotate(0deg); }              /* the crouch */
+  100% { transform: translateY(-7px)   rotate(var(--tilt, 0deg)); }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(-7px)  rotate(var(--tilt, 0deg)); }
+  50%      { transform: translateY(-11px) rotate(calc(var(--tilt, 0deg) * -1)); }
+}
+
+.letting-go {
+  animation:
+    liftoff 780ms cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    bob 3.2s ease-in-out infinite;
+}
+
+/* and the dust in the room goes with it */
+@keyframes cosmic-drift {
+  0%   { opacity: 0;   transform: translateY(8px); }
+  25%  { opacity: 0.8; }
+  100% { opacity: 0;   transform: translateY(-22px); }
+}
+
+.cosmic-speck { animation: cosmic-drift linear infinite; }
+
+/* `rust` — iron left out. The one moving egg that changes no position: colour
+   only, slowly, and it holds. Two stops and no return, because rust does not
+   go back. */
+@keyframes oxidise {
+  0%   { color: var(--muted); }
+  55%  { color: #7a5a3a; }
+  100% { color: #a0522d; }
+}
+
+.oxidising { animation: oxidise ease-in forwards; }
+
+/* `docker` — a box on the water.
+
+   Three animations that have to stay independent: the crest travels along the
+   sea (one glyph at a time, staggered), the hull sails the length of the line,
+   and the hull bobs. The last two are on nested elements on purpose — a single
+   element cannot carry two transforms, the later one simply wins. */
+@keyframes swell {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2.5px); }
+}
+
+@keyframes sailing {
+  /* off one edge to off the other, so the loop has no visible seam and the ship
+     only ever travels forwards — `alternate` made it reverse, which is a ship
+     sailing backwards, and starting at 0 made it appear mid-water */
+  0%   { transform: translateX(-23ch); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes bobbing {
+  0%, 100% { transform: translateY(0)    rotate(-1.8deg); }
+  50%      { transform: translateY(-4px) rotate(1.8deg); }
+}
+
+.swelling { animation: swell 1.5s ease-in-out infinite; }
+/* linear, because a boat holds its speed — ease-in-out spends the first seconds
+   moving so little that the ship reads as stuck. Slow, but not so slow that you
+   have to take its word for it: about seventeen seconds to cross. */
+.sailing  { animation: sailing 17s linear infinite; }
+.bobbing  { animation: bobbing 2.6s ease-in-out infinite; }
+
+/* `uv` — a moment of sunlight.
+
+   Ultraviolet is the light past what an eye does, so what this shows is the part
+   you can see: the room washes warm and a few shafts cross it. Warm translucent
+   white rather than a blend mode, because screen/plus-lighter behave differently
+   on the daylight desk than on the dark terminal and this has to read as weather
+   on both. */
+@keyframes sun-wash {
+  0%   { opacity: 0; }
+  16%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.sunlight-wash {
+  animation: sun-wash 2600ms ease-out forwards;
+  background:
+    radial-gradient(120% 85% at 76% -12%,
+      rgba(255, 238, 190, 0.5),
+      rgba(255, 216, 150, 0.14) 44%,
+      transparent 72%);
+}
+
+@keyframes sun-shaft {
+  0%   { opacity: 0;    transform: translateX(-40%) skewX(-16deg); }
+  35%  { opacity: 0.75; }
+  100% { opacity: 0;    transform: translateX(120%) skewX(-16deg); }
+}
+
+.sunlight-shaft {
+  position: absolute;
+  /* past both edges, so a skewed band never shows its own top or bottom end */
+  top: -25%;
+  bottom: -25%;
+  width: 11vw;
+  background: linear-gradient(90deg, transparent, rgba(255, 246, 214, 0.55), transparent);
+  filter: blur(7px);
+  animation: sun-shaft 2400ms cubic-bezier(0.2, 0.6, 0.3, 1) both;
+}
+
 /* a page of paper, for reading prose */
 .paper {
   background:

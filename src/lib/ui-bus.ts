@@ -1,24 +1,28 @@
-import type { DitherShape } from './dither'
-
 /**
- * Commands are pure functions with no access to React state, so the `dither`
- * command publishes here and ViewModeProvider subscribes. (View mode has its
- * own store in view-mode-store.ts, which commands can call directly.)
+ * Commands are pure functions with no access to React state, so a command that
+ * needs to reach the page publishes here and a component subscribes. (View mode
+ * and the open app have their own stores, which commands call directly; this is
+ * for the ones that are events rather than state — a thing that happens once and
+ * is then over.)
+ *
+ * A set of listeners, not one. It held a single `listener`, so a second
+ * subscriber would have silently replaced the first.
  */
 
-type UiEvent = { kind: 'dither'; shape: DitherShape | null }
+/** a moment of sunlight across the whole desk — see `uv` */
+type UiEvent = { kind: 'sunlight' }
 
 type Listener = (event: UiEvent) => void
 
-let listener: Listener | null = null
+const listeners = new Set<Listener>()
 
 export function subscribeToUiEvents(fn: Listener): () => void {
-  listener = fn
+  listeners.add(fn)
   return () => {
-    if (listener === fn) listener = null
+    listeners.delete(fn)
   }
 }
 
 export function publishUiEvent(event: UiEvent): void {
-  listener?.(event)
+  listeners.forEach((listener) => listener(event))
 }

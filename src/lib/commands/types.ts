@@ -38,6 +38,16 @@ export interface TerminalLine {
    * the same two-column shape as any other key/value line.
    */
   chips?: string[]
+  /**
+   * The line moves, and how.
+   *
+   * A property of the line rather than of the block, because in every egg that
+   * uses it the point is the contrast: one line does something and the sentence
+   * next to it stays where sentences stay. Motion is only ever given to a word
+   * whose meaning *is* the motion — a force, a process, a thing that will not
+   * settle. `xyzzy` replies "nothing happens", and nothing is what happens.
+   */
+  motion?: 'weightless' | 'oxidising' | 'afloat'
 }
 
 export interface CommandResult {

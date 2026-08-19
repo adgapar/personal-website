@@ -223,8 +223,7 @@ export default function Dock() {
         // px-4: the room a tile at the end of the row needs to grow sideways
         // into without leaving the glass. The tiles grow up and out of the top
         // instead of resizing the panel, the way the real one does.
-        className="glass pointer-events-auto flex items-end gap-2.5 rounded-xl px-4 py-1.5 after:rounded-xl"
-        style={{ boxShadow: '0 10px 30px -12px rgba(40, 34, 22, 0.45)' }}
+        className="dock-glass pointer-events-auto flex items-end gap-2.5 rounded-xl px-4 py-1.5"
       >
         {/* Flat in the panel, with no wrapper around each pair: the swell reads
             offsetLeft, which is measured from the nearest positioned ancestor,
@@ -237,7 +236,7 @@ export default function Dock() {
             {item.external && i > 0 && items[i - 1].external !== true && (
               <span
                 aria-hidden
-                className="relative z-10 mb-1 h-7 w-px shrink-0 bg-[rgba(35,32,25,0.28)]"
+                className="relative z-10 mb-1 h-7 w-px shrink-0 bg-[rgba(255,255,255,0.22)]"
               />
             )}
             {/* Link for both: an absolute URL renders as a plain anchor, so

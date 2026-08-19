@@ -236,7 +236,8 @@
  * No CSS value fixes that; only giving it a moving backdrop would.
  */
 .glass,
-.glass-paper {
+.glass-paper,
+.dock-glass {
   -webkit-backdrop-filter: blur(16px) saturate(1.5);
   backdrop-filter: blur(16px) saturate(1.5);
 }
@@ -312,6 +313,47 @@
    rather than to unreadable text on a bare desk */
 @supports not (backdrop-filter: blur(1px)) {
   .glass { background: rgba(206, 202, 194, 0.95); }
+}
+
+/**
+ * The dock's tray — the one dark thing on the desk, and deliberately so.
+ *
+ * It was smoked light glass, the same as the reader's sidebar, and on a lit
+ * water surface that is a pale slab with four near-white tiles on it: the tray
+ * and the things it holds were the same value, so neither read. Dark gives the
+ * tiles something to be seen against, which is the whole reason the dock has a
+ * ground at all.
+ *
+ * It does not redefine the ink ranks the way .glass does. The tiles are paper
+ * objects sitting in a tray, not text printed on it, so they keep the desk's
+ * daylight tokens and only the ground goes dark.
+ */
+.dock-glass {
+  position: relative;
+  background: rgba(26, 25, 22, 0.66);
+  box-shadow:
+    0 10px 30px -12px rgba(20, 16, 10, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* the light along the top edge — weaker than the light version's, because a
+   dark surface catches less of it */
+.dock-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.04) 26%,
+    rgba(255, 255, 255, 0) 55%
+  );
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .dock-glass { background: rgba(26, 25, 22, 0.9); }
 }
 
 /**

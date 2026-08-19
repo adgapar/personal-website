@@ -1,85 +1,55 @@
-'use client'
-
-import { useSyncExternalStore } from 'react'
-import { Water } from '@paper-design/shaders-react'
+import Image from 'next/image'
 
 /**
- * The desk: shallow water over sand.
+ * The desk: a hill, printed.
  *
- * Five backgrounds were tried before this one. A photograph competed with the
+ * Six backgrounds were tried before this one. A photograph competed with the
  * writing and won. A flat colour read as blank. Paper fibre looked like dirt. A
  * mesh gradient looked like a smear. A ruled grid looked like a spreadsheet.
+ * Shallow water moved, which made the glass legible, and cost a full-viewport
+ * WebGL shader running behind every page to do it.
  *
- * This one is different for a reason that has nothing to do with taste: it moves.
- * Motion is what makes glass legible — a still backdrop behind a translucent
- * window is indistinguishable from a fill, no matter how the numbers are tuned,
- * and every earlier attempt failed that test. Caustics drift, so the terminal is
- * visibly something you are looking through.
+ * This is the wallpaper the metaphor was always pointing at. Bliss is the
+ * desktop everyone means when they say desktop, and the version here is a
+ * risograph of it: two inks on cream stock, halftoned, with the paper left
+ * showing through the sky. Every other surface on this site is ink on paper —
+ * the tiles in the dock, the reader's pages, the window's own frame — so the
+ * thing they all sit on is now printed too, on the same stock.
  *
- * And it means something. Elche is twenty minutes from the sea, so the warm
- * ground stops being beige-because-beige and becomes sand under water.
+ * It is still, where the water moved, and it gets away with it for two reasons
+ * the flat fields never could: the halftone gives the blur behind the glass a
+ * texture to carry, and the horizon crosses behind the window, so there is a
+ * hard edge running under the terminal that tells you it is a surface you are
+ * looking through. What it will not do is compete for attention. Two flat
+ * fields and one line have nothing to say after the first second, which is
+ * exactly the job.
  *
- * Tuned much quieter than it wants to be. Speed 0.22 rather than the 0.55 it was
- * judged at: a wallpaper you notice while reading is a wallpaper that failed.
+ * No shader, no client hooks, no reduced-motion branch: nothing here moves.
  */
 
-const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
-/* the breakpoint at which a window stops covering the whole desk — Tailwind's sm */
-const HAS_DESK = '(min-width: 640px)'
-
-function useMatchMedia(query: string, fallback: boolean) {
-  return useSyncExternalStore(
-    (onChange) => {
-      const mq = window.matchMedia(query)
-      mq.addEventListener('change', onChange)
-      return () => mq.removeEventListener('change', onChange)
-    },
-    () => window.matchMedia(query).matches,
-    () => fallback,
-  )
-}
-
+/* Below Tailwind's sm the window is the screen, so every pixel of this sits
+   behind an opaque surface. Hidden in CSS rather than behind a media-query hook,
+   because a static image needs no JavaScript to decide it is not visible. */
 export default function DeskSurface() {
-  const still = useMatchMedia(REDUCED_MOTION, false)
-  // Below sm the window is the screen, so every pixel of this is behind an
-  // opaque surface. A full-viewport WebGL shader animating at 60fps where
-  // nothing of it is visible is the worst trade on the site: all of the battery,
-  // none of the effect.
-  const visible = useMatchMedia(HAS_DESK, true)
-
-  if (!visible) return null
-
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <Water
-        colorBack="#dedad0"
-        colorHighlight="#fffdf4"
-        // all four dialled down from the lab: this sits behind prose
-        highlights={0.2}
-        layering={0.3}
-        edges={0.14}
-        waves={0.22}
-        caustic={0.26}
-        size={0.55}
-        scale={0.95}
-        // stopped entirely for anyone who asked for that. A moving background is
-        // the exact thing the setting is for.
-        speed={still ? 0 : 0.22}
-        frame={still ? 2400 : undefined}
-        fit="cover"
-        width="100%"
-        height="100%"
-        maxPixelCount={1_600_000}
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0 hidden overflow-hidden sm:block"
+    >
+      <Image
+        src="/bg-bliss.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
       />
-      {/* the light falling where the windows sit */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(85% 62% at 50% 6%, rgba(255,253,246,0.5) 0%, rgba(255,253,246,0) 66%)',
-        }}
-      />
+      {/* The stock is brighter than the desk it replaces, and the window is
+          brighter still — without this the sheet and the sky were within a few
+          percent of each other and the window stopped being an object on
+          something. Ten percent of ink over the whole print puts the paper back
+          at about the old desk's value and leaves the window sitting on it. */}
+      <div className="absolute inset-0 bg-[rgba(30,26,18,0.10)]" />
     </div>
   )
 }

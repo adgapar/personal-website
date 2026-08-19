@@ -1,14 +1,9 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Dock from './Dock'
-
-// WebGL must not run during SSR; the flat .desk underneath is the fallback
-const DeskSurface = dynamic(() => import('@/components/visual/DeskSurface'), {
-  ssr: false,
-})
+import DeskSurface from '@/components/visual/DeskSurface'
 import SiteNav from './SiteNav'
 import StatusBar from './StatusBar'
 import TerminalTabs from './TerminalTabs'

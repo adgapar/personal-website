@@ -1,15 +1,10 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { TITLE_BAR, WINDOW_FRAME } from '@/lib/window-style'
-
-// WebGL must not run during SSR; the flat .desk underneath is the fallback
-const DeskSurface = dynamic(() => import('@/components/visual/DeskSurface'), {
-  ssr: false,
-})
+import DeskSurface from '@/components/visual/DeskSurface'
 
 /**
  * The reader: one window on the desk, with the list of pieces in its own pane on

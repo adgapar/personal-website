@@ -316,28 +316,33 @@
 }
 
 /**
- * The dock's tray — the one dark thing on the desk, and deliberately so.
+ * The dock's tray — the reader's glass, laid flat.
  *
- * It was smoked light glass, the same as the reader's sidebar, and on a lit
- * water surface that is a pale slab with four near-white tiles on it: the tray
- * and the things it holds were the same value, so neither read. Dark gives the
- * tiles something to be seen against, which is the whole reason the dock has a
- * ground at all.
+ * It was dark for one release, and dark was solving a problem the wallpaper had:
+ * on a pale lit water surface the tray and the near-white tiles it holds were
+ * the same value, so a light tray read as a slab with nothing on it. The print
+ * fixed that on its own — the dock stands on the green half of the hill, and the
+ * glass takes its tint from what is behind it, which is the darkest thing on the
+ * desk. The tiles have their ground back without the desk needing one dark
+ * object on it.
+ *
+ * So it is the same material as the reader's sidebar and its bars, at the same
+ * alpha and the same blur, and the desk is what shows through. One glass on the
+ * whole site rather than one per surface.
  *
  * It does not redefine the ink ranks the way .glass does. The tiles are paper
  * objects sitting in a tray, not text printed on it, so they keep the desk's
- * daylight tokens and only the ground goes dark.
+ * daylight tokens and only the ground is glass.
  */
 .dock-glass {
   position: relative;
-  background: rgba(26, 25, 22, 0.66);
-  box-shadow:
-    0 10px 30px -12px rgba(20, 16, 10, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: rgba(112, 108, 98, 0.24);
+  /* the tray floats over the desk and the window both, so it casts on them */
+  box-shadow: 0 10px 30px -12px rgba(20, 16, 10, 0.42);
 }
 
-/* the light along the top edge — weaker than the light version's, because a
-   dark surface catches less of it */
+/* Light catching the edge — the same sheen as .glass, which is most of what
+   says glass rather than tint. Radius inherited: the tray has corners. */
 .dock-glass::after {
   content: "";
   position: absolute;
@@ -346,14 +351,15 @@
   border-radius: inherit;
   background: linear-gradient(
     160deg,
-    rgba(255, 255, 255, 0.16) 0%,
-    rgba(255, 255, 255, 0.04) 26%,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.14) 26%,
     rgba(255, 255, 255, 0) 55%
   );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 @supports not (backdrop-filter: blur(1px)) {
-  .dock-glass { background: rgba(26, 25, 22, 0.9); }
+  .dock-glass { background: rgba(206, 202, 194, 0.95); }
 }
 
 /**

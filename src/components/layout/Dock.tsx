@@ -236,7 +236,9 @@ export default function Dock() {
             {item.external && i > 0 && items[i - 1].external !== true && (
               <span
                 aria-hidden
-                className="relative z-10 mb-1 h-7 w-px shrink-0 bg-[rgba(255,255,255,0.22)]"
+                // ink, not light: the tray is light glass now, and a white rule
+                // on it was a rule nobody could see
+                className="relative z-10 mb-1 h-7 w-px shrink-0 bg-[rgba(35,32,25,0.28)]"
               />
             )}
             {/* Link for both: an absolute URL renders as a plain anchor, so

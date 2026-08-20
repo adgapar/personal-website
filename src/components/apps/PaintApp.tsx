@@ -8,7 +8,9 @@ import {
   PAPER,
   SIZES,
   pushSnapshot,
+  storeRatio,
   toCanvasPoint,
+  type Paper,
   type Tool,
 } from '@/lib/paint'
 
@@ -29,11 +31,20 @@ import {
  * Undo holds whole bitmaps, capped — the pixels are the document, and there is
  * no smaller honest representation of "what it looked like before" for a tool
  * where every stroke is freehand. Eight of them is the budget.
+ *
+ * The sheet is the size of the hole it is in. On a desk that is Paint's landscape
+ * 400x280, because a window there is as tall as its contents and the paper is
+ * what says how tall that is. On a phone the window is the whole screen, so the
+ * paper is measured from what the toolbox and the palette leave behind and comes
+ * out portrait — a fixed landscape sheet in a portrait screen spends two thirds
+ * of the display on margin, which was the bug this app shipped with.
  */
 
 export default function PaintApp({ onClose }: { onClose: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const ctx = useRef<CanvasRenderingContext2D | null>(null)
+  /** the box the paper is cut to fit */
+  const easel = useRef<HTMLDivElement>(null)
   /** where the last segment ended, in canvas pixels */
   const last = useRef<{ x: number; y: number } | null>(null)
   const undo = useRef<ImageData[]>([])
@@ -42,30 +53,64 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
   const [colour, setColour] = useState<string>(PALETTE[0].hex)
   const [size, setSize] = useState<number>(SIZES[1])
   const [canUndo, setCanUndo] = useState(false)
+  const [paper, setPaper] = useState<Paper>(CANVAS)
 
   /**
-   * Set up the backing store once.
+   * Cut the paper to the space there is, once.
    *
-   * The canvas is 400 of its own pixels but a screen may have two or three
-   * device pixels for each — without scaling the store to match, every stroke is
-   * soft. Scaling the context once means everything after it can be written in
-   * the canvas's own coordinates and never think about it again.
+   * Only on a phone: there the window is the screen, so the box around the canvas
+   * has a real height handed to it by the flexbox, and the paper should be all of
+   * it. On a desk the box is as tall as whatever is inside it, so measuring it
+   * would be asking the paper how big the paper is; CANVAS answers instead.
+   *
+   * Once, not on every resize. Re-cutting the sheet means deciding what happens
+   * to the picture and throwing away an undo stack whose bitmaps are the old
+   * size, and it would fire on an iOS toolbar sliding away. A phone turned
+   * sideways mid-drawing instead shows the same sheet scaled to fit — the maxima
+   * below keep it inside the window, and toCanvasPoint reads the live rect, so
+   * the ink still lands under the finger.
+   */
+  useEffect(() => {
+    if (window.matchMedia('(min-width: 640px)').matches) return
+    const box = easel.current
+    if (!box) return
+    const width = Math.floor(box.clientWidth)
+    const height = Math.floor(box.clientHeight)
+    // a box that has not been laid out yet is not a sheet of paper
+    if (width < 80 || height < 80) return
+    setPaper({ width, height })
+  }, [])
+
+  /**
+   * Set up the backing store for the sheet.
+   *
+   * The canvas is some number of its own pixels but a screen may have two or
+   * three device pixels for each — without scaling the store to match, every
+   * stroke is soft. Scaling the context once means everything after it can be
+   * written in the canvas's own coordinates and never think about it again.
+   *
+   * Runs again when the paper is cut, which happens before anything is drawn on
+   * it, so there is no picture here to lose.
    */
   useEffect(() => {
     const node = canvas.current
     if (!node) return
-    const ratio = Math.min(window.devicePixelRatio || 1, 3)
-    node.width = CANVAS.width * ratio
-    node.height = CANVAS.height * ratio
+    const ratio = storeRatio(paper, window.devicePixelRatio)
+    node.width = Math.round(paper.width * ratio)
+    node.height = Math.round(paper.height * ratio)
     const context = node.getContext('2d')
     if (!context) return
     context.scale(ratio, ratio)
     context.lineCap = 'round'
     context.lineJoin = 'round'
     context.fillStyle = PAPER
-    context.fillRect(0, 0, CANVAS.width, CANVAS.height)
+    context.fillRect(0, 0, paper.width, paper.height)
     ctx.current = context
-  }, [])
+    // The sheet is only ever cut once, before there is a picture on it, so there
+    // is nothing here to keep. Dropping the stack anyway is the cheap guard
+    // against putImageData ever being handed a bitmap of the wrong size.
+    undo.current = []
+  }, [paper])
 
   /** remember the whole bitmap, so a stroke can be taken back as a unit */
   const remember = useCallback(() => {
@@ -93,8 +138,8 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
     if (!context) return
     remember()
     context.fillStyle = PAPER
-    context.fillRect(0, 0, CANVAS.width, CANVAS.height)
-  }, [remember])
+    context.fillRect(0, 0, paper.width, paper.height)
+  }, [remember, paper])
 
   const ink = tool === 'eraser' ? PAPER : colour
 
@@ -104,7 +149,7 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
       const context = ctx.current
       if (!node || !context) return
       remember()
-      const point = toCanvasPoint(e.clientX, e.clientY, node.getBoundingClientRect())
+      const point = toCanvasPoint(e.clientX, e.clientY, node.getBoundingClientRect(), paper)
       last.current = point
       // a tap with no drag should still leave a mark, so the press paints a dot
       context.fillStyle = ink
@@ -115,7 +160,7 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
       // rather than stopping dead the moment the pointer crosses the frame
       node.setPointerCapture(e.pointerId)
     },
-    [ink, size, remember],
+    [ink, size, remember, paper],
   )
 
   const onPointerMove = useCallback(
@@ -124,7 +169,7 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
       const context = ctx.current
       const from = last.current
       if (!node || !context || !from) return
-      const to = toCanvasPoint(e.clientX, e.clientY, node.getBoundingClientRect())
+      const to = toCanvasPoint(e.clientX, e.clientY, node.getBoundingClientRect(), paper)
       context.strokeStyle = ink
       context.lineWidth = size
       context.beginPath()
@@ -133,7 +178,7 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
       context.stroke()
       last.current = to
     },
-    [ink, size],
+    [ink, size, paper],
   )
 
   const endStroke = useCallback(() => {
@@ -210,9 +255,13 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          {/* min-w-0, or the canvas's own width keeps the flex row from ever
-              shrinking below 400px and the window overflows a phone */}
-          <div className="flex min-w-0 flex-1 items-start justify-center">
+          {/* The easel, and the thing the paper is measured against. min-w-0 and
+              min-h-0, or the sheet's own size becomes the floor this box can
+              shrink to and the window overflows the phone it is measuring. */}
+          <div
+            ref={easel}
+            className="flex min-h-0 min-w-0 flex-1 items-start justify-center overflow-hidden"
+          >
             <canvas
               ref={canvas}
               role="img"
@@ -222,10 +271,16 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
               onPointerUp={endStroke}
               onPointerCancel={endStroke}
               // touch-none: a drag here is a brush stroke, never a page scroll
-              className="w-full touch-none rounded-[2px] shadow-[2px_2px_0_rgba(0,0,0,0.25)]"
+              className="touch-none rounded-[2px] shadow-[2px_2px_0_rgba(0,0,0,0.25)]"
               style={{
-                maxWidth: CANVAS.width,
-                aspectRatio: `${CANVAS.width} / ${CANVAS.height}`,
+                // the sheet's own size, in CSS pixels — on a phone that is the
+                // easel exactly, so there is no margin left to explain
+                width: paper.width,
+                height: paper.height,
+                // and a ceiling for the sideways phone, which is the only way
+                // the easel ever ends up smaller than the sheet it cut
+                maxWidth: '100%',
+                maxHeight: '100%',
                 cursor: 'crosshair',
                 background: PAPER,
               }}

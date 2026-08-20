@@ -8,10 +8,12 @@
 
 import {
   CANVAS,
+  MAX_STORE_PIXELS,
   PALETTE,
   SIZES,
   UNDO_DEPTH,
   pushSnapshot,
+  storeRatio,
   toCanvasPoint,
 } from '../src/lib/paint.ts'
 
@@ -45,6 +47,21 @@ ok('clamps past the top left', p.x === 0 && p.y === 0, JSON.stringify(p))
 p = toCanvasPoint(9999, 9999, same)
 ok('clamps past the bottom right', p.x === CANVAS.width && p.y === CANVAS.height, JSON.stringify(p))
 
+// a phone's sheet, which is portrait and is not CANVAS — the paper has to come
+// from the argument or every stroke lands at the wrong place on a phone
+const phone = { width: 300, height: 560 }
+const shown = { left: 0, top: 0, width: phone.width, height: phone.height }
+p = toCanvasPoint(150, 280, shown, phone)
+ok('a measured sheet maps 1:1 at its own size', p.x === 150 && p.y === 280, JSON.stringify(p))
+p = toCanvasPoint(9999, 9999, shown, phone)
+ok('clamps to the measured sheet, not to CANVAS',
+   p.x === phone.width && p.y === phone.height, JSON.stringify(p))
+// the sideways phone: same sheet, shown smaller
+const scaled = { left: 0, top: 0, width: phone.width / 2, height: phone.height / 2 }
+p = toCanvasPoint(150, 280, scaled, phone)
+ok('a rescaled sheet still lands under the finger',
+   p.x === phone.width && p.y === phone.height, JSON.stringify(p))
+
 // a rect that has not been laid out yet
 p = toCanvasPoint(10, 10, { left: 0, top: 0, width: 0, height: 0 })
 ok('an unlaid-out rect is not Infinity', Number.isFinite(p.x) && Number.isFinite(p.y), JSON.stringify(p))
@@ -61,6 +78,20 @@ const before = [1, 2, 3]
 pushSnapshot(before, 4)
 ok('does not mutate what it was given', before.length === 3)
 ok('a depth of one keeps only the last', pushSnapshot([1, 2], 3, 1).join() === '3')
+
+// the store ratio: match the screen, but never past what eight bitmaps can hold
+ok('matches a plain screen', storeRatio(CANVAS, 1) === 1)
+ok('matches a retina screen', storeRatio(CANVAS, 2) === 2)
+ok('never goes below one', storeRatio(CANVAS, 0.5) === 1, String(storeRatio(CANVAS, 0.5)))
+ok('a missing dpr is one', storeRatio(CANVAS, 0) === 1, String(storeRatio(CANVAS, 0)))
+ok('caps at three', storeRatio({ width: 10, height: 10 }, 8) === 3)
+const tall = { width: 300, height: 560 }
+const r = storeRatio(tall, 3)
+ok('backs off on a big sheet', r < 3, String(r))
+ok('and stays inside the budget', tall.width * r * tall.height * r <= MAX_STORE_PIXELS + 1,
+   String(tall.width * tall.height * r * r))
+ok('a zero sheet is not a division by zero',
+   Number.isFinite(storeRatio({ width: 0, height: 0 }, 2)))
 
 // the palette and nibs are well formed — a bad hex is invisible until you paint
 ok('every colour is a hex triple', PALETTE.every((c) => /^#[0-9a-f]{6}$/i.test(c.hex)),

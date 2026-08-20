@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import AppWindow from './AppWindow'
 import {
   COLS,
@@ -39,6 +39,10 @@ import {
  * and ↓ for command history, and a game listening globally would eat them for
  * the session; one that listens only while its own screen has focus takes
  * nothing that was not aimed at it.
+ *
+ * Every key has a gesture beside it, because a phone has none of them: a tap is
+ * the space bar, a swipe is an arrow, and the panel says so instead of saying
+ * PRESS A KEY at a screen with no keys attached.
  */
 
 /* An LCD, not a palette entry: four values that only mean anything together, so
@@ -53,6 +57,32 @@ const LCD = {
   on: '#2b3a1c',
   /** the case around the glass */
   bezel: '#8d9a66',
+}
+
+/** how far a finger has to travel before it is a swipe and not a tap, in px */
+const SWIPE = 24
+
+/**
+ * Whether the thing pointing at this is a finger.
+ *
+ * Asked because the panel has to name the control it actually has — an LCD that
+ * reads PRESS A KEY on a phone is an LCD telling you to do the one thing you
+ * cannot. Subscribed rather than read once: a tablet with a keyboard folded on
+ * and off changes the answer, and the server has no pointer at all, which is what
+ * the third argument is for.
+ */
+const COARSE = '(pointer: coarse)'
+
+function useCoarsePointer() {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia(COARSE)
+      mq.addEventListener('change', onChange)
+      return () => mq.removeEventListener('change', onChange)
+    },
+    () => window.matchMedia(COARSE).matches,
+    () => false,
+  )
 }
 
 export default function SnakeApp({ onClose }: { onClose: () => void }) {
@@ -76,6 +106,8 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
     panel.current?.focus()
   }, [])
 
+  const coarse = useCoarsePointer()
+
   const push = useCallback((d: Direction) => setGame((g) => turn(g, d)), [])
   const restart = useCallback(() => setGame((g) => newGame(rng, g.best)), [rng])
 
@@ -98,39 +130,63 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
       if (key === 'q') { onClose(); return }
       if (key === ' ' || key === 'enter') {
         e.preventDefault()
+        // the same two jobs the tap has: start a waiting game, restart a finished
+        // one. PRESS A KEY was only true of the arrows before this.
         if (game.phase === 'dead') restart()
+        else if (game.phase === 'idle') push(game.heading)
       }
     },
-    [push, onClose, restart, game.phase],
+    [push, onClose, restart, game.phase, game.heading],
   )
 
   /**
-   * Swipe, for the phone, where the panel is the whole screen and the gesture has
-   * somewhere to happen. A d-pad would cost a fifth of the field to say what a
-   * swipe says for free. Longer axis wins, with a floor so a tap is not a flick.
+   * Tap and swipe, for the phone, where the panel is the whole screen and a
+   * gesture has somewhere to happen. A d-pad would cost a fifth of the field to
+   * say what a swipe says for free.
+   *
+   * Pointer events rather than touch events. They are one code path for glass and
+   * for a mouse, they are what paint next door already draws with on the same
+   * devices, and setPointerCapture guarantees the up lands on this element — a
+   * touchend can be stolen by whatever the finger has wandered over, and a swipe
+   * whose end never arrives is a control that silently does nothing.
    */
-  const touch = useRef<{ x: number; y: number } | null>(null)
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    const t = e.touches[0]
-    touch.current = { x: t.clientX, y: t.clientY }
+  const drag = useRef<{ x: number; y: number } | null>(null)
+
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    drag.current = { x: e.clientX, y: e.clientY }
+    e.currentTarget.setPointerCapture(e.pointerId)
+    // a finger on the panel is also how the panel takes focus, so a phone with a
+    // keyboard attached and a desk with a mouse end up in the same state
+    panel.current?.focus()
   }, [])
-  const onTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const start = touch.current
+
+  const onPointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      const start = drag.current
       if (!start) return
-      touch.current = null
-      const t = e.changedTouches[0]
-      const dx = t.clientX - start.x
-      const dy = t.clientY - start.y
-      if (Math.abs(dx) < 24 && Math.abs(dy) < 24) {
-        // a tap is how you restart, since there is no space bar on glass
+      drag.current = null
+      const dx = e.clientX - start.x
+      const dy = e.clientY - start.y
+      // a floor, so a tap is not read as a flick in whichever direction the
+      // finger happened to roll
+      if (Math.abs(dx) < SWIPE && Math.abs(dy) < SWIPE) {
+        // A tap is the space bar: it starts a waiting game and restarts a
+        // finished one. Starting it with the heading it already has means the tap
+        // says "go" and nothing about which way, which is the honest reading of a
+        // gesture with no direction in it.
         if (game.phase === 'dead') restart()
+        else if (game.phase === 'idle') push(game.heading)
         return
       }
+      // longer axis wins
       push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up')
     },
-    [push, game.phase, restart],
+    [push, game.phase, game.heading, restart],
   )
+
+  const endDrag = useCallback(() => {
+    drag.current = null
+  }, [])
 
   const won = game.snake.length >= COLS * ROWS
   /** the readout strip above the field, in cell units */
@@ -138,15 +194,26 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
   const height = ROWS + HUD
 
   return (
-    <AppWindow title="snake" onClose={onClose} status={game.phase === 'idle' ? 'esc to put it away' : undefined}>
+    <AppWindow
+      title="snake"
+      onClose={onClose}
+      status={
+        game.phase === 'idle' ? (coarse ? 'swipe to steer' : 'esc to put it away') : undefined
+      }
+    >
       <div
         ref={panel}
         tabIndex={0}
         role="application"
-        aria-label={`snake. score ${game.score}. arrow keys or wasd to steer, q to quit`}
+        aria-label={
+          coarse
+            ? `snake. score ${game.score}. tap to start, swipe to steer`
+            : `snake. score ${game.score}. arrow keys or wasd to steer, q to quit`
+        }
         onKeyDown={onKeyDown}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={endDrag}
         // touch-none: a swipe here is a direction, never a page scroll
         className="flex flex-1 touch-none items-center justify-center p-3 outline-none focus-visible:outline-none sm:p-5"
       >
@@ -268,7 +335,11 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
                 opacity="0.7"
                 style={{ fontSize: '0.85px', letterSpacing: '0.08px' }}
               >
-                {game.phase === 'idle' ? 'PRESS A KEY' : `SCORE ${game.score}`}
+                {game.phase === 'idle'
+                  ? coarse
+                    ? 'TAP TO PLAY'
+                    : 'PRESS A KEY'
+                  : `SCORE ${game.score}${coarse ? ' · TAP' : ''}`}
               </text>
             </g>
           )}

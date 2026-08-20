@@ -11,10 +11,26 @@
  * some other size, and an undo stack that grows until the tab dies.
  */
 
-/** the canvas, in its own pixels. Fixed, the way Paint's canvas was fixed —
- *  a canvas that resizes with the window has to decide what happens to the
- *  picture when it does, and every answer to that is worse than not asking. */
+/**
+ * The paper on a desk, in its own pixels.
+ *
+ * Fixed here because a window sitting on a desk has no height of its own to fill
+ * — it is as tall as what is in it, so the paper is what decides, and 400x280 is
+ * the landscape sheet Paint opened with.
+ *
+ * A phone is the other case and does not use this. There the window *is* the
+ * screen, so the paper is measured from the space that is actually left over and
+ * comes out portrait; a 4:3 sheet in a 9:19 hole leaves two thirds of the screen
+ * as margin, which is not paper anyone asked for. The size is taken once, when
+ * the app opens, so nothing has to decide what happens to a picture mid-stroke.
+ */
 export const CANVAS = { width: 400, height: 280 } as const
+
+/** a sheet of paper, in CSS pixels */
+export interface Paper {
+  width: number
+  height: number
+}
 
 /** the paper it starts as, and what the eraser puts back */
 export const PAPER = '#f6f1e7'
@@ -79,27 +95,65 @@ interface Rect {
 /**
  * Where on the canvas a pointer is.
  *
- * The canvas is 400 of its own pixels wide and is displayed at whatever width
- * the window gives it, so every pointer position has to be divided back down.
- * Getting this wrong is the bug where the ink appears at an offset from the
+ * The paper is some number of its own pixels wide and is displayed at whatever
+ * width the window gives it, so every pointer position has to be divided back
+ * down. Getting this wrong is the bug where the ink appears at an offset from the
  * cursor, and it gets worse the further you are from the top left — which is why
  * it is tested rather than eyeballed near the middle.
+ *
+ * The paper is a parameter rather than the constant, because the sheet a phone
+ * measures for itself is not the sheet a desk gets. Passing the rect *and* the
+ * paper is also what lets the display size drift — a phone turned sideways after
+ * the app opened shows the same picture at a different scale, and the ink still
+ * lands under the finger.
  *
  * Clamped, because a pointer captured mid-stroke keeps reporting after it leaves
  * the element, and a stroke should stop at the edge of the paper.
  */
-export function toCanvasPoint(clientX: number, clientY: number, rect: Rect): Point {
+export function toCanvasPoint(
+  clientX: number,
+  clientY: number,
+  rect: Rect,
+  paper: Paper = CANVAS,
+): Point {
   // a zero-sized rect means the element is not laid out yet; anything divided by
   // it is an Infinity that would poison the whole stroke
   if (rect.width === 0 || rect.height === 0) return { x: 0, y: 0 }
 
-  const x = ((clientX - rect.left) * CANVAS.width) / rect.width
-  const y = ((clientY - rect.top) * CANVAS.height) / rect.height
+  const x = ((clientX - rect.left) * paper.width) / rect.width
+  const y = ((clientY - rect.top) * paper.height) / rect.height
 
   return {
-    x: Math.min(Math.max(x, 0), CANVAS.width),
-    y: Math.min(Math.max(y, 0), CANVAS.height),
+    x: Math.min(Math.max(x, 0), paper.width),
+    y: Math.min(Math.max(y, 0), paper.height),
   }
+}
+
+/**
+ * How many device pixels to keep per canvas pixel.
+ *
+ * A screen may have two or three device pixels for each of the canvas's own, and
+ * a store that does not match them draws every stroke soft. But the store is also
+ * the undo stack's unit — eight whole bitmaps — so the honest ceiling is an area,
+ * not a ratio. A phone's portrait sheet is over twice the area of the desk's
+ * landscape one, and at 3x that is a 70MB stack on the device least able to hold
+ * it.
+ *
+ * So: match the screen, up to a total the stack can afford. Above that, back the
+ * ratio off until the store fits, which costs a little crispness on exactly the
+ * screens where there was surplus crispness to spend.
+ *
+ * The budget is the old fixed sheet at 3x — 1200x840, which is what this app has
+ * been asking of phones since it shipped. A sheet that now fills the screen gets
+ * the same allowance rather than a larger one.
+ */
+export const MAX_STORE_PIXELS = 1_000_000
+
+export function storeRatio(paper: Paper, dpr: number): number {
+  const area = paper.width * paper.height
+  if (area <= 0) return 1
+  const affordable = Math.sqrt(MAX_STORE_PIXELS / area)
+  return Math.max(1, Math.min(dpr || 1, 3, affordable))
 }
 
 /** how many steps back you can go — each one is a full bitmap, so this is a

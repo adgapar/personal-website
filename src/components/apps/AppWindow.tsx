@@ -27,12 +27,19 @@ interface Props {
   onClose: () => void
   /** shown in the title bar, right of the name — a score, a state, a hint */
   status?: string
+  /**
+   * Stays full-bleed past the sm breakpoint — for a phone turned to
+   * landscape, which is often wider than 640px and still has no desk to
+   * float a window on. The point of asking for that width back is to spend
+   * it on the app, not on the frame around it.
+   */
+  fullscreen?: boolean
   children: React.ReactNode
 }
 
 type Offset = { x: number; y: number }
 
-export default function AppWindow({ title, onClose, status, children }: Props) {
+export default function AppWindow({ title, onClose, status, fullscreen, children }: Props) {
   const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 })
   const [dragging, setDragging] = useState(false)
   const frame = useRef<HTMLDivElement>(null)
@@ -51,14 +58,15 @@ export default function AppWindow({ title, onClose, status, children }: Props) {
   const onPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
       // pinned to the viewport below sm, so a drag has nothing to move — asked
-      // of the medium, not the input, exactly as WindowChrome asks it
-      if (!window.matchMedia('(min-width: 640px)').matches) return
+      // of the medium, not the input, exactly as WindowChrome asks it. A
+      // window forced full-bleed past sm has just as little to drag it to.
+      if (fullscreen || !window.matchMedia('(min-width: 640px)').matches) return
       if ((e.target as HTMLElement).closest('button, a')) return
       origin.current = { pointer: { x: e.clientX, y: e.clientY }, offset }
       setDragging(true)
       e.currentTarget.setPointerCapture(e.pointerId)
     },
-    [offset],
+    [offset, fullscreen],
   )
 
   const onPointerMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
@@ -92,15 +100,16 @@ export default function AppWindow({ title, onClose, status, children }: Props) {
       ref={frame}
       role="dialog"
       aria-label={title}
-      className={`term term-glass window-shell pointer-events-auto fixed inset-0 z-[45] flex flex-col sm:relative sm:inset-auto sm:z-auto sm:w-auto ${
-        dragging ? '' : 'sm:transition-transform duration-300'
-      }`}
+      className={`term term-glass window-shell pointer-events-auto fixed inset-0 z-[45] flex flex-col ${
+        fullscreen ? 'window-fullscreen' : 'sm:relative sm:inset-auto sm:z-auto sm:w-auto'
+      } ${dragging || fullscreen ? '' : 'sm:transition-transform duration-300'}`}
       style={{
         ...(dragging ? WINDOW_FRAME_LIFTED : WINDOW_FRAME),
         // the same two numbers window-shell already reads for the terminal, and
-        // the same rule drops them below sm where the window is the screen
-        ['--win-tx' as string]: `${offset.x}px`,
-        ['--win-ty' as string]: `${offset.y}px`,
+        // the same rule drops them below sm where the window is the screen —
+        // forced to zero here too, since fullscreen has nowhere to drag to
+        ['--win-tx' as string]: fullscreen ? '0px' : `${offset.x}px`,
+        ['--win-ty' as string]: fullscreen ? '0px' : `${offset.y}px`,
       }}
     >
       <div
@@ -109,8 +118,8 @@ export default function AppWindow({ title, onClose, status, children }: Props) {
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onDoubleClick={() => setOffset({ x: 0, y: 0 })}
-        title="drag to move · double-click to recentre"
-        className={`relative flex items-center gap-3 px-3 py-2 select-none sm:touch-none ${
+        title={fullscreen ? undefined : 'drag to move · double-click to recentre'}
+        className={`relative flex items-center gap-3 px-3 py-2 select-none ${fullscreen ? '' : 'sm:touch-none'} ${
           dragging ? 'sm:cursor-grabbing' : 'sm:cursor-grab'
         }`}
         style={TITLE_BAR}

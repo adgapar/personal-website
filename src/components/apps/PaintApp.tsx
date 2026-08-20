@@ -77,9 +77,13 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
    * sideways mid-drawing instead shows the same sheet scaled to fit — the maxima
    * below keep it inside the window, and toCanvasPoint reads the live rect, so
    * the ink still lands under the finger.
+   *
+   * "On a phone" here means either dimension under the breakpoint, not just
+   * the width — a landscape phone is often wider than 640px, and it is still
+   * a phone with no desk under it.
    */
   useEffect(() => {
-    if (window.matchMedia('(min-width: 640px)').matches) return
+    if (window.matchMedia('(min-width: 640px) and (min-height: 640px)').matches) return
     const box = easel.current
     if (!box) return
     const width = Math.floor(box.clientWidth)
@@ -194,7 +198,12 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
   }, [])
 
   return (
-    <AppWindow title="paint" onClose={onClose} status={tool === 'eraser' ? 'eraser' : undefined}>
+    <AppWindow
+      title="paint"
+      onClose={onClose}
+      fullscreen={mobile && !portrait}
+      status={tool === 'eraser' ? 'eraser' : undefined}
+    >
       {/* The Windows layout: toolbox down the left, colours in a strip along the
           bottom, canvas in what is left. Worth copying exactly, because it is the
           arrangement anyone who has opened Paint already knows — and it needs no

@@ -22,13 +22,15 @@ function useMedia(query: string) {
 /**
  * Whether this is a phone, and which way it is held.
  *
- * `mobile` is the same sm breakpoint AppWindow already uses to decide a
- * window is the whole screen rather than a box on a desk. Snake and Paint
- * both want to know when that screen is portrait, so it can be asked to turn
- * rather than squeezed into a shape that loses most of its width to margin.
+ * `mobile` asks about the short side, not just the width: a phone in
+ * landscape is often wider than the sm breakpoint (a 932px-wide iPhone,
+ * held sideways), and it is still a phone with no desk to float a window
+ * on. Checking width OR height against the breakpoint is what a device's
+ * short axis actually looks like in either orientation, where checking
+ * width alone only caught portrait.
  */
 export function useMobileOrientation() {
-  const mobile = useMedia('(max-width: 639px)')
+  const mobile = useMedia('(max-width: 639px), (max-height: 639px)')
   const portrait = useMedia('(orientation: portrait)')
   return { mobile, portrait }
 }

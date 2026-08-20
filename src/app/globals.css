@@ -179,6 +179,34 @@
 }
 
 /**
+ * The same "a phone's window is the screen" reasoning as the block above,
+ * for a window that asks for it by name instead of by width. A phone turned
+ * to landscape is frequently wider than 639px — the point of turning it is
+ * to spend that width on the app, not on a floating box with a shadow and a
+ * hairline it has no desk to cast them onto.
+ */
+.window-fullscreen,
+.window-fullscreen.term-glass {
+  --frame-radius: 0px;
+  --frame-border: 0px;
+  --frame-edge: transparent;
+  --frame-shadow: none;
+  --frame-shadow-lifted: none;
+}
+
+.window-fullscreen.term-glass {
+  --frame-fill: #1d1c19;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.window-fullscreen {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/**
  * How tall the scrollback is, which is really the question of what the window is.
  *
  * A window that fills the screen — maximized, or any window on a phone — takes

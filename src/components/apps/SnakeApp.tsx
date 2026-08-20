@@ -278,6 +278,7 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
     <AppWindow
       title="snake"
       onClose={onClose}
+      fullscreen={dpad}
       status={
         game.phase === 'idle'
           ? dpad

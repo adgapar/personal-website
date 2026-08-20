@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import AppWindow from './AppWindow'
+import RotateOverlay from './RotateOverlay'
+import { useMobileOrientation } from './use-mobile-orientation'
 import {
   COLS,
   ROWS,
@@ -73,6 +75,74 @@ const SWIPE = 24
  */
 const COARSE = '(pointer: coarse)'
 
+/** one button of the d-pad — a direction, or the centre "go" */
+function DPadButton({
+  area,
+  glyph,
+  label,
+  onPress,
+  wide,
+}: {
+  area: string
+  glyph: string
+  label: string
+  onPress: () => void
+  wide?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onPointerDown={(e) => {
+        // fires on touch-down, not the click that follows it, so the
+        // direction turns the instant the thumb lands rather than a frame of
+        // travel later
+        e.preventDefault()
+        onPress()
+      }}
+      aria-label={label}
+      style={{ gridArea: area }}
+      className={`flex items-center justify-center rounded-[3px] border border-[var(--hair)] bg-[var(--surface)] text-[var(--muted)] transition-colors duration-75 active:border-[var(--accent)] active:text-[var(--accent)] ${
+        wide ? 'text-[8px] tracking-widest uppercase' : 'text-base'
+      }`}
+    >
+      {glyph}
+    </button>
+  )
+}
+
+/**
+ * The d-pad, for a phone turned to landscape — width Snake's SVG panel does
+ * not need, and where a cluster of buttons costs nothing the swipe was
+ * already spending. Portrait keeps the swipe alone; see the note above
+ * onPointerUp for why.
+ */
+function DPad({
+  onSteer,
+  onActivate,
+  activateLabel,
+}: {
+  onSteer: (d: Direction) => void
+  onActivate: () => void
+  activateLabel: string
+}) {
+  return (
+    <div
+      className="grid shrink-0 gap-1.5"
+      style={{
+        gridTemplateAreas: `". up ." "left mid right" ". down ."`,
+        gridTemplateColumns: 'repeat(3, 2.5rem)',
+        gridTemplateRows: 'repeat(3, 2.5rem)',
+      }}
+    >
+      <DPadButton area="up" glyph="▲" label="up" onPress={() => onSteer('up')} />
+      <DPadButton area="left" glyph="◀" label="left" onPress={() => onSteer('left')} />
+      <DPadButton area="mid" glyph={activateLabel} label={activateLabel} onPress={onActivate} wide />
+      <DPadButton area="right" glyph="▶" label="right" onPress={() => onSteer('right')} />
+      <DPadButton area="down" glyph="▼" label="down" onPress={() => onSteer('down')} />
+    </div>
+  )
+}
+
 function useCoarsePointer() {
   return useSyncExternalStore(
     (onChange) => {
@@ -93,13 +163,19 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
   const [game, setGame] = useState<Game>(() => newGame(rng))
   const panel = useRef<HTMLDivElement>(null)
 
+  // A phone in portrait sees RotateOverlay instead of the field, so the clock
+  // pauses with it rather than running a game nobody can steer.
+  const { mobile, portrait } = useMobileOrientation()
+  const rotate = mobile && portrait
+  const dpad = mobile && !portrait
+
   // The clock, keyed off the score so eating tightens the interval. A fixed
   // setInterval would have to be torn down every tick to do the same thing.
   useEffect(() => {
-    if (game.phase !== 'playing') return
+    if (game.phase !== 'playing' || rotate) return
     const id = setInterval(() => setGame((g) => step(g, rng)), intervalFor(game.score))
     return () => clearInterval(id)
-  }, [game.phase, game.score, rng])
+  }, [game.phase, game.score, rng, rotate])
 
   // focus on open, so the first arrow key is already the game's
   useEffect(() => {
@@ -110,6 +186,14 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
 
   const push = useCallback((d: Direction) => setGame((g) => turn(g, d)), [])
   const restart = useCallback(() => setGame((g) => newGame(rng, g.best)), [rng])
+
+  // The same job a tap and the space bar both do: start a waiting game, or
+  // restart a finished one. Named once so the d-pad's centre button, the
+  // keyboard and the tap all mean it the same way.
+  const activate = useCallback(() => {
+    if (game.phase === 'dead') restart()
+    else if (game.phase === 'idle') push(game.heading)
+  }, [game.phase, game.heading, restart, push])
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -130,19 +214,18 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
       if (key === 'q') { onClose(); return }
       if (key === ' ' || key === 'enter') {
         e.preventDefault()
-        // the same two jobs the tap has: start a waiting game, restart a finished
-        // one. PRESS A KEY was only true of the arrows before this.
-        if (game.phase === 'dead') restart()
-        else if (game.phase === 'idle') push(game.heading)
+        activate()
       }
     },
-    [push, onClose, restart, game.phase, game.heading],
+    [push, onClose, activate],
   )
 
   /**
-   * Tap and swipe, for the phone, where the panel is the whole screen and a
-   * gesture has somewhere to happen. A d-pad would cost a fifth of the field to
-   * say what a swipe says for free.
+   * Tap and swipe, for the phone in portrait's narrow field, where a d-pad
+   * would cost a fifth of the width to say what a swipe says for free. Turned
+   * landscape there is width to spare, so DPad sits beside the panel instead
+   * and this stays live underneath it — a thumb already swiping doesn't stop
+   * working just because there are now buttons too.
    *
    * Pointer events rather than touch events. They are one code path for glass and
    * for a mouse, they are what paint next door already draws with on the same
@@ -170,18 +253,16 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
       // a floor, so a tap is not read as a flick in whichever direction the
       // finger happened to roll
       if (Math.abs(dx) < SWIPE && Math.abs(dy) < SWIPE) {
-        // A tap is the space bar: it starts a waiting game and restarts a
-        // finished one. Starting it with the heading it already has means the tap
-        // says "go" and nothing about which way, which is the honest reading of a
-        // gesture with no direction in it.
-        if (game.phase === 'dead') restart()
-        else if (game.phase === 'idle') push(game.heading)
+        // A tap is the space bar: starting it with the heading it already
+        // has means the tap says "go" and nothing about which way, which is
+        // the honest reading of a gesture with no direction in it.
+        activate()
         return
       }
       // longer axis wins
       push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up')
     },
-    [push, game.phase, game.heading, restart],
+    [push, activate],
   )
 
   const endDrag = useCallback(() => {
@@ -198,152 +279,172 @@ export default function SnakeApp({ onClose }: { onClose: () => void }) {
       title="snake"
       onClose={onClose}
       status={
-        game.phase === 'idle' ? (coarse ? 'swipe to steer' : 'esc to put it away') : undefined
+        game.phase === 'idle'
+          ? dpad
+            ? 'd-pad to steer'
+            : coarse
+              ? 'swipe to steer'
+              : 'esc to put it away'
+          : undefined
       }
     >
-      <div
-        ref={panel}
-        tabIndex={0}
-        role="application"
-        aria-label={
-          coarse
-            ? `snake. score ${game.score}. tap to start, swipe to steer`
-            : `snake. score ${game.score}. arrow keys or wasd to steer, q to quit`
-        }
-        onKeyDown={onKeyDown}
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
-        onPointerCancel={endDrag}
-        // touch-none: a swipe here is a direction, never a page scroll
-        className="flex flex-1 touch-none items-center justify-center p-3 outline-none focus-visible:outline-none sm:p-5"
-      >
-        <svg
-          viewBox={`0 0 ${COLS} ${height}`}
-          // The panel takes the window, whichever dimension runs out first: the
-          // aspect ratio is fixed, so one CSS rule handles a phone in portrait
-          // and a dragged window on a desk without laying anything out twice.
-          className="h-auto max-h-full w-full max-w-full"
-          style={{ fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-          shapeRendering="crispEdges"
-          aria-hidden
+      <div className="relative flex min-h-0 flex-1">
+        <div
+          ref={panel}
+          tabIndex={0}
+          role="application"
+          aria-label={
+            dpad
+              ? `snake. score ${game.score}. use the d-pad to steer`
+              : coarse
+                ? `snake. score ${game.score}. tap to start, swipe to steer`
+                : `snake. score ${game.score}. arrow keys or wasd to steer, q to quit`
+          }
+          onKeyDown={onKeyDown}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={endDrag}
+          // touch-none: a swipe here is a direction, never a page scroll
+          className="flex flex-1 touch-none items-center justify-center p-3 outline-none focus-visible:outline-none sm:p-5"
         >
-          <defs>
-            {/* every pixel on the screen, lit or not — the ghost grid is what
-                makes a dark square read as a pixel that is on rather than as a
-                shape drawn on paper */}
-            <pattern id="lcd-pixels" width="1" height="1" patternUnits="userSpaceOnUse">
-              <rect x="0.12" y="0.12" width="0.76" height="0.76" fill={LCD.off} />
-            </pattern>
-          </defs>
-
-          {/* the case, and the glass inset into it */}
-          <rect x="0" y="0" width={COLS} height={height} fill={LCD.bezel} />
-          <rect x="0.35" y="0.35" width={COLS - 0.7} height={height - 0.7} fill={LCD.screen} />
-
-          {/* the readout: score left, best right, the way a handheld does it */}
-          <text
-            x="0.9"
-            y={HUD - 0.55}
-            fill={LCD.on}
-            style={{ fontSize: '0.95px', letterSpacing: '0.12px' }}
+          <svg
+            viewBox={`0 0 ${COLS} ${height}`}
+            // The panel takes the window, whichever dimension runs out first: the
+            // aspect ratio is fixed, so one CSS rule handles a phone in portrait
+            // and a dragged window on a desk without laying anything out twice.
+            className="h-auto max-h-full w-full max-w-full"
+            style={{ fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
+            shapeRendering="crispEdges"
+            aria-hidden
           >
-            {String(game.score).padStart(3, '0')}
-          </text>
-          {game.best > 0 && (
+            <defs>
+              {/* every pixel on the screen, lit or not — the ghost grid is what
+                  makes a dark square read as a pixel that is on rather than as a
+                  shape drawn on paper */}
+              <pattern id="lcd-pixels" width="1" height="1" patternUnits="userSpaceOnUse">
+                <rect x="0.12" y="0.12" width="0.76" height="0.76" fill={LCD.off} />
+              </pattern>
+            </defs>
+
+            {/* the case, and the glass inset into it */}
+            <rect x="0" y="0" width={COLS} height={height} fill={LCD.bezel} />
+            <rect x="0.35" y="0.35" width={COLS - 0.7} height={height - 0.7} fill={LCD.screen} />
+
+            {/* the readout: score left, best right, the way a handheld does it */}
             <text
-              x={COLS - 0.9}
+              x="0.9"
               y={HUD - 0.55}
-              textAnchor="end"
               fill={LCD.on}
-              opacity="0.55"
               style={{ fontSize: '0.95px', letterSpacing: '0.12px' }}
             >
-              HI {String(game.best).padStart(3, '0')}
+              {String(game.score).padStart(3, '0')}
             </text>
-          )}
-
-          {/* the field: unlit pixels first, then the bezel line that fences them */}
-          <rect x="0.6" y={HUD} width={COLS - 1.2} height={ROWS - 0.6} fill="url(#lcd-pixels)" />
-          <rect
-            x="0.6"
-            y={HUD}
-            width={COLS - 1.2}
-            height={ROWS - 0.6}
-            fill="none"
-            stroke={LCD.on}
-            strokeWidth="0.12"
-            opacity="0.5"
-          />
-
-          <g transform={`translate(0.6, ${HUD})`}>
-            {/* the apple: a lit pixel with its middle off, so it reads as a thing
-                to eat rather than as another piece of snake */}
-            <rect x={game.food.x + 0.1} y={game.food.y + 0.1} width="0.8" height="0.8" fill={LCD.on} />
-            <rect x={game.food.x + 0.35} y={game.food.y + 0.35} width="0.3" height="0.3" fill={LCD.screen} />
-
-            {/* Segments, each inset so a hairline of unlit screen shows between
-                them — a solid rope of pixels loses the count of how long it is,
-                which is the one number the player is actually watching. */}
-            {game.snake.map((p, i) => (
-              <rect
-                key={`${p.x},${p.y},${i}`}
-                x={p.x + 0.08}
-                y={p.y + 0.08}
-                width="0.84"
-                height="0.84"
+            {game.best > 0 && (
+              <text
+                x={COLS - 0.9}
+                y={HUD - 0.55}
+                textAnchor="end"
                 fill={LCD.on}
-              />
-            ))}
-            {/* the head keeps a lit core with a ring of screen around it, so you
-                can tell which end is which at a glance */}
+                opacity="0.55"
+                style={{ fontSize: '0.95px', letterSpacing: '0.12px' }}
+              >
+                HI {String(game.best).padStart(3, '0')}
+              </text>
+            )}
+
+            {/* the field: unlit pixels first, then the bezel line that fences them */}
+            <rect x="0.6" y={HUD} width={COLS - 1.2} height={ROWS - 0.6} fill="url(#lcd-pixels)" />
             <rect
-              x={game.snake[0].x + 0.24}
-              y={game.snake[0].y + 0.24}
-              width="0.52"
-              height="0.52"
-              fill={LCD.screen}
+              x="0.6"
+              y={HUD}
+              width={COLS - 1.2}
+              height={ROWS - 0.6}
+              fill="none"
+              stroke={LCD.on}
+              strokeWidth="0.12"
+              opacity="0.5"
             />
-          </g>
 
-          {/* Messages are drawn on the panel, over a plate of screen — an LCD
-              that passes its own text down to the HTML stops being an LCD. */}
-          {game.phase !== 'playing' && (
-            <g>
+            <g transform={`translate(0.6, ${HUD})`}>
+              {/* the apple: a lit pixel with its middle off, so it reads as a thing
+                  to eat rather than as another piece of snake */}
+              <rect x={game.food.x + 0.1} y={game.food.y + 0.1} width="0.8" height="0.8" fill={LCD.on} />
+              <rect x={game.food.x + 0.35} y={game.food.y + 0.35} width="0.3" height="0.3" fill={LCD.screen} />
+
+              {/* Segments, each inset so a hairline of unlit screen shows between
+                  them — a solid rope of pixels loses the count of how long it is,
+                  which is the one number the player is actually watching. */}
+              {game.snake.map((p, i) => (
+                <rect
+                  key={`${p.x},${p.y},${i}`}
+                  x={p.x + 0.08}
+                  y={p.y + 0.08}
+                  width="0.84"
+                  height="0.84"
+                  fill={LCD.on}
+                />
+              ))}
+              {/* the head keeps a lit core with a ring of screen around it, so you
+                  can tell which end is which at a glance */}
               <rect
-                x={COLS / 2 - 7}
-                y={HUD + ROWS / 2 - 3}
-                width="14"
-                height="5"
+                x={game.snake[0].x + 0.24}
+                y={game.snake[0].y + 0.24}
+                width="0.52"
+                height="0.52"
                 fill={LCD.screen}
-                stroke={LCD.on}
-                strokeWidth="0.14"
               />
-              <text
-                x={COLS / 2}
-                y={HUD + ROWS / 2 - 1.1}
-                textAnchor="middle"
-                fill={LCD.on}
-                style={{ fontSize: '1.5px', letterSpacing: '0.2px' }}
-              >
-                {game.phase === 'idle' ? 'SNAKE' : won ? 'PERFECT' : 'GAME OVER'}
-              </text>
-              <text
-                x={COLS / 2}
-                y={HUD + ROWS / 2 + 0.75}
-                textAnchor="middle"
-                fill={LCD.on}
-                opacity="0.7"
-                style={{ fontSize: '0.85px', letterSpacing: '0.08px' }}
-              >
-                {game.phase === 'idle'
-                  ? coarse
-                    ? 'TAP TO PLAY'
-                    : 'PRESS A KEY'
-                  : `SCORE ${game.score}${coarse ? ' · TAP' : ''}`}
-              </text>
             </g>
-          )}
-        </svg>
+
+            {/* Messages are drawn on the panel, over a plate of screen — an LCD
+                that passes its own text down to the HTML stops being an LCD. */}
+            {game.phase !== 'playing' && (
+              <g>
+                <rect
+                  x={COLS / 2 - 7}
+                  y={HUD + ROWS / 2 - 3}
+                  width="14"
+                  height="5"
+                  fill={LCD.screen}
+                  stroke={LCD.on}
+                  strokeWidth="0.14"
+                />
+                <text
+                  x={COLS / 2}
+                  y={HUD + ROWS / 2 - 1.1}
+                  textAnchor="middle"
+                  fill={LCD.on}
+                  style={{ fontSize: '1.5px', letterSpacing: '0.2px' }}
+                >
+                  {game.phase === 'idle' ? 'SNAKE' : won ? 'PERFECT' : 'GAME OVER'}
+                </text>
+                <text
+                  x={COLS / 2}
+                  y={HUD + ROWS / 2 + 0.75}
+                  textAnchor="middle"
+                  fill={LCD.on}
+                  opacity="0.7"
+                  style={{ fontSize: '0.85px', letterSpacing: '0.08px' }}
+                >
+                  {game.phase === 'idle'
+                    ? coarse
+                      ? 'TAP TO PLAY'
+                      : 'PRESS A KEY'
+                    : `SCORE ${game.score}${coarse ? ' · TAP' : ''}`}
+                </text>
+              </g>
+            )}
+          </svg>
+        </div>
+        {dpad && (
+          <div className="flex items-center pr-3">
+            <DPad
+              onSteer={push}
+              onActivate={activate}
+              activateLabel={game.phase === 'dead' ? 'retry' : 'go'}
+            />
+          </div>
+        )}
+        {rotate && <RotateOverlay />}
       </div>
     </AppWindow>
   )

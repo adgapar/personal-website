@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import AppWindow from './AppWindow'
+import RotateOverlay from './RotateOverlay'
+import { useMobileOrientation } from './use-mobile-orientation'
 import {
   CANVAS,
   PALETTE,
@@ -54,6 +56,12 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
   const [size, setSize] = useState<number>(SIZES[1])
   const [canUndo, setCanUndo] = useState(false)
   const [paper, setPaper] = useState<Paper>(CANVAS)
+
+  // A phone in portrait sees RotateOverlay instead of the easel — the sheet
+  // stays mounted underneath it, so nothing here has to remeasure once the
+  // phone turns back.
+  const { mobile, portrait } = useMobileOrientation()
+  const rotate = mobile && portrait
 
   /**
    * Cut the paper to the space there is, once.
@@ -192,7 +200,7 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
           arrangement anyone who has opened Paint already knows — and it needs no
           responsive branch, since a narrow tool column and a wide palette are the
           right shape on a phone too. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:p-4">
+      <div className="relative flex min-h-0 flex-1 flex-col gap-3 p-3 sm:p-4">
         <div className="flex min-h-0 flex-1 gap-3">
           {/* the toolbox */}
           <div className="flex w-[54px] shrink-0 flex-col gap-3">
@@ -325,6 +333,7 @@ export default function PaintApp({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         </div>
+        {rotate && <RotateOverlay />}
       </div>
     </AppWindow>
   )

@@ -54,9 +54,8 @@ function SampleText() {
         <span className="text-[var(--fg)]">Elche, Spain</span>
       </div>
       <div className="mt-4 border-l border-[var(--border)] pl-4 text-[var(--fg)]">
-        Founding AI engineer at Orbio AI, building agents for recruitment,
-        onboarding and employee experience. They talk to thousands of candidates
-        a day, so reliability and safety aren&apos;t optional.
+        Founding AI engineer at Orbio AI. I build AI products and the systems
+        behind them.
       </div>
       <div className="pt-2 text-[var(--muted)]">
         2026-07 · newsletter · what kind of poker player is an AI

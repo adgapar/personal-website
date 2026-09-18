@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -55,6 +56,16 @@ export default function WindowChrome({ title, tabs, children }: Props) {
   // empty frame is not a state anyone wants. `maximized` is remembered, so
   // restoring puts it back to fullscreen.
   const fullscreen = maximized && !minimized
+
+  useEffect(() => {
+    if (!fullscreen) return
+    const restore = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setWindowState({ maximized: false })
+    }
+    window.addEventListener('keydown', restore)
+    return () => window.removeEventListener('keydown', restore)
+  }, [fullscreen])
+
 
   const frame = useRef<HTMLDivElement>(null)
   const origin = useRef<{ pointer: Offset; offset: Offset } | null>(null)
@@ -171,7 +182,7 @@ export default function WindowChrome({ title, tabs, children }: Props) {
         title={fullscreen ? undefined : 'drag to move · double-click to recentre'}
         // touch-none only from sm up: below it the bar is not a drag handle, and
         // swallowing touch there just makes the top of the window feel dead
-        className={`relative flex items-stretch select-none sm:touch-none sm:gap-3 sm:px-4 ${
+        className={`relative flex shrink-0 items-stretch select-none sm:touch-none sm:gap-3 sm:px-4 ${
           fullscreen ? '' : dragging ? 'sm:cursor-grabbing' : 'sm:cursor-grab'
         }`}
         style={TITLE_BAR}

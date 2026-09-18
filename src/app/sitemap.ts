@@ -11,6 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const newest = posts[0]?.date
 
   return [
+    { url: `${SITE}/tapas`, priority: 0.9 },
+    { url: `${SITE}/projects`, priority: 0.8 },
     ...pages.map((page) => ({
       url: `${SITE}${page.route}`,
       lastModified: page.slug === 'writing' && newest ? new Date(newest) : new Date(),

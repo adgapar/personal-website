@@ -34,11 +34,21 @@ export function shortenPrompt(prompt: string) {
 export default function Prompt({ prompt }: { prompt?: string }) {
   const inherited = useContext(PromptContext)
   const text = prompt ?? inherited
+  const colorPrompt = (value: string) => {
+    const split = value.indexOf(':')
+    if (split === -1) return value
+    return <>
+      <span className="text-[var(--success)]">{value.slice(0, split)}</span>
+      <span className="text-[var(--dim)]">:</span>
+      <span className="text-[var(--accent)]">{value.slice(split + 1).replace(/\$$/, '')}</span>
+      <span className="text-[var(--muted)]">{value.endsWith('$') ? '$' : ''}</span>
+    </>
+  }
 
   return (
     <span className="shrink-0 font-medium text-[var(--accent)] select-none">
-      <span className="sm:hidden">{shortenPrompt(text)}</span>
-      <span className="hidden sm:inline">{text}</span>
+      <span className="sm:hidden">{colorPrompt(shortenPrompt(text))}</span>
+      <span className="hidden sm:inline">{colorPrompt(text)}</span>
     </span>
   )
 }

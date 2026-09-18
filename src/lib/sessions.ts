@@ -24,6 +24,7 @@ export type LogEntry = {
 }
 
 export type SessionBlock = {
+  id?: string       // optional in-page destination
   cmd?: string        // if set, renders "$ cmd" above output
   mdHeading?: string  // section heading used by the markdown/agent view
   mdSkip?: boolean    // terminal-only chrome, omitted from markdown
@@ -76,52 +77,61 @@ export type PageSession = {
 
 // ─── Homepage ────────────────────────────────────────────────────────────────
 
+const updatesBlock: SessionBlock = {
+  id: 'updates',
+  cmd: 'tail updates.log',
+  mdHeading: 'updates',
+  lines: [],
+    log: { entries: [
+      { date: '2026-07', tag: 'writing', content: 'What kind of poker player is an AI?', href: 'https://theworkingprototype.substack.com/p/what-kind-of-poker-player-is-an-ai' },
+      { date: '2026-06', tag: 'writing', content: 'Riding the wave', href: '/blog/riding-the-wave' },
+      { date: '2026-02', tag: 'talk', content: '10,000 interviews without a human 🇰🇿', href: 'https://www.youtube.com/watch?v=_5IoO2fA1FM' },
+      { date: '2025-12', tag: 'life', content: 'My sister visited Elche. First time together since Chicago, 2017.' },
+      { date: '2025-02', tag: 'life', content: 'Madrid → Elche. Traded traffic for sunshine.' },
+    ] },
+}
+
 export const homeSession: SessionBlock[] = [
   {
     cmd: 'whois adilet',
-    mdHeading: 'profile',
+    mdHeading: 'about',
     avatar: '/profile.jpg',
     lines: [
-      { label: 'name',     content: `${profile.name}  ·  ${profile.nickname}`, style: 'warm' },
-      { label: 'role',     content: profile.role, style: 'warm' },
-      { label: 'org',      content: profile.org, style: 'default' },
-      { label: 'location', content: profile.location, style: 'default' },
-      { label: 'focus',    content: 'AI agents · recruitment · voice AI · building in public', style: 'default' },
+      { content: 'Adilet Gaparov · Adi', style: 'warm' },
+      { content: profile.bio, style: 'default' },
+      { content: 'From Kazakhstan 🇰🇿. At home in Elche 🇪🇸 with my family of four.', style: 'muted' },
     ],
   },
   {
     cmd: 'cat about.txt',
-    mdHeading: 'about',
+    mdHeading: 'what keeps me busy',
     lines: [
-      { content: profile.longBio, style: 'quote' },
+      { content: 'I came to agents through cloud at Microsoft, ML at Volvo Cars, and software and risk models at Capchase. I like building things that get used, then figuring out where they break.', style: 'quote' },
+      { content: 'I write The Working Prototype about practical AI, and a blog about learning, building, and life outside work. Small projects have a habit of turning into apps.', style: 'quote' },
     ],
   },
   {
-    cmd: 'cat links.txt',
-    mdHeading: 'links',
+    cmd: 'ls studio/',
+    mdHeading: 'explore',
+    lines: [
+      { label: 'projects', content: 'Tapas, Teya, and other experiments', href: '/projects', style: 'accent' },
+      { label: 'writing', content: 'essays & The Working Prototype', href: '/reader', style: 'accent' },
+      { label: 'background', content: 'the path from cloud to AI agents', href: '/cv', style: 'accent' },
+    ],
+  },
+  {
+    mdHeading: 'say hello',
     linkRow: true,
     lines: [
-      { content: 'github',   href: profile.links.github },
-      { content: 'twitter',  href: profile.links.twitter },
-      { content: 'linkedin', href: profile.links.linkedin },
-      { content: 'threads',  href: profile.links.threads },
-      { content: 'substack', href: profile.links.newsletter },
+      { content: 'email me', href: `mailto:${profile.email}` },
+      { content: 'X', href: profile.links.twitter },
+      { content: 'Substack', href: profile.links.newsletter },
+      { content: 'GitHub', href: profile.links.github },
+      { content: 'LinkedIn', href: profile.links.linkedin },
+      { content: 'more ways to connect', href: '/contact' },
     ],
   },
-  {
-    cmd: 'tail -n 5 updates.log',
-    mdHeading: 'recent',
-    lines: [],
-    log: {
-      entries: [
-        { date: '2026-07', tag: 'newsletter', content: 'what kind of poker player is an AI',                              href: 'https://theworkingprototype.substack.com/p/what-kind-of-poker-player-is-an-ai' },
-        { date: '2026-06', tag: 'blog',       content: 'riding the wave',                                                 href: '/blog/riding-the-wave' },
-        { date: '2026-02', tag: 'talk',       content: '10,000 interviews without a human 🇰🇿',                         href: 'https://www.youtube.com/watch?v=_5IoO2fA1FM' },
-        { date: '2025-12',                    content: 'sister visited Elche — first time together since Chicago, 2017' },
-        { date: '2025-02',                    content: 'moved from Madrid to Elche. traded traffic for sunshine.' },
-      ],
-    },
-  },
+  updatesBlock,
 ]
 
 // ─── About (same content as home, no animation) ──────────────────────────────
@@ -131,6 +141,13 @@ export const aboutSession: SessionBlock[] = homeSession
 // ─── CV ───────────────────────────────────────────────────────────────────────
 
 export const cvSession: SessionBlock[] = [
+  {
+    cmd: 'cat background.txt',
+    mdHeading: 'background',
+    lines: [
+      { content: 'Cloud at Microsoft, ML at Volvo Cars, software and risk models at Capchase. Now I’m a founding AI engineer at Orbio AI, building AI products and the systems behind them.', style: 'quote' },
+    ],
+  },
   {
     cmd: 'ls work',
     mdHeading: 'work',
@@ -149,6 +166,7 @@ export const cvSession: SessionBlock[] = [
   },
   {
     cmd: 'ls -l ./projects/',
+    termSkip: true,
     mdHeading: 'projects',
     lines: [],
     list: {
@@ -163,6 +181,11 @@ export const cvSession: SessionBlock[] = [
       })),
       hint: "click a row for detail  ·  or type 'open <name>'  ·  e.g. open teya",
     },
+  },
+  {
+    mdSkip: true,
+    lines: [],
+    action: { label: 'browse projects ↗', run: 'projects', hint: 'tools and experiments in their own window' },
   },
   {
     cmd: 'ls education',
@@ -194,42 +217,15 @@ export const cvSession: SessionBlock[] = [
 export const writingSession: SessionBlock[] = []
 
 // ─── Play ───────────────────────────────────────────────────────────────────
-// Every other tab arrives full, which reads as "look at this". This one is
-// empty on purpose, so the prompt is the invitation.
 
 export const playSession: SessionBlock[] = [
-  // The one tab that starts with something, and the reason is that it starts
-  // with nothing else. Every other tab arrives full of its own content and
-  // needs no introduction; this one is a bare prompt, so the banner is what
-  // says which shell you are standing in and what to do with it — the two
-  // things a CLI prints on launch before it hands you the cursor.
-  //
-  // Drawn from the label rows, not from a box of ─ and │. A box has a width,
-  // and any width that fits the desk breaks at 37 characters on a phone. The
-  // gutter does the same work the box was doing: it says these two lines are
-  // the machine reporting, not the session's content.
   {
     mdSkip: true,
     lines: [
-      { label: 'shell', content: 'play  ·  a bare prompt, nothing loaded', style: 'default' },
-      { label: 'tips',  content: '1. type a tool you use every day — the ones you would swear at', style: 'muted' },
-      { label: '',      content: "2. 'help' lists the obvious commands", style: 'muted' },
-      { label: '',      content: '3. the rest are found, not listed', style: 'muted' },
+      { content: 'A shell with a sense of humor.', style: 'warm' },
+      { content: 'Try a tool you use every day. Some work. Some talk back.', style: 'muted' },
+      { label: 'start here', content: '', chips: ['help', 'fortune', 'snake', 'paint'] },
     ],
-  },
-  // A door for anyone not holding a keyboard. This page is deliberately empty —
-  // the prompt is the invitation — but an empty prompt only invites you if
-  // typing at it is cheap, and on a phone it is the most expensive thing on the
-  // page. One tap plays the same game: something you did not ask for, and no
-  // hint about how many more there are.
-  {
-    mdSkip: true,
-    lines: [],
-    action: {
-      label: 'feeling lucky',
-      run: 'fortune',
-      hint: 'or type something — a tool you use every day',
-    },
   },
 ]
 
@@ -240,7 +236,7 @@ export const contactSession: SessionBlock[] = [
     cmd: 'nmap adgapar',
     mdHeading: 'contact',
     lines: [
-      { content: 'host is up  ·  open to network, collaboration, discussions, AI conversations', style: 'success' },
+      { content: 'Host is up. Say hello about something you’re building, something I wrote, or just because.', style: 'success' },
     ],
   },
   {
@@ -254,6 +250,7 @@ export const contactSession: SessionBlock[] = [
         { cols: ['linkedin',   'open',     'professional network'],       href: profile.links.linkedin },
         { cols: ['github',     'open',     'code · building together'],   href: profile.links.github },
         { cols: ['threads',    'open',     'casual · low stakes'],        href: profile.links.threads },
+        { cols: ['substack',   'open',     'The Working Prototype'],      href: profile.links.newsletter },
         { cols: ['cold-sales', 'filtered', '—'] },
       ],
     },
@@ -264,11 +261,11 @@ export const contactSession: SessionBlock[] = [
 
 export const aboutPage: PageSession = {
   blocks: aboutSession,
-  prompt: 'adilet@home:~$',
+  prompt: 'adilet@studio:~$',
   commands: [
     { name: 'whois adilet', description: 'show profile info' },
   ],
-  placeholder: "try 'whois adilet' or navigate — type 'help'",
+  placeholder: "try projects, writing, or help",
 }
 
 export const cvPage: PageSession = {
@@ -329,7 +326,7 @@ export const pageMeta = {
   cv: {
     slug: 'cv',
     route: '/cv',
-    title: 'CV',
+    title: 'Background',
     summary: 'Work history, projects and education.',
     session: cvPage,
   },

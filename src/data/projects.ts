@@ -13,6 +13,19 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    id: 'tapas',
+    name: 'tapas',
+    type: 'Mac app',
+    tagStyle: 'warm',
+    status: 'live',
+    summary: 'free local transcription, full transcripts, and a skill for your own agent',
+    details: [
+      { label: 'name', content: 'tapas — Small tools. Good company.', style: 'warm' },
+      { content: 'Keep full meeting transcripts as local Markdown. Install the tapas skill for your own agent, then build notes, routines, and connected workflows your way. Powered by Desert Ant Labs.', style: 'default' },
+      { label: 'explore', content: 'open tapas', href: '/tapas', style: 'accent' },
+    ],
+  },
+  {
     id: 'teya',
     name: 'Teya',
     type: 'home AI 🏠',

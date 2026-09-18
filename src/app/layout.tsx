@@ -3,6 +3,8 @@ import { Geist_Mono } from "next/font/google";
 import BootSequence from "@/components/boot/BootSequence";
 import ViewModeProvider from "@/components/layout/ViewModeProvider";
 import "./globals.css";
+import "./eink.css";
+import "./reader.css";
 
 const geistMono = Geist_Mono({
   variable: "--font-mono",
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s — adilet",
   },
   description:
-    "Adilet Gaparov — founding AI engineer at Orbio AI. Writing about AI reliability, agents, and building in public.",
+    "Adilet Gaparov — founding AI engineer at Orbio AI, building AI products and the systems behind them. Writing about AI reliability, agents, and building in public.",
   alternates: {
     types: {
       "text/markdown": "/llms.txt",

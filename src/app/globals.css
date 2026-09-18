@@ -220,7 +220,7 @@
 .term-scroll { flex: 1 1 0%; min-height: 0; }
 
 @media (min-width: 640px) {
-  .window-shell:not(.window-filled) .term-scroll {
+  .window-shell:not(.window-filled) .terminal-workspace {
     flex: none;
     height: var(--term-max-h);
   }
@@ -343,28 +343,11 @@
   .glass { background: rgba(206, 202, 194, 0.95); }
 }
 
-/**
- * The dock's tray — the reader's glass, laid flat.
- *
- * It was dark for one release, and dark was solving a problem the wallpaper had:
- * on a pale lit water surface the tray and the near-white tiles it holds were
- * the same value, so a light tray read as a slab with nothing on it. The print
- * fixed that on its own — the dock stands on the green half of the hill, and the
- * glass takes its tint from what is behind it, which is the darkest thing on the
- * desk. The tiles have their ground back without the desk needing one dark
- * object on it.
- *
- * So it is the same material as the reader's sidebar and its bars, at the same
- * alpha and the same blur, and the desk is what shows through. One glass on the
- * whole site rather than one per surface.
- *
- * It does not redefine the ink ranks the way .glass does. The tiles are paper
- * objects sitting in a tray, not text printed on it, so they keep the desk's
- * daylight tokens and only the ground is glass.
- */
+/* A smoked tray separates the paper-mounted icons from the pale desktop. */
 .dock-glass {
   position: relative;
-  background: rgba(112, 108, 98, 0.24);
+  background: rgba(85, 79, 69, 0.28);
+  border: 1px solid rgba(70, 63, 53, 0.16);
   /* the tray floats over the desk and the window both, so it casts on them */
   box-shadow: 0 10px 30px -12px rgba(20, 16, 10, 0.42);
 }
@@ -387,30 +370,10 @@
 }
 
 @supports not (backdrop-filter: blur(1px)) {
-  .dock-glass { background: rgba(206, 202, 194, 0.95); }
+  .dock-glass { background: #c4bfb5; }
 }
 
-/**
- * The desk: ruled, flat, and drawn in CSS.
- *
- * A mesh gradient was here and it looked like a smear. It was also solving the
- * wrong problem — glass needs *structure* behind it, not tone. Lines you can
- * count beat colour you cannot name, and a ruled surface is what a desk is.
- *
- * No shader, so nothing to fall back from and nothing to wait for.
- */
-.desk {
-  background:
-    /* the major rule, every four */
-    repeating-linear-gradient(0deg, rgba(58, 50, 38, 0.22) 0 5px, transparent 5px 288px),
-    repeating-linear-gradient(90deg, rgba(58, 50, 38, 0.22) 0 5px, transparent 5px 288px),
-    /* the minor */
-    repeating-linear-gradient(0deg, rgba(58, 50, 38, 0.08) 0 1.5px, transparent 1.5px 72px),
-    repeating-linear-gradient(90deg, rgba(58, 50, 38, 0.08) 0 1.5px, transparent 1.5px 72px),
-    /* the light it catches where the windows sit */
-    radial-gradient(80% 62% at 50% 8%, rgba(255, 252, 244, 0.9) 0%, rgba(255, 252, 244, 0) 68%),
-    var(--bg);
-}
+.desk { background: var(--bg); }
 
 ::selection {
   background: var(--accent);
@@ -421,6 +384,31 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* The live shell line has a focus marker beside its prompt, not a form box. */
+.terminal-command-line {
+  position: relative;
+}
+
+.terminal-command-line::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 5px;
+  bottom: 5px;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0;
+}
+
+.terminal-command-line:focus-within::before {
+  opacity: 1;
+}
+
+.terminal-command-input:focus-visible {
+  outline: none;
+  border-radius: 0;
 }
 
 /* the scrollback's own scrollbar, thin and out of the way */
@@ -728,3 +716,119 @@ body {
 /* wide tables scroll rather than breaking the measure */
 .prose-paper .table-scroll { overflow-x: auto; margin: 1.75rem 0; }
 .prose-paper .table-scroll table { margin: 0; }
+
+/* Personal studio: blue ink and independent windows on warm paper. */
+:root {
+  --bg: #efebe3;
+  --surface: #faf9f4;
+  --fg: #263544;
+  --accent: #365f94;
+  --border: #e0e1d9;
+  --hair: #b9c0bd;
+}
+
+.term {
+  --surface: #202c38;
+  --fg: #eef0e9;
+  --muted: #b7c3c8;
+  --chrome: #a3b3bd;
+  --dim: #8b9da7;
+  --accent: #78c5fa;
+  --warm: #f0bb6a;
+  --success: #83d3a1;
+  --frame-fill: #202c38;
+  --frame-edge: #172330;
+}
+.term-glass { --frame-fill: #202c38f5; backdrop-filter: blur(20px); }
+.studio-bar { background: rgba(250, 249, 244, .88); backdrop-filter: blur(12px); position: relative; z-index: 20; display: flex; align-items: center; width: 100%; gap: 35px; padding: 14px 28px; border-bottom: 1px solid #60758324; font-family: var(--font-mono), monospace; font-size: 11px; color: #384c5c; }
+.studio-brand { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.studio-brand > span:first-child { font-size: 22px; line-height: 1; }
+.studio-label { font-size: 10px; font-weight: 400; color: #62717a; }
+.studio-bar nav { display: flex; gap: 22px; }
+.studio-bar a:hover { color: #235999; }
+.studio-location { margin-left: auto; color: #62717a; font-size: 10px; }
+.project-desktop { height: 100dvh; display: flex; flex-direction: column; position: relative; }
+.project-browser { position: relative; z-index: 10; margin: 24px auto 80px; width: calc(100% - 64px); max-width: 1160px; min-height: 0; flex: 1; display: flex; flex-direction: column; border: 1px solid var(--hair); border-radius: 10px; background: var(--surface); box-shadow: var(--frame-shadow); overflow: hidden; }
+.browser-tabs { display: flex; align-items: center; gap: 18px; padding: 10px 16px 0; background: #e4e7e3; }
+.browser-close { align-self: flex-start; display: grid; place-items: center; width: 20px; height: 20px; margin-top: 3px; border-radius: 50%; background: #d78173; color: #462b26; line-height: 1; font-size: 15px; }
+.browser-tabs nav { display: flex; gap: 4px; }
+.browser-tabs nav a { padding: 9px 20px; font-size: 11px; color: #586774; border-radius: 6px 6px 0 0; }
+.browser-tabs nav a[aria-current] { background: var(--surface); color: var(--fg); }
+.browser-tabs nav a span { margin-left: 30px; }
+.browser-title { margin-left: auto; padding-bottom: 10px; font-size: 9px; color: #64727b; }
+.browser-toolbar { display: flex; align-items: center; gap: 16px; padding: 11px 18px; border-bottom: 1px solid var(--border); }
+.browser-address { flex: 1; padding: 5px 12px; border: 1px solid #dbe0de; border-radius: 5px; background: #edf0ec; font-size: 10px; color: #586774; }
+.browser-address > span { margin-right: 8px; }
+.browser-terminal { font-size: 10px; color: #586774; }
+.browser-content { flex: 1; min-height: 0; overflow-y: auto; }
+.project-index { padding: 50px 6% 25px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.studio-kicker { font-family: var(--font-mono), monospace; text-transform: uppercase; letter-spacing: .1em; font-size: 10px; color: #64727b; }
+.project-intro h1 { font-size: clamp(36px, 4.5vw, 56px); font-weight: 550; line-height: 1.1; letter-spacing: -.05em; margin: 20px 0; }
+.project-intro > p:last-child { max-width: 440px; color: #64727b; font-size: 14px; line-height: 1.8; }
+.project-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 38px; }
+.project-card { border: 1px solid #cbd0cb; border-radius: 8px; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+.project-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px #26354412; }
+.project-art { min-height: 220px; display: flex; align-items: center; justify-content: center; gap: 15px; padding: 25px; background: #ede6cb; }
+.project-art > span { font-weight: 650; font-size: 23px; letter-spacing: -.045em; line-height: 1.2; color: #303b2b; }
+.project-card-copy { padding: 25px; }
+.project-card h2 { display: flex; justify-content: space-between; margin: 12px 0 8px; font-size: 26px; font-weight: 550; letter-spacing: -.04em; }
+.project-card h2 > span { font-size: 18px; color: #64727b; }
+.project-card p { font-size: 14px; color: #64727b; line-height: 1.8; }
+.project-open { display: block; font-size: 11px; color: #365f94; margin-top: 20px; }
+.project-teya .project-art { background: #dbe5e6; gap: 35px; }
+.teya-device { width: 83px; height: 150px; border: 4px solid #344958; border-radius: 15px; background: #faf2d9; padding: 13px 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-shadow: 5px 5px 0 #34495820; transform: rotate(-7deg); }
+.teya-device span { font-family: var(--font-mono), monospace; font-size: 8px; }
+.teya-device span:nth-child(2) { font-size: 35px; }
+.project-archive { margin-top: 45px; border-top: 1px solid var(--border); padding-top: 25px; }
+.project-archive article { display: grid; grid-template-columns: 160px 1fr; gap: 20px; padding: 15px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+.project-archive p { color: #64727b; }
+.project-footer { display: flex; justify-content: space-between; gap: 20px; padding-top: 35px; font-size: 11px; color: #64727b; }
+.project-browser a:focus-visible, .studio-bar a:focus-visible { outline: 2px solid #365f94; outline-offset: 3px; }
+@media (max-width: 800px) { .studio-location { display: none; } .project-art { gap: 5px; padding: 15px; } .project-art img { width: 110px; height: 110px; } .project-art > span { font-size: 20px; } }
+@media (max-width: 639px) {
+  .studio-bar { display: none; }
+  .project-desktop { height: auto; min-height: 100dvh; }
+  .project-browser { margin: 0; width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  .browser-tabs { padding-top: max(10px, env(safe-area-inset-top)); gap: 12px; }
+  .browser-title { display: none; }
+  .browser-tabs nav a { padding: 10px 15px; }
+  .browser-content { overflow: visible; }
+  .browser-terminal span { display: none; }
+  .project-index { padding: 35px 6% max(30px, env(safe-area-inset-bottom)); }
+  .project-grid { grid-template-columns: 1fr; }
+  .project-art { min-height: 210px; gap: 25px; }
+  .project-art img { width: 140px; height: 140px; }
+  .project-art > span { font-size: 23px; }
+  .project-archive article { grid-template-columns: 1fr; gap: 5px; }
+  .project-footer { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) { .project-card { transition: none; } .project-card:hover { transform: none; } }
+
+/* A persistent command area below the independently scrolling session. */
+.terminal-composer {
+  border-top: 1px solid var(--hair);
+  background: rgba(0, 0, 0, 0.16);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06);
+}
+.terminal-composer:focus-within {
+  border-top-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Raw file view stays separate from the desktop and terminal themes. */
+.agent-mode {
+  color-scheme: dark;
+  --surface: #000;
+  --fg: #ededed;
+  --muted: #bdbdbd;
+  --chrome: #aaa;
+  --dim: #999;
+  --accent: #74c6f2;
+  --warm: #dcae63;
+  --success: #74c79b;
+  --error: #e89b8c;
+  --info: #a3b2c1;
+  --border: #303030;
+  --hair: #444;
+  background: #000;
+  color: var(--fg);
+}

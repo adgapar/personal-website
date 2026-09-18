@@ -48,9 +48,8 @@ export default function DitheredAvatar({
           src={src}
           grid={Math.round(size / 1.6)}
           size={size}
-          // paper on a dark window, not ink on a white one — this only ever
-          // renders inside the terminal
-          ink={[236, 233, 226]}
+          // Dark bitmap ink on the terminal’s paper surface.
+          ink={[41, 46, 43]}
           contrast={1.05}
         />
       </span>

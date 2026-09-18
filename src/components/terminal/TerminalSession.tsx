@@ -17,7 +17,12 @@ import { executeCommand, hasCommand, listCommands } from '@/lib/commands'
 import type { TerminalLine as TLine } from '@/lib/commands/types'
 import type { PageCommand, SessionBlock } from '@/lib/sessions'
 
-const NAV_COMMANDS = ['about', 'cv', 'writing', 'contact', 'play']
+const NAV_COMMANDS = ['studio', 'log', 'background', 'projects', 'writing', 'contact', 'play']
+const TAG_COLORS: Record<string, string> = {
+  writing: 'var(--accent)',
+  talk: 'var(--warm)',
+  life: 'var(--success)',
+}
 
 // Columns only from sm up. A 176px column is a third of a phone's width, and
 // three of them made a table that scrolled sideways inside a scrollback that
@@ -104,7 +109,6 @@ export default function TerminalSession({
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   /** true only while the reveal is taking focus by itself — see the effect below */
-  const autoFocusing = useRef(false)
 
   // some blocks exist for the markdown and agent views only — a full post index
   // is worth indexing but would bury the session it sits in
@@ -173,16 +177,11 @@ export default function TerminalSession({
   // visible input to take it, and `visibility: hidden` makes it unfocusable.
   useEffect(() => {
     if (instant || !revealDone) return
-    // Flagged so the input's own onFocus can tell this apart from a reader
-    // tapping the prompt. That handler scrolls to the bottom to stay clear of
-    // the on-screen keyboard, which is right for a tap and wrong here — it
-    // would open every page at the end of its own session.
-    autoFocusing.current = true
+    // Keep the introduction in view when the persistent prompt takes focus.
     inputRef.current?.focus({ preventScroll: true })
-    autoFocusing.current = false
   }, [instant, revealDone])
 
-  // New output should bring the prompt into view. The reveal animation must not:
+  // New output should scroll into view. The reveal animation must not:
   // scrolling on every block meant every page opened at the bottom, with the
   // first line cut in half under the tab bar.
   const settled = useRef(false)
@@ -277,6 +276,8 @@ export default function TerminalSession({
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Tab') {
+        // Keep a keyboard route out of the shell while Tab completes commands.
+        if (e.shiftKey) return
         e.preventDefault()
         cycleCompletion()
         return
@@ -477,7 +478,10 @@ export default function TerminalSession({
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="text-[var(--dim)] text-xs shrink-0 whitespace-nowrap w-[5.5rem]">{entry.date}</span>
               {entry.tag && (
-                <span className="shrink-0 text-xs tracking-wide text-[var(--muted)]">{entry.tag}</span>
+                <span
+                  className="shrink-0 text-xs tracking-wide"
+                  style={{ color: TAG_COLORS[entry.tag] ?? 'var(--muted)' }}
+                >{entry.tag}</span>
               )}
               <span className="text-[var(--muted)]">{entry.content}</span>
               {entry.href &&
@@ -508,15 +512,15 @@ export default function TerminalSession({
         <div className="flex flex-wrap gap-x-5 gap-y-1">
           {block.lines.map((line, j) =>
             line.href ? (
-              <a
+              <Link
                 key={j}
                 href={line.href}
-                target="_blank"
+                target={line.href.startsWith('http') ? '_blank' : undefined}
                 rel="noopener noreferrer"
-                className="text-[var(--muted)] hover:text-[var(--accent)] transition-colors duration-200 tracking-wide"
+                className="text-[var(--accent)] hover:text-[var(--fg)] transition-colors duration-200 tracking-wide"
               >
                 {line.content}
-              </a>
+              </Link>
             ) : (
               <span key={j} className="text-[var(--muted)] tracking-wide">
                 {line.content}
@@ -573,6 +577,10 @@ export default function TerminalSession({
     // command's output.
     <PromptContext.Provider value={prompt}>
     <div
+      className="terminal-workspace flex min-h-0 flex-1 flex-col font-mono text-[13px] text-[var(--fg)] sm:text-[15px]"
+      style={{ flex: '1 1 auto', height: 'var(--term-max-h, 0px)' }}
+    >
+    <div
       ref={scrollRef}
       // How tall this is belongs to the window, not to the session — see
       // .term-scroll in globals.css. It fills a window that fills the screen, and
@@ -582,13 +590,18 @@ export default function TerminalSession({
       // "type 'help' for available commands" broke across two lines; 13px fits 45
       // and the session reads as lines again rather than as paragraphs.
       className="term-scroll flex cursor-text flex-col overflow-y-auto overscroll-contain font-mono text-[13px] text-[var(--fg)] sm:text-[15px]"
-      onClick={focusInput}
+      style={{ flex: '1 1 0%', height: 'auto' }}
+      onClick={(event) => {
+        if ((event.target as HTMLElement).closest('a, button, input')) return
+        if (window.getSelection()?.toString()) return
+        focusInput()
+      }}
     >
       {/* the same left edge as the tab row and the status bar */}
-      <div className="w-full space-y-6 px-4 pt-5 pb-8 sm:space-y-8 sm:px-8 sm:pt-7 sm:pb-9">
+      <div className="w-full space-y-5 px-4 py-5 sm:space-y-6 sm:px-8 sm:py-6">
         {/* what has been typed so far */}
         {blocks.slice(0, visibleCount).map((block, i) => (
-          <div key={i}>{renderBlock(block)}</div>
+          <div key={i} id={block.id}>{renderBlock(block)}</div>
         ))}
 
         {/* scrollback: each command above the output it produced */}
@@ -608,12 +621,20 @@ export default function TerminalSession({
           </div>
         ))}
 
-        {/* The live prompt, always last — and hidden until the session it
-            belongs to has finished arriving. `invisible` rather than unmounted,
-            so the line it will stand on is already reserved and nothing below
-            it jumps when it appears. */}
-        <div className={`space-y-2 ${revealDone ? '' : 'invisible'}`}>
-          <div className="flex items-center gap-3">
+      </div>
+    </div>
+
+        {/* Keep the command line reachable while reading the scrollback. */}
+        <div
+          className="terminal-composer shrink-0 px-4 py-3 sm:px-8 sm:py-4"
+          style={{ borderTop: '1px solid var(--hair)', background: 'var(--surface)' }}
+        >
+          <div className="mb-2 flex items-center justify-between gap-3 text-[10px] tracking-widest text-[var(--dim)]">
+            <span>{revealDone ? 'COMMAND' : 'OPENING SESSION…'}</span>
+            <span className="hidden sm:inline">{placeholder}</span>
+          </div>
+          <div className={`space-y-2 ${revealDone ? '' : 'invisible'}`}>
+          <div className="terminal-command-line flex min-h-8 items-center gap-3">
             <Prompt />
             {instant ? (
               // an unfocused window has no live prompt to type into, and must
@@ -625,7 +646,7 @@ export default function TerminalSession({
               // does not scroll, so it zooms you into a corner you cannot get
               // back out of. The ghost sits in here too, so both keep the same
               // metrics and the completion still lines up under the caret.
-              <span className="relative flex-1 text-base sm:text-[15px]">
+              <span className="relative min-w-0 flex-1 text-base sm:text-[15px]">
                 {/* the completion, drawn under the caret in the same metrics —
                     the typed part is invisible so the ghost lines up exactly */}
                 {(ghost || (base !== null && matches.length > 1)) && (
@@ -651,14 +672,7 @@ export default function TerminalSession({
                     setBase(null)
                   }}
                   onKeyDown={handleKeyDown}
-                  // the keyboard shortens the window under it; put the prompt
-                  // back at the bottom of what is left
-                  onFocus={() => {
-                    setFocused(true)
-                    if (autoFocusing.current) return
-                    const el = scrollRef.current
-                    if (el) setTimeout(() => { el.scrollTop = el.scrollHeight }, 300)
-                  }}
+                  onFocus={() => setFocused(true)}
                   onBlur={() => setFocused(false)}
                   autoComplete="off"
                   autoCorrect="off"
@@ -667,9 +681,9 @@ export default function TerminalSession({
                   // the return key should say what it does — this is a command
                   // line, not a form you are filling in
                   enterKeyHint="go"
-                  placeholder={placeholder}
+                  placeholder="type a command…"
                   aria-label="terminal input"
-                  className="relative w-full bg-transparent outline-none font-[inherit] text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
+                  className="terminal-command-input relative w-full bg-transparent outline-none font-[inherit] text-[var(--fg)] caret-[var(--accent)] placeholder:text-[var(--dim)]"
                 />
               </span>
             )}
@@ -715,8 +729,8 @@ export default function TerminalSession({
               </span>
             </div>
           )}
+          </div>
         </div>
-      </div>
     </div>
 
     {/* Sits between the scrollback and the status bar, so it lands directly on

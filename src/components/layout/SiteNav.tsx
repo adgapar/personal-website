@@ -6,7 +6,7 @@ import { useViewMode } from './ViewModeProvider'
 
 const sections = [
   { name: 'about',      href: '/' },
-  { name: 'cv',         href: '/cv' },
+  { name: 'background', href: '/cv' },
   { name: 'writing',    href: '/writing' },
   { name: 'contact',    href: '/contact' },
 ]

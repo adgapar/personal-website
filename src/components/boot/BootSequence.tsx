@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
+import { usePathname } from 'next/navigation'
 import TypedText from '@/components/terminal/TypedText'
 import {
   beginHandover,
@@ -55,6 +56,13 @@ const COLOR: Record<NonNullable<Line['style']>, string> = {
 }
 
 export default function BootSequence() {
+  const pathname = usePathname()
+  // Product links must render immediately, including the server's first paint.
+  if (pathname === '/tapas' || pathname === '/projects') return null
+  return <BootScreen />
+}
+
+function BootScreen() {
   const phase = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   const [shown, setShown] = useState(0)
   const [paused, setPaused] = useState(false)

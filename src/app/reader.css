@@ -1,0 +1,69 @@
+/* Reader: illustrated library outside, a measured page of prose inside. */
+.reading-library { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 40px 5% 64px; background: var(--paper-raised); }
+.reading-label { font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.library-masthead { position: relative; padding-bottom: 28px; border-bottom: 2px solid var(--ink); }
+.library-masthead h1 { margin: 16px 0 10px; font: 400 clamp(38px, 5vw, 64px)/1.08 Georgia, serif; letter-spacing: -.045em; }
+.library-masthead h1 > span { color: #a36363; }
+.library-masthead p { font: 18px/1.5 Georgia, serif; color: #596566; }
+.library-masthead > a { display: inline-block; font-size: 10px; color: var(--accent); margin-top: 16px; text-decoration: underline; text-underline-offset: 4px; }
+.reading-featured { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin: 28px 0 44px; }
+.reading-feature { display: grid; grid-template-columns: 1fr; min-width: 0; border-bottom: 1px solid var(--hair); padding-bottom: 20px; gap: 20px; }
+.reading-feature-art { width: min(100%, 360px); justify-self: center; aspect-ratio: 3 / 2; overflow: hidden; background: #e1e5d6; align-self: start; border: 1px solid var(--hair); }
+.reading-feature-art img { width: 100%; height: 100%; object-fit: contain; }
+.reading-feature-art > span { display: grid; place-items: center; height: 100%; font: 80px Georgia, serif; }
+.reading-feature-copy { min-width: 0; padding-top: 5px; }
+.reading-feature-copy .reading-label { display: flex; justify-content: space-between; gap: 10px; line-height: 1.6; color: var(--accent); }
+.reading-feature-newsletter .reading-label { color: #945951; }
+.reading-feature h2 { margin: 12px 0; font: 400 clamp(21px, 2.2vw, 28px)/1.15 Georgia, serif; letter-spacing: -.02em; }
+.reading-feature:hover h2 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.reading-feature p { font: 14px/1.5 Georgia, serif; color: var(--muted); }
+.reading-feature time { display: block; margin-top: 16px; font-size: 10px; color: var(--muted); }
+.reading-archive-heading { display: flex; align-items: baseline; gap: 18px; margin-bottom: 18px; }
+.reading-archive-heading h2 { font: 28px Georgia, serif; }
+.reading-archive-heading > span { font-size: 10px; color: var(--muted); }
+.reading-filters { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 12px 0; border-block: 1px solid var(--hair); }
+.reading-filters > div { display: flex; gap: 6px; flex-wrap: wrap; }
+.reading-filters button, .reader-focus-toggle, .reader-type-control { cursor: pointer; border: 1px solid var(--hair); background: var(--paper-raised); padding: 6px 10px; font: 10px var(--font-mono), monospace; color: var(--ink); }
+.reading-filters button[aria-pressed='true'], .reader-focus-toggle[aria-pressed='true'] { background: var(--ink-blue); color: white; border-color: var(--ink-blue); }
+.reading-filters input { min-width: 0; width: 220px; padding: 6px 10px; border: 1px solid var(--hair); background: var(--paper); font: 12px var(--font-mono), monospace; }
+.reading-archive-row { display: grid; grid-template-columns: 100px 1fr 80px 16px; align-items: baseline; gap: 20px; padding: 17px 0; border-bottom: 1px solid var(--border); }
+.reading-archive-row time, .reading-archive-row small { font-size: 10px; color: var(--muted); }
+.reading-archive-row > span:nth-child(2) { font: 19px/1.4 Georgia, serif; }
+.reading-archive-row:hover { color: var(--accent); background: #dce5e533; }
+.reading-archive-row > span:last-child { color: var(--accent); }
+.reading-empty { padding: 28px 0; font-size: 13px; }
+.reader-library-heading { padding: 22px 18px 18px; border-bottom: 1px solid var(--hair); }
+.reader-library-heading a { font: 10px var(--font-mono), monospace; color: var(--accent); }
+.reader-library-heading h2 { font: 26px Georgia, serif; margin-top: 17px; }
+.reader-sidebar { width: 230px; }
+.reader-sidebar a[aria-current='page'] { background: #f3f3e8; color: var(--ink); border-left: 3px solid var(--accent); border-radius: 0; box-shadow: none; }
+.reader-sidebar a[aria-current='page'] > span { color: var(--muted); }
+.reader-article-measure { max-width: 740px; margin: 0 auto; }
+.reader-article-header { padding-bottom: 28px; margin-bottom: 32px; border-bottom: 1px solid var(--hair); }
+.reader-article-header.has-cover { display: grid; grid-template-columns: 1fr; gap: 24px; }
+.reader-article-title { font: 400 clamp(30px, 3.5vw, 46px)/1.12 Georgia, serif; letter-spacing: -.035em; color: var(--ink); }
+.reader-cover-link { display: block; width: min(100%, 450px); margin-inline: auto; min-width: 0; text-align: right; }
+.reader-cover-link > span { display: inline-block; margin-top: 8px; font: 10px var(--font-mono), monospace; color: var(--accent); }
+.reader-article-cover { display: block; width: 100%; max-height: 280px; object-fit: contain; background: var(--paper); border: 1px solid var(--hair); cursor: zoom-in; }
+.reader-article .prose-paper { line-height: 1.8; }
+.reader-type-control { padding: 4px 7px; }
+.reader-type-control:disabled { opacity: .4; cursor: default; }
+.reader-focus-toggle { padding: 4px 8px; }
+.reading-progress { height: 3px; flex-shrink: 0; background: #d8e1db; }
+.reading-progress > span { display: block; height: 100%; background: var(--accent); }
+.reader-focused .reader-article-measure { max-width: 720px; }
+@media (max-width: 800px) {
+  .reading-feature { grid-template-columns: 1fr; gap: 14px; }
+}
+@media (max-width: 639px) {
+  .reading-library { padding: 28px 20px 48px; }
+  .reading-featured { grid-template-columns: 1fr; gap: 24px; }
+  .reading-feature { grid-template-columns: 1fr; }
+  .reading-archive-row { grid-template-columns: 1fr 16px; gap: 5px 12px; }
+  .reading-archive-row time { grid-column: 1 / -1; }
+  .reading-archive-row small { display: none; }
+  .reading-filters input { width: 100%; font-size: 16px; }
+  .reader-article-header.has-cover { grid-template-columns: 1fr; }
+  .reader-article-cover { width: 100%; max-height: 240px; object-fit: contain; background: var(--paper); }
+  .reader-focus-toggle { display: none; }
+}

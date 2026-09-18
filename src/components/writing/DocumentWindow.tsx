@@ -41,6 +41,9 @@ export default function DocumentWindow({
   next?: { slug: string; title: string }
 }) {
   const [copied, setCopied] = useState(false)
+  const [textSize, setTextSize] = useState(18)
+  const [progress, setProgress] = useState(0)
+  const minutes = Math.max(1, Math.ceil(markdown.trim().split(/\s+/).length / 220))
   // the same file, rendered or as source — no reason to leave the window for it
   const [showSource, setShowSource] = useState(false)
 
@@ -55,27 +58,23 @@ export default function DocumentWindow({
   }
 
   return (
-    // relative, because the two bars float over the page rather than sitting
-    // beside it — the prose passes underneath them and blurs, which is the whole
-    // point of making them glass
+    // Opaque toolbars sit outside the scrolling document.
     <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden">
           {/* the document's own toolbar — under the app's title bar */}
-          <div className="glass-paper absolute inset-x-0 top-0 z-20 flex h-9 items-center gap-2 border-b border-[var(--border)] px-3 font-mono select-none">
+          <div className="reader-toolbar flex shrink-0 min-h-10 items-center gap-2 border-b border-[var(--border)] px-3 font-mono select-none">
             <span className="min-w-0 flex-1 truncate text-[10px] tracking-widest text-[var(--muted)]">
-              {title}.md — {showSource ? 'source' : 'reader'}
+              {showSource ? 'Markdown source' : 'Reading'}
             </span>
             <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
+              <button className="reader-type-control" type="button" aria-label="Decrease text size" disabled={textSize <= 16 || showSource} onClick={() => setTextSize(size => size - 2)}>A−</button>
+              <button className="reader-type-control" type="button" aria-label="Increase text size" disabled={textSize >= 24 || showSource} onClick={() => setTextSize(size => size + 2)}>A+</button>
               <button
                 type="button"
                 onClick={copy}
                 title="copy this post as markdown"
                 // these are the two things you can do to a document, so they
                 // read as buttons at rest rather than only under the pointer
-                // Pills, and filled rather than outlined. A hairline box with
-                // square corners is the one shape left over from the old build,
-                // and it reads as a dialog button from another decade. Filled on
-                // hover in the same accent as a selected row in the list.
-                className={`rounded-full px-2.5 py-1 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
+                className={`rounded-sm border border-[var(--hair)] px-2.5 py-1 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
                   copied
                     ? 'bg-[var(--success)] text-white'
                     : 'bg-black/[0.06] text-[var(--muted)] hover:bg-[var(--accent)] hover:text-white'
@@ -90,7 +89,7 @@ export default function DocumentWindow({
                 title={showSource ? 'back to the rendered post' : 'show the markdown source'}
                 // pressed is filled, not outlined — a toggle should say which
                 // of its two states you are in without reading the label
-                className={`rounded-full px-2.5 py-1 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
+                className={`rounded-sm border border-[var(--hair)] px-2.5 py-1 text-[10px] leading-4 tracking-wide transition-colors duration-200 ${
                   showSource
                     ? 'bg-[var(--accent)] text-white'
                     : 'bg-black/[0.06] text-[var(--muted)] hover:bg-[var(--accent)] hover:text-white'
@@ -102,11 +101,18 @@ export default function DocumentWindow({
           </div>
 
       {/* the page — scrolls inside the pane, like any reader */}
-      {/* the page — scrolls under both bars, so its padding clears them */}
-      <article className="paper min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-[4.25rem] pb-[4.5rem] sm:px-14 sm:pt-[5.5rem] sm:pb-[5rem]">
-            <header className="mb-10">
+      <article className="reader-article paper min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-14 sm:py-12"
+        onScroll={event => {
+          const element = event.currentTarget
+          const distance = element.scrollHeight - element.clientHeight
+          setProgress(distance > 0 ? Math.round(element.scrollTop / distance * 100) : 100)
+        }}>
+        <div className="reader-article-measure">
+            <header className={`reader-article-header ${image && !showSource ? "has-cover" : ""}`}><div>
               <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] tracking-widest text-[#8a8178]">
-                <span>{date}</span>
+                <span>{source === 'blog' ? 'Essay' : 'The Working Prototype'}</span>
+                <span> / </span><time dateTime={date}>{date}</time>
+                <span> / {minutes} min read</span>
                 {canonical && (
                   <>
                     <span>·</span>
@@ -122,7 +128,7 @@ export default function DocumentWindow({
                   </>
                 )}
               </div>
-              <h1 className="text-[1.75rem] leading-tight font-semibold text-[#1f1b16]">
+              <h1 className="reader-article-title">
                 {title}
               </h1>
               {subtitle && (
@@ -130,17 +136,15 @@ export default function DocumentWindow({
                   {subtitle}
                 </p>
               )}
-            </header>
-
+            </div>
             {image && !showSource && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={image}
-                alt=""
-                className="mb-10 w-full border border-[#ddd6c8]"
-                style={{ imageRendering: 'pixelated' }}
-              />
+              <a href={image} target="_blank" rel="noopener noreferrer" className="reader-cover-link" aria-label={`View illustration for ${title} at full size (opens in a new tab)`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={image} alt={`Illustration for ${title}`} className="reader-article-cover" />
+                <span>View full size ↗</span>
+              </a>
             )}
+            </header>
 
             {showSource ? (
               <>
@@ -156,15 +160,18 @@ export default function DocumentWindow({
             ) : (
               <div
                 className="prose-paper"
+                style={{ fontSize: textSize }}
                 dangerouslySetInnerHTML={{ __html: html }}
               />
             )}
 
+        </div>
       </article>
 
+      <div className="reading-progress" role="progressbar" aria-label="Reading progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: `${progress}%` }} /></div>
       {/* navigation is chrome, not part of the document — and at the foot of
           the pane it stays reachable without scrolling to the end */}
-      <div className="glass-paper absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-3 border-t border-[var(--border)] px-3 font-mono text-[10px] tracking-widest">
+      <div className="reader-toolbar flex shrink-0 min-h-10 items-center gap-3 border-t border-[var(--border)] px-3 font-mono text-[10px] tracking-widest">
         <div className="min-w-0 flex-1">
           {prev && (
             <Link

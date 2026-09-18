@@ -5,8 +5,8 @@ export const profile = {
   role: 'Founding AI Engineer',
   org: 'Orbio AI',
   location: 'Elche, Spain',
-  bio: 'Building AI agents that talk to thousands of candidates and make decisions affecting their careers.',
-  longBio: `I build AI agents. I'm a founding engineer at Orbio AI, and our agents talk to thousands of job candidates a day. Before that I did software and risk models at Capchase (financing for SaaS companies), ML at Volvo Cars, and cloud at Microsoft.
+  bio: 'Founding AI engineer at Orbio AI. I build AI products and the systems behind them.',
+  longBio: `I'm a founding AI engineer at Orbio AI. I build AI products and the systems behind them. Before that I did software and risk models at Capchase (financing for SaaS companies), ML at Volvo Cars, and cloud at Microsoft.
 
 I write a Substack called The Working Prototype, and a blog here that is less about work.
 

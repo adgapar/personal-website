@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import Prompt from './Prompt'
 import DitheredPlate from '@/components/visual/DitheredPlate'
 import Weightless from '@/components/visual/Weightless'
@@ -95,14 +96,14 @@ export default function TerminalLine({ line, onRun }: Props) {
           {line.label}
         </span>
         {line.href ? (
-          <a
+          <Link
             href={line.href}
-            target="_blank"
+            target={line.href.startsWith('/') ? undefined : '_blank'}
             rel="noopener noreferrer"
             className="text-[var(--accent)] underline underline-offset-2 hover:opacity-80 transition-opacity duration-200"
           >
             {line.content}
-          </a>
+          </Link>
         ) : (
           <span className={valueClass}>{line.content}</span>
         )}
@@ -149,14 +150,14 @@ export default function TerminalLine({ line, onRun }: Props) {
       <div className={`${className} whitespace-pre-wrap break-words leading-relaxed`}>
         {line.prefix && <span className="text-[var(--accent)] mr-2">{line.prefix}</span>}
         {line.content}{' '}
-        <a
+        <Link
           href={line.href}
-          target="_blank"
+          target={line.href.startsWith('/') ? undefined : '_blank'}
           rel="noopener noreferrer"
           className="text-[var(--accent)] hover:opacity-80 transition-opacity duration-200 text-[10px] tracking-wide"
         >
           (link)
-        </a>
+        </Link>
       </div>
     )
   }

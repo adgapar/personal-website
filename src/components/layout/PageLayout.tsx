@@ -42,12 +42,9 @@ export default function PageLayout({ page }: Props) {
 
   return (
     <div
-      // Agent mode is the machine's view of the page, so it belongs to the
-      // machine's world: the `term` palette on a solid dark ground, with no desk
-      // under it. It was inheriting the desk — a lit surface built for windows
-      // to sit on, with nothing sitting on it.
+      // Raw files use their own palette, independent of the human desktop.
       className={`relative flex flex-col items-center font-mono text-base ${
-        isAgent ? 'term bg-[var(--surface)] text-[var(--fg)]' : 'desk text-[var(--fg)]'
+        isAgent ? 'agent-mode bg-[var(--surface)] text-[var(--fg)]' : 'desk text-[var(--fg)]'
       } ${warmingUp ? 'screen-on ' : ''}${
         isAgent
           ? // a document scrolls
@@ -78,7 +75,7 @@ export default function PageLayout({ page }: Props) {
         // the whole desk. The dock is drawn above the window, so this padding is
         // what keeps it from resting on the prompt — the window can still be
         // dragged under it, which is the window's own business.
-        <div className="pointer-events-none relative z-10 flex h-full w-full items-center justify-center overflow-hidden sm:px-8 sm:pt-10 sm:pb-20">
+        <div className="terminal-stage pointer-events-none relative z-10 flex h-full w-full items-center justify-center overflow-hidden sm:px-8 sm:pt-10 sm:pb-20">
           <WindowChrome
             title={`${page.session.prompt}  —  terminal`}
             tabs={<TerminalTabs />}
@@ -95,7 +92,7 @@ export default function PageLayout({ page }: Props) {
               placeholder={page.session.placeholder}
               onNavigate={(href) => router.push(href)}
             />
-            <StatusBar hint={page.session.placeholder} />
+            <StatusBar hint="Tab complete · ↑↓ history · Shift+Tab leave prompt" />
           </WindowChrome>
         </div>
       )}

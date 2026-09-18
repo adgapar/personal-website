@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { TITLE_BAR, WINDOW_FRAME } from '@/lib/window-style'
 import DeskSurface from '@/components/visual/DeskSurface'
+import Dock from '@/components/layout/Dock'
+import WindowClose from '@/components/layout/WindowClose'
 
 /**
  * The reader: one window on the desk, with the list of pieces in its own pane on
@@ -41,6 +43,7 @@ export default function ReaderShell({
   // contents page turns into once something is open: a way to the next piece
   // without going back.
   const reading = pathname !== '/reader'
+  const [focused, setFocused] = useState(false)
 
   // One source at a time, so the pane stays half as long as both lists joined —
   // and stays that length as the archive grows. The other source is not hidden:
@@ -86,12 +89,13 @@ export default function ReaderShell({
   }, [pathname, tab])
 
   return (
-    <div className="desk relative h-[100dvh] overflow-hidden">
+    <div className="desk relative flex h-[100dvh] flex-col overflow-hidden">
       <DeskSurface />
+      <Dock independent />
 
       {/* no inset below sm: the frame has no corners, edge or shadow there, so
           8px of desk around a flat rectangle only says the window missed */}
-      <div className="relative z-10 flex h-full justify-center sm:px-6 sm:py-8">
+      <div className="relative z-10 flex min-h-0 flex-1 justify-center sm:px-6 sm:pt-6 sm:pb-20">
         {/* the window */}
         <div
           // the window is as wide as the view needs: a contents page alone is a
@@ -99,12 +103,10 @@ export default function ReaderShell({
           // window-shell for the safe-area insets it carries below sm — this
           // window reaches the screen edges there too, so its title bar has the
           // same notch to keep clear of
-          className={`window-shell flex h-full w-full flex-col overflow-hidden transition-[max-width] duration-300 ${
-            reading ? 'max-w-6xl' : 'max-w-4xl'
+          className={`reader-shell window-shell flex h-full w-full flex-col overflow-hidden transition-[max-width] duration-300 ${
+            focused ? 'reader-focused max-w-6xl' : 'max-w-6xl'
           }`}
-          // no background on the frame itself: the sidebar is glass, and glass
-          // over an opaque parent blurs the parent and shows nothing
-          style={{ ...WINDOW_FRAME, background: 'transparent' }}
+          style={WINDOW_FRAME}
         >
           {/* one title bar, for the whole app */}
           <div
@@ -115,26 +117,20 @@ export default function ReaderShell({
               href="/reader"
               className="text-[10px] tracking-widest text-[var(--muted)] hover:text-[var(--accent)]"
             >
-              reader
+              reading room
             </Link>
             <span className="text-[10px] tracking-widest text-[var(--chrome)]">
               {total} pieces
             </span>
-            <Link
-              href="/writing"
-              aria-label="Close"
-              title="back to the terminal"
-              // same mark as the terminal's close, for the same reason
-              className="ml-auto shrink-0 px-1 text-[11px] leading-4 text-[var(--chrome)] transition-colors duration-200 hover:text-[var(--error)]"
-            >
-              ✕
-            </Link>
+            {reading && <button type="button" aria-pressed={focused} onClick={() => setFocused(value => !value)} className="reader-focus-toggle ml-auto">{focused ? 'Show library' : 'Focus reading'}</button>}
+            <WindowClose label="Close reader and return to terminal" />
           </div>
 
           {/* the body: list on the left, what is open on the right */}
           <div className="flex min-h-0 flex-1">
-            {reading && (
-            <nav className="glass hidden w-[15rem] shrink-0 flex-col border-r border-[var(--border)] lg:flex xl:w-[17rem]">
+            {reading && !focused && (
+            <nav className="reader-sidebar hidden w-[15rem] shrink-0 flex-col border-r border-[var(--border)] lg:flex xl:w-[17rem]">
+              <div className="reader-library-heading"><Link href="/reader">← All writing</Link><h2>On the shelf</h2></div>
               {/* one source at a time — the other tab shows what it holds */}
               <div
                 className="flex shrink-0 gap-px border-b border-[var(--border)] px-2 pt-2 font-mono"
@@ -180,7 +176,7 @@ export default function ReaderShell({
                       // the app with, and every row was secondary to nothing.
                       // Selected is a filled row rather than a tinted one — a
                       // 5%-white wash on light glass was invisible.
-                      className={`block rounded-md px-2.5 py-1.5 text-xs leading-snug transition-colors ${
+                      className={`block rounded-sm px-2.5 py-1.5 text-xs leading-snug transition-colors ${
                         active
                           ? 'bg-[var(--accent)] text-white shadow-[0_1px_2px_rgba(20,16,8,0.2)]'
                           : 'text-[var(--fg)] hover:bg-black/[0.06]'
@@ -200,7 +196,7 @@ export default function ReaderShell({
               </div>
 
               <Link
-                href="/writing"
+                href="/"
                 className="shrink-0 border-t border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-widest text-[var(--muted)] hover:text-[var(--accent)]"
                 style={TITLE_BAR}
               >

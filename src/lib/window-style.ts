@@ -17,7 +17,9 @@ import type { CSSProperties } from 'react'
 // Four stops, not one — the contact shadow does the sitting, the wide one does
 // the lifting. See the .term block in globals.css.
 export const WINDOW_FRAME: CSSProperties = {
-  border: 'var(--frame-border) solid var(--frame-edge)',
+  borderWidth: 'var(--frame-border)',
+  borderStyle: 'solid',
+  borderColor: 'var(--frame-edge)',
   // a token, not a literal: below 640px every one of these resolves to nothing,
   // because the window is the screen there and has no desk to sit on
   borderRadius: 'var(--frame-radius)',
